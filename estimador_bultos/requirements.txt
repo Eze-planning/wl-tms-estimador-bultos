@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+openpyxl
+google-cloud-bigquery
+google-auth
+python-dotenv
+pyarrow
+python-multipart
+xlrd
+lxml

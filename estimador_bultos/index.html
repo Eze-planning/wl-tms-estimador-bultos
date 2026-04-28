@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estimador de Bultos — Wild Lama</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --accent: #c8f542;
+    --accent2: #42f5a7;
+    --text: #f0f0f0;
+    --text2: #888;
+    --danger: #ff4d4d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(200,245,66,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(200,245,66,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+  .badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; color: var(--text2); letter-spacing: 1px; }
+  .hero { padding: 64px 0 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .hero-title { font-size: clamp(36px, 5vw, 56px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; }
+  .hero-title span { color: var(--accent); display: block; }
+  .hero-desc { margin-top: 20px; color: var(--text2); font-size: 15px; line-height: 1.7; font-weight: 400; }
+  .upload-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(200,245,66,0.04); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 40px; margin-bottom: 16px; display: block; }
+  .upload-label { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+  .upload-hint { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); }
+  .file-selected { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(200,245,66,0.08); border: 1px solid rgba(200,245,66,0.3); border-radius: 8px; margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .file-selected .fname { color: var(--accent); flex: 1; }
+  .file-selected .fsize { color: var(--text2); }
+  .btn-estimar { width: 100%; margin-top: 16px; padding: 16px; background: var(--accent); color: #0f0f0f; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-estimar:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn-estimar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .loading { display: none; text-align: center; padding: 48px; }
+  .loading.show { display: block; }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); }
+  .results { display: none; padding: 0 0 64px; }
+  .results.show { display: block; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .summary-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .summary-card.highlight::after { background: var(--accent2); }
+  .summary-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+  .summary-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+  .summary-card.highlight .summary-value { color: var(--accent2); }
+  .summary-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+  .btn-download { padding: 8px 16px; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+  .btn-download:hover { background: rgba(200,245,66,0.1); }
+  .lineas-grid { display: grid; gap: 12px; margin-bottom: 40px; }
+  .linea-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 24px; transition: border-color 0.2s; }
+  .linea-row:hover { border-color: rgba(200,245,66,0.3); }
+  .linea-name { font-weight: 600; font-size: 15px; }
+  .linea-stat { text-align: right; }
+  .linea-stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+  .linea-stat-value { font-size: 20px; font-weight: 700; }
+  .linea-stat-value.accent { color: var(--accent); }
+  .linea-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .linea-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  th { padding: 12px 16px; text-align: left; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
+  td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid rgba(46,46,46,0.6); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .td-mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+  .td-accent { color: var(--accent); font-weight: 600; }
+  .td-muted { color: var(--text2); }
+  .badge-nivel { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+  .badge-nivel.sku { border-color: var(--accent2); color: var(--accent2); }
+  .badge-nivel.fallback { border-color: #f5a542; color: #f5a542; }
+  .search-bar { padding: 10px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; width: 240px; outline: none; transition: border-color 0.2s; }
+  .search-bar:focus { border-color: var(--accent); }
+  .error-msg { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.3); border-radius: 10px; padding: 16px 20px; color: var(--danger); font-family: 'DM Mono', monospace; font-size: 13px; margin-top: 16px; display: none; }
+  .error-msg.show { display: block; }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+  @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🦙</div>
+      <div>
+        <div class="logo-text">Wild Lama</div>
+        <div class="logo-sub">Warehouse Intelligence</div>
+      </div>
+    </div>
+    <div class="badge">v1.0 · EPA</div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1 class="hero-title">Estimador<span>de Bultos</span></h1>
+      <p class="hero-desc">Sube el archivo de reposición y obtén una estimación inteligente de la cantidad de bultos por línea, basada en el histórico real de embalaje.</p>
+    </div>
+    <div class="upload-card">
+      <div class="upload-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls">
+        <span class="upload-icon">📦</span>
+        <div class="upload-label">Arrastra el archivo Excel</div>
+        <div class="upload-hint">o haz clic para seleccionar · .xlsx / .xls</div>
+      </div>
+      <div class="file-selected" id="fileSelected" style="display:none">
+        <span>📄</span>
+        <span class="fname" id="fileName"></span>
+        <span class="fsize" id="fileSize"></span>
+      </div>
+      <div class="error-msg" id="errorMsg"></div>
+      <button class="btn-estimar" id="btnEstimar" disabled onclick="estimar()">
+        <span>⚡</span> Estimar bultos
+      </button>
+    </div>
+  </section>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Consultando histórico en BigQuery...</div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div class="divider"></div>
+    <div class="section-header">
+      <div class="section-title">Bultos por Línea</div>
+    </div>
+    <div class="lineas-grid" id="lineasGrid"></div>
+    <div class="divider"></div>
+    <div class="section-header">
+      <div class="section-title">Detalle por SKU</div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <input class="search-bar" id="searchInput" placeholder="Buscar SKU o descripción..." oninput="filtrarTabla()">
+        <button class="btn-download" onclick="descargarExcel()">⬇ Descargar Excel</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th><th>Descripción</th><th>Talla</th><th>Línea</th>
+            <th>Clase</th><th>Unidades</th><th>Ratio u/caja</th><th>Bultos est.</th><th>Nivel</th>
+          </tr>
+        </thead>
+        <tbody id="detalleTabla"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:8080";
+let currentFile = null;
+let allData = [];
+
+const dropZone = document.getElementById("dropZone");
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("dragover"); const f = e.dataTransfer.files[0]; if (f) setFile(f); });
+document.getElementById("fileInput").addEventListener("change", e => { if (e.target.files[0]) setFile(e.target.files[0]); });
+
+function setFile(file) {
+  currentFile = file;
+  document.getElementById("fileName").textContent = file.name;
+  document.getElementById("fileSize").textContent = (file.size/1024).toFixed(0) + " KB";
+  document.getElementById("fileSelected").style.display = "flex";
+  document.getElementById("btnEstimar").disabled = false;
+  document.getElementById("errorMsg").classList.remove("show");
+}
+
+async function estimar() {
+  if (!currentFile) return;
+  document.getElementById("loading").classList.add("show");
+  document.getElementById("results").classList.remove("show");
+  document.getElementById("btnEstimar").disabled = true;
+  document.getElementById("errorMsg").classList.remove("show");
+  const formData = new FormData();
+  formData.append("file", currentFile);
+  try {
+    const res = await fetch(`${API_URL}/estimar`, { method: "POST", body: formData });
+    if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Error al procesar"); }
+    mostrarResultados(await res.json());
+  } catch(e) {
+    document.getElementById("errorMsg").textContent = "❌ " + e.message;
+    document.getElementById("errorMsg").classList.add("show");
+  } finally {
+    document.getElementById("loading").classList.remove("show");
+    document.getElementById("btnEstimar").disabled = false;
+  }
+}
+
+function mostrarResultados(data) {
+  const orden = data.resumen_orden;
+  allData = data.detalle;
+  document.getElementById("summaryGrid").innerHTML = `
+    <div class="summary-card"><div class="summary-label">Punto de venta</div><div class="summary-value" style="font-size:18px;letter-spacing:-0.5px">${orden.punto_de_venta}</div><div class="summary-sub">${(orden.fecha_compromiso||"").split("T")[0]}</div></div>
+    <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
+    <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
+    <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>
+  `;
+  const maxB = Math.max(...orden.lineas.map(l => l.Bultos_estimados));
+  document.getElementById("lineasGrid").innerHTML = orden.lineas.map(l => `
+    <div class="linea-row">
+      <div><div class="linea-name">${l["Línea"] || l.Línea || "Sin línea"}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${(l.Bultos_estimados/maxB*100)}%"></div></div></div>
+      <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${l.SKUs}</div></div>
+      <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${l.Unidades_totales}</div></div>
+      <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(l.Bultos_estimados)}</div></div>
+    </div>
+  `).join("");
+  renderTabla(allData);
+  document.getElementById("results").classList.add("show");
+  document.getElementById("results").scrollIntoView({ behavior: "smooth" });
+}
+
+function renderTabla(data) {
+  document.getElementById("detalleTabla").innerHTML = data.map(row => {
+    const nc = row["Nivel fallback"] === "SKU" ? "sku" : row["Nivel fallback"] === "Global" ? "fallback" : "";
+    return `<tr>
+      <td class="td-mono">${row["Código producto"]}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${row["Descripción"]}</td>
+      <td class="td-mono td-muted">${row["Talla"]||"-"}</td>
+      <td class="td-muted">${row["Línea"]||"-"}</td>
+      <td class="td-muted">${row["Clase"]||"-"}</td>
+      <td class="td-mono">${row["Unidades pedidas"]}</td>
+      <td class="td-mono td-muted">${row["Ratio und/caja"]}</td>
+      <td class="td-mono td-accent">${Math.ceil(row["Bultos estimados"])}</td>
+      <td><span class="badge-nivel ${nc}">${row["Nivel fallback"]}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function filtrarTabla() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  renderTabla(allData.filter(r => (r["Código producto"]||"").toLowerCase().includes(q) || (r["Descripción"]||"").toLowerCase().includes(q) || (r["Clase"]||"").toLowerCase().includes(q)));
+}
+
+async function descargarExcel() {
+  if (!currentFile) return;
+  const fd = new FormData(); fd.append("file", currentFile);
+  const res = await fetch(`${API_URL}/estimar/excel`, { method: "POST", body: fd });
+  if (!res.ok) return;
+  const blob = await res.blob();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = currentFile.name.replace(".xlsx", "_estimado.xlsx");
+  a.click();
+}
+</script>
+</body>
+</html>

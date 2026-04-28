@@ -1,0 +1,11 @@
+.env
+*.json
+downloads/
+__pycache__/
+*.log
+*.xlsx
+*.exe
+*.zip
+*.bat
+*.docx
+*.pyc
