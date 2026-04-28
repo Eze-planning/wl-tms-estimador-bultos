@@ -1,28 +1,49 @@
-# Estimador de Bultos — Wild Lama
+# Estimador de Bultos — Wild Lama TMS
 
-Estima la cantidad de bultos para pedidos futuros basándose en el histórico real de embalaje en BigQuery.
+## Descripción
+Aplicación web que estima la cantidad de bultos (cajas de despacho) 
+para pedidos a tiendas propias, basándose en el histórico real de 
+embalaje almacenado en BigQuery.
 
-## Estructura
+Parte del proyecto TMS de Wild Lama, orientado a optimizar rutas, 
+visibilidad de pedidos y acceso ágil a reportes logísticos.
+
+## Autor
+Ezequiel Ortiz — Área de Planning & Logistics
+
+## Tier
+Tier 3 — Crítica (conecta a GCP/BigQuery)
+
+## Estructura del proyecto
 ```
 estimador_bultos/
-├── modelo.py          ← lógica de estimación + conexión BigQuery
-├── app.py             ← backend FastAPI
-├── frontend/
-│   └── index.html     ← web app
+├── app.py          # Backend FastAPI (puerto 8080)
+├── modelo.py       # Lógica de estimación y conexión a BigQuery
+├── index.html      # Frontend web
 ├── requirements.txt
-├── .env.example
-└── run.bat            ← arrancar en Windows
+└── .env.example    # Variables de entorno necesarias
+valgreti_scraper/
+└── valgreti_scraper.py  # Bot de descarga automática desde Valgreti
 ```
+## Variables de entorno necesarias
+Ver `.env.example`
 
-## Setup
-1. Copiar `.env.example` a `.env` y completar
-2. Poner `bq_service_account.json` en la carpeta
-3. Correr `run.bat` (o `python app.py`)
-4. Abrir `frontend/index.html` en el browser
+## Cómo correr localmente
+```bash
+pip install -r requirements.txt
+python app.py
+```
+Abrir `index.html` en el browser.
 
-## Lógica de fallback
-SKU → Subclase → Clase → Sublínea → Línea → Global
+## Base de datos
+- **Proyecto GCP:** prj-wlcl-p-data-share
+- **Dataset:** sandbox
+- **Tablas:**
+  - `log_embalaje` — histórico de embalaje por caja
+  - `documento_salida` — órdenes de despacho
+  - `log_recepcion` — recepciones de mercadería
+  - `dims.product_dim` — dimensión de productos (solo lectura)
 
-## Endpoints
-- `POST /estimar` → JSON con detalle y resumen
-- `POST /estimar/excel` → descarga Excel con dos hojas
+## Scraper Valgreti
+Descarga automática 3 veces al día (7:00, 12:00, 17:30) desde Valgreti 
+hacia BigQuery. Requiere despliegue en Cloud Run.
