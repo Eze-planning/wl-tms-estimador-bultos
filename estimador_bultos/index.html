@@ -51,7 +51,19 @@
   .loading-text { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); }
   .results { display: none; padding: 0 0 64px; }
   .results.show { display: block; }
-  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  #costoWrap { display: none; }
+  #costoWrap.show { display: block; }
+  .costo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .costo-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .costo-title { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
+  .costo-grid { display: flex; gap: 32px; align-items: baseline; flex-wrap: wrap; }
+  .costo-item { display: flex; flex-direction: column; gap: 4px; }
+  .costo-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+  .costo-value { font-size: 18px; font-weight: 700; }
+  .costo-value.total { font-size: 28px; color: var(--accent2); letter-spacing: -0.5px; }
+  .costo-destino { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); margin-top: 8px; }
+  .costo-advertencia { font-family: 'DM Mono', monospace; font-size: 11px; color: #f5a542; margin-top: 8px; }
   .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
   .summary-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
   .summary-card.highlight::after { background: var(--accent2); }
@@ -90,8 +102,63 @@
   .search-bar:focus { border-color: var(--accent); }
   .error-msg { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.3); border-radius: 10px; padding: 16px 20px; color: var(--danger); font-family: 'DM Mono', monospace; font-size: 13px; margin-top: 16px; display: none; }
   .error-msg.show { display: block; }
+  .tipo-selector { margin-top: 16px; display: flex; gap: 8px; }
+  .tipo-btn { flex: 1; padding: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; text-align: center; letter-spacing: 0.5px; }
+  .tipo-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,245,66,0.08); }
+  .tiendas-grid { display: grid; gap: 10px; margin-bottom: 32px; }
+  .tienda-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 24px; transition: border-color 0.2s; }
+  .tienda-row:hover { border-color: rgba(200,245,66,0.3); }
+  .tienda-name { font-weight: 600; font-size: 14px; }
   .divider { height: 1px; background: var(--border); margin: 40px 0; }
+  .shipper-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .shipper-table th { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border); }
+  .shipper-table th:first-child { text-align: left; }
+  .shipper-table td { font-family: 'DM Mono', monospace; font-size: 13px; padding: 8px 10px; text-align: right; border-bottom: 1px solid rgba(46,46,46,0.5); }
+  .shipper-table td:first-child { text-align: left; font-family: 'Syne', sans-serif; font-size: 13px; color: var(--text); }
+  .shipper-table tr:last-child td { border-bottom: none; }
+  .shipper-table .hl { color: var(--accent2); font-weight: 700; font-size: 15px; }
+  .shipper-table .row-direct td:first-child { font-weight: 600; }
+  .shipper-table .row-ruta td:first-child { color: var(--text2); font-size: 12px; }
   @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } }
+  /* ── Tabs ── */
+  .tab-nav { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tab-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 14px 22px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  /* ── Despachos ── */
+  .desp-filters { display: flex; gap: 10px; align-items: center; padding: 24px 0 20px; flex-wrap: wrap; }
+  .desp-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); }
+  .desp-input { padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
+  .desp-input:focus { border-color: var(--accent); }
+  input[type="date"].desp-input { color-scheme: dark; }
+  .view-toggle { display: flex; gap: 4px; margin-left: auto; }
+  .view-btn { padding: 7px 16px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+  .view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,245,66,0.06); }
+  .desp-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 48px; }
+  .desp-table { width: 100%; border-collapse: collapse; }
+  .desp-table th { padding: 11px 14px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; background: var(--surface2); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .desp-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid rgba(46,46,46,0.5); white-space: nowrap; }
+  .desp-table tr:last-child td { border-bottom: none; }
+  .desp-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .courier-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 12px; display: inline-block; }
+  .courier-badge.shipper { background: rgba(200,245,66,0.1); color: var(--accent); border: 1px solid rgba(200,245,66,0.25); }
+  .courier-badge.min99 { background: rgba(66,245,167,0.1); color: var(--accent2); border: 1px solid rgba(66,245,167,0.25); }
+  .courier-badge.otro { background: rgba(136,136,136,0.12); color: var(--text2); border: 1px solid var(--border); }
+  .estado-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  /* ── Calendario ── */
+  .cal-nav { display: flex; align-items: center; gap: 16px; padding: 8px 0 20px; }
+  .cal-nav-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 12px; transition: border-color 0.2s; }
+  .cal-nav-btn:hover { border-color: var(--accent); }
+  .cal-title { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 48px; }
+  .cal-col { display: flex; flex-direction: column; gap: 6px; }
+  .cal-day-header { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-align: center; padding: 6px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .cal-day-num { font-size: 22px; font-weight: 800; text-align: right; font-family: 'DM Mono', monospace; color: var(--text2); line-height: 1; margin-bottom: 8px; }
+  .cal-day-num.today { color: var(--accent); }
+  .cal-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; transition: border-color 0.15s; }
+  .cal-card:hover { border-color: rgba(200,245,66,0.3); }
+  .cal-card-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
+  .cal-card-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); margin-top: 4px; display: flex; gap: 6px; align-items: center; }
 </style>
 </head>
 <body>
@@ -104,9 +171,14 @@
         <div class="logo-sub">Warehouse Intelligence</div>
       </div>
     </div>
-    <div class="badge">v1.0 · EPA</div>
+    <div class="badge">TMS · v1.0</div>
   </header>
+  <nav class="tab-nav">
+    <button class="tab-btn active" id="tab-btn-estimador" onclick="setTab('estimador')">Estimador</button>
+    <button class="tab-btn" id="tab-btn-despachos" onclick="setTab('despachos')">Despachos</button>
+  </nav>
 
+  <div id="tab-estimador">
   <section class="hero">
     <div>
       <h1 class="hero-title">Estimador<span>de Bultos</span></h1>
@@ -124,6 +196,10 @@
         <span class="fname" id="fileName"></span>
         <span class="fsize" id="fileSize"></span>
       </div>
+      <div class="tipo-selector">
+        <button class="tipo-btn active" id="btnTiendaPropia" onclick="setTipo('tienda_propia')">Tienda propia</button>
+        <button class="tipo-btn" id="btnParisXdb" onclick="setTipo('paris_xdb')">Paris</button>
+      </div>
       <div class="error-msg" id="errorMsg"></div>
       <button class="btn-estimar" id="btnEstimar" disabled onclick="estimar()">
         <span>⚡</span> Estimar bultos
@@ -138,37 +214,86 @@
 
   <div class="results" id="results">
     <div class="summary-grid" id="summaryGrid"></div>
+    <div id="costoWrap" style="margin-bottom:40px">
+      <div class="costo-card" id="costoCard" style="position:relative;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+          <div class="costo-title" style="margin-bottom:0">Costos de envío</div>
+          <div id="costoDestLabel" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)"></div>
+        </div>
+        <table class="shipper-table" id="costoTable"></table>
+        <div id="costoAdvert" class="costo-advertencia"></div>
+      </div>
+    </div>
     <div class="divider"></div>
+    <div id="tiendasSection" style="display:none">
+      <div class="section-header">
+        <div class="section-title">Bultos por Tienda</div>
+      </div>
+      <div class="tiendas-grid" id="tiendasGrid"></div>
+      <div class="divider"></div>
+    </div>
     <div class="section-header">
       <div class="section-title">Bultos por Línea</div>
     </div>
     <div class="lineas-grid" id="lineasGrid"></div>
-    <div class="divider"></div>
-    <div class="section-header">
-      <div class="section-title">Detalle por SKU</div>
-      <div style="display:flex;gap:12px;align-items:center">
-        <input class="search-bar" id="searchInput" placeholder="Buscar SKU o descripción..." oninput="filtrarTabla()">
-        <button class="btn-download" onclick="descargarExcel()">⬇ Descargar Excel</button>
+  </div>
+  </div><!-- /tab-estimador -->
+
+  <!-- ── TAB DESPACHOS ── -->
+  <div id="tab-despachos" style="display:none">
+    <div style="padding:40px 0 0">
+      <h1 style="font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-1.5px">Despachos<span style="color:var(--accent)">.</span></h1>
+      <p style="color:var(--text2);font-size:14px;margin-top:8px;line-height:1.6">Historial de salidas · Courier óptimo calculado automáticamente</p>
+    </div>
+    <div class="desp-filters">
+      <span class="desp-label">Desde</span>
+      <input type="date" class="desp-input" id="despDesde">
+      <span class="desp-label">Hasta</span>
+      <input type="date" class="desp-input" id="despHasta">
+      <input type="text" class="desp-input" id="despSearch" placeholder="Filtrar tienda..." style="width:180px" oninput="filtrarDespachos()">
+      <button class="btn-estimar" style="width:auto;padding:9px 20px;margin:0;font-size:13px" onclick="cargarDespachos()">Consultar</button>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnVista-lista" onclick="setVista('lista')">Lista</button>
+        <button class="view-btn" id="btnVista-cal" onclick="setVista('cal')">Calendario</button>
       </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th><th>Descripción</th><th>Talla</th><th>Línea</th>
-            <th>Clase</th><th>Unidades</th><th>Ratio u/caja</th><th>Bultos est.</th><th>Nivel</th>
-          </tr>
-        </thead>
-        <tbody id="detalleTabla"></tbody>
-      </table>
+    <div id="loadingDesp" style="display:none;text-align:center;padding:40px">
+      <div class="spinner"></div>
+      <div class="loading-text" style="margin-top:12px">Consultando BigQuery...</div>
     </div>
-  </div>
-</div>
+    <div id="despError" class="error-msg"></div>
+
+    <!-- Lista -->
+    <div id="vistaLista">
+      <div class="desp-table-wrap">
+        <table class="desp-table">
+          <thead><tr>
+            <th>Tienda / Cliente</th><th>Estado</th><th>F. Compromiso</th>
+            <th>F. Despacho</th><th>Bultos</th>
+            <th>Courier sugerido</th><th>Costo</th><th>99 Min</th><th>Shipper XL</th>
+          </tr></thead>
+          <tbody id="despTabla"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Calendario -->
+    <div id="vistaCal" style="display:none">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="semanaOffset(-1)">← Anterior</button>
+        <div class="cal-title" id="calTitulo"></div>
+        <button class="cal-nav-btn" onclick="semanaOffset(+1)">Siguiente →</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div><!-- /tab-despachos -->
+
+</div><!-- /container -->
 
 <script>
 const API_URL = "http://localhost:8080";
 let currentFile = null;
-let allData = [];
+let currentTipo = "tienda_propia";
 
 const dropZone = document.getElementById("dropZone");
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
@@ -185,6 +310,12 @@ function setFile(file) {
   document.getElementById("errorMsg").classList.remove("show");
 }
 
+function setTipo(tipo) {
+  currentTipo = tipo;
+  document.getElementById("btnTiendaPropia").classList.toggle("active", tipo === "tienda_propia");
+  document.getElementById("btnParisXdb").classList.toggle("active", tipo === "paris_xdb");
+}
+
 async function estimar() {
   if (!currentFile) return;
   document.getElementById("loading").classList.add("show");
@@ -193,6 +324,7 @@ async function estimar() {
   document.getElementById("errorMsg").classList.remove("show");
   const formData = new FormData();
   formData.append("file", currentFile);
+  formData.append("tipo", currentTipo);
   try {
     const res = await fetch(`${API_URL}/estimar`, { method: "POST", body: formData });
     if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Error al procesar"); }
@@ -208,60 +340,262 @@ async function estimar() {
 
 function mostrarResultados(data) {
   const orden = data.resumen_orden;
-  allData = data.detalle;
-  document.getElementById("summaryGrid").innerHTML = `
-    <div class="summary-card"><div class="summary-label">Punto de venta</div><div class="summary-value" style="font-size:18px;letter-spacing:-0.5px">${orden.punto_de_venta}</div><div class="summary-sub">${(orden.fecha_compromiso||"").split("T")[0]}</div></div>
-    <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
-    <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
-    <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>
-  `;
-  const maxB = Math.max(...orden.lineas.map(l => l.Bultos_estimados));
-  document.getElementById("lineasGrid").innerHTML = orden.lineas.map(l => `
+  const esXdb = orden.tipo === "paris_xdb";
+  document.getElementById("costoWrap").classList.remove("show");
+
+  if (orden.tipo === "paris_stock") {
+    document.getElementById("summaryGrid").innerHTML = `
+      <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:22px;letter-spacing:-0.5px">${orden.n_orden}</div><div class="summary-sub">Stock · Cd Omnicanal</div></div>
+      <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">filas en la orden</div></div>
+      <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${orden.total_bultos.toLocaleString()}</div><div class="summary-sub">1 SKU por caja</div></div>
+    `;
+    document.getElementById("tiendasSection").style.display = "none";
+  } else if (esXdb) {
+    document.getElementById("summaryGrid").innerHTML = `
+      <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:22px;letter-spacing:-0.5px">${orden.n_orden}</div><div class="summary-sub">${orden.total_tiendas} tiendas destino</div></div>
+      <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
+      <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>
+    `;
+    const maxT = Math.max(...(orden.tiendas||[]).map(t => t.Bultos_estimados));
+    document.getElementById("tiendasGrid").innerHTML = (orden.tiendas||[])
+      .sort((a,b) => b.Bultos_estimados - a.Bultos_estimados)
+      .map(t => `
+        <div class="tienda-row">
+          <div><div class="tienda-name">${t.Tienda}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${(t.Bultos_estimados/maxT*100)}%"></div></div></div>
+          <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${t.SKUs}</div></div>
+          <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${t.Unidades}</div></div>
+          <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(t.Bultos_estimados)}</div></div>
+        </div>`).join("");
+    document.getElementById("tiendasSection").style.display = "block";
+  } else if (!esXdb) {
+    document.getElementById("summaryGrid").innerHTML = `
+      <div class="summary-card"><div class="summary-label">Punto de venta</div><div class="summary-value" style="font-size:18px;letter-spacing:-0.5px">${orden.punto_de_venta}</div><div class="summary-sub">${(orden.fecha_compromiso||"").split("T")[0]}</div></div>
+      <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
+      <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>
+    `;
+    document.getElementById("tiendasSection").style.display = "none";
+  }
+
+  const lineas = orden.lineas || [];
+  const maxB = Math.max(...lineas.map(l => l.Bultos_estimados), 1);
+  document.getElementById("lineasGrid").innerHTML = lineas.map(l => `
     <div class="linea-row">
-      <div><div class="linea-name">${l["Línea"] || l.Línea || "Sin línea"}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${(l.Bultos_estimados/maxB*100)}%"></div></div></div>
+      <div><div class="linea-name">${l["Línea"] || l.linea || "Sin línea"}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${(l.Bultos_estimados/maxB*100)}%"></div></div></div>
       <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${l.SKUs}</div></div>
       <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${l.Unidades_totales}</div></div>
       <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(l.Bultos_estimados)}</div></div>
     </div>
   `).join("");
-  renderTabla(allData);
+
+  renderCostos(data.costo_99min, data.costo_shipper);
   document.getElementById("results").classList.add("show");
   document.getElementById("results").scrollIntoView({ behavior: "smooth" });
 }
 
-function renderTabla(data) {
-  document.getElementById("detalleTabla").innerHTML = data.map(row => {
-    const nc = row["Nivel fallback"] === "SKU" ? "sku" : row["Nivel fallback"] === "Global" ? "fallback" : "";
-    return `<tr>
-      <td class="td-mono">${row["Código producto"]}</td>
-      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${row["Descripción"]}</td>
-      <td class="td-mono td-muted">${row["Talla"]||"-"}</td>
-      <td class="td-muted">${row["Línea"]||"-"}</td>
-      <td class="td-muted">${row["Clase"]||"-"}</td>
-      <td class="td-mono">${row["Unidades pedidas"]}</td>
-      <td class="td-mono td-muted">${row["Ratio und/caja"]}</td>
-      <td class="td-mono td-accent">${Math.ceil(row["Bultos estimados"])}</td>
-      <td><span class="badge-nivel ${nc}">${row["Nivel fallback"]}</span></td>
-    </tr>`;
-  }).join("");
+function renderCostos(c99, cShipper) {
+  const wrap = document.getElementById("costoWrap");
+  if (!c99 && !cShipper) { wrap.classList.remove("show"); return; }
+  const fmt = v => v != null ? "$ " + Math.round(v).toLocaleString("es-CL") : "—";
+
+  document.getElementById("costoAdvert").textContent = cShipper?.advertencia || c99?.advertencia || "";
+
+  if (cShipper && !cShipper.advertencia) {
+    const d      = cShipper.directo;
+    const rutas  = cShipper.rutas || [];
+    const t99    = c99?.costo_total ?? null;
+    document.getElementById("costoDestLabel").textContent = cShipper.destino || "";
+
+    const delta = (sXL) => {
+      if (t99 == null || sXL == null) return "";
+      const pct = Math.round((sXL / t99 - 1) * 100);
+      const sign = pct > 0 ? "+" : "";
+      const color = pct > 0 ? "#f5a542" : "var(--accent2)";
+      return `<span style="font-family:'DM Mono',monospace;font-size:10px;color:${color}">${sign}${pct}%</span>`;
+    };
+
+    const pionetaNote = v => v > 0
+      ? `<br><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">+ $${(v).toLocaleString("es-CL")} pioneta</span>`
+      : "";
+
+    let rows = "";
+    if (rutas.length > 0) {
+      rows = rutas.map(r => `<tr class="row-ruta">
+        <td>${r.nombre} <span style="color:var(--text2);font-size:11px">÷${r.n_tiendas}</span>${pionetaNote(r.pioneta)}</td>
+        <td>${fmt(r.por_tienda_L)}</td>
+        <td class="hl">${fmt(r.por_tienda_XL)} ${delta(r.por_tienda_XL)}</td>
+        <td>${fmt(t99)}</td>
+      </tr>`).join("");
+      rows += `<tr style="opacity:0.4;font-size:12px">
+        <td>Directo (sin combinar)</td>
+        <td>${fmt(d.costo_L)}</td>
+        <td>${fmt(d.costo_XL)}${d.costo_rampla != null ? ` · <span style="font-size:10px">Rampla ${fmt(d.costo_rampla)}</span>` : ""}</td>
+        <td>—</td>
+      </tr>`;
+    } else {
+      rows = `<tr class="row-direct">
+        <td>Directo${pionetaNote(d.pioneta)}</td>
+        <td>${fmt(d.costo_L)}</td>
+        <td class="hl">${fmt(d.costo_XL)} ${delta(d.costo_XL)}</td>
+        <td>${fmt(t99)}</td>
+      </tr>`;
+    }
+
+    document.getElementById("costoTable").innerHTML = `
+      <thead><tr><th>Opción</th><th>Shipper L</th><th>Shipper XL</th><th>99 Min</th></tr></thead>
+      <tbody>${rows}</tbody>`;
+  } else {
+    document.getElementById("costoTable").innerHTML = "";
+    document.getElementById("costoDestLabel").textContent = "";
+  }
+
+  wrap.classList.add("show");
 }
 
-function filtrarTabla() {
-  const q = document.getElementById("searchInput").value.toLowerCase();
-  renderTabla(allData.filter(r => (r["Código producto"]||"").toLowerCase().includes(q) || (r["Descripción"]||"").toLowerCase().includes(q) || (r["Clase"]||"").toLowerCase().includes(q)));
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function setTab(tab) {
+  document.getElementById('tab-estimador').style.display = tab === 'estimador' ? 'block' : 'none';
+  document.getElementById('tab-despachos').style.display = tab === 'despachos' ? 'block' : 'none';
+  document.getElementById('tab-btn-estimador').classList.toggle('active', tab === 'estimador');
+  document.getElementById('tab-btn-despachos').classList.toggle('active', tab === 'despachos');
+  if (tab === 'despachos' && despData.length === 0) cargarDespachos();
 }
 
-async function descargarExcel() {
-  if (!currentFile) return;
-  const fd = new FormData(); fd.append("file", currentFile);
-  const res = await fetch(`${API_URL}/estimar/excel`, { method: "POST", body: fd });
-  if (!res.ok) return;
-  const blob = await res.blob();
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = currentFile.name.replace(".xlsx", "_estimado.xlsx");
-  a.click();
+// ── DESPACHOS ─────────────────────────────────────────────────────────────────
+let despData = [];
+let _calBase = null;
+
+(function initDespDates() {
+  const today = new Date();
+  const hace30 = new Date(today);
+  hace30.setDate(today.getDate() - 30);
+  document.getElementById('despDesde').value = hace30.toISOString().split('T')[0];
+  document.getElementById('despHasta').value = today.toISOString().split('T')[0];
+})();
+
+async function cargarDespachos() {
+  const desde = document.getElementById('despDesde').value;
+  const hasta = document.getElementById('despHasta').value;
+  const loading = document.getElementById('loadingDesp');
+  const errorEl = document.getElementById('despError');
+  loading.style.display = 'block';
+  errorEl.classList.remove('show');
+  despData = [];
+  try {
+    const res = await fetch(`${API_URL}/despachos?desde=${desde}&hasta=${hasta}`);
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Error al consultar'); }
+    despData = (await res.json()).despachos || [];
+    filtrarDespachos();
+  } catch(e) {
+    errorEl.textContent = '❌ ' + e.message;
+    errorEl.classList.add('show');
+  } finally {
+    loading.style.display = 'none';
+  }
 }
+
+function filtrarDespachos() {
+  const q = (document.getElementById('despSearch').value || '').toLowerCase();
+  const filtered = q ? despData.filter(d => (d.nom_cliente || '').toLowerCase().includes(q)) : despData;
+  const enLista = document.getElementById('vistaLista').style.display !== 'none';
+  if (enLista) renderLista(filtered); else renderCalendario(filtered);
+}
+
+function setVista(vista) {
+  document.getElementById('vistaLista').style.display = vista === 'lista' ? 'block' : 'none';
+  document.getElementById('vistaCal').style.display  = vista === 'cal'   ? 'block' : 'none';
+  document.getElementById('btnVista-lista').classList.toggle('active', vista === 'lista');
+  document.getElementById('btnVista-cal').classList.toggle('active',   vista === 'cal');
+  filtrarDespachos();
+}
+
+function renderLista(data) {
+  const fmt = v => v != null ? '$ ' + Math.round(v).toLocaleString('es-CL') : '—';
+  const badge = c => {
+    if (!c) return '<span class="courier-badge otro">—</span>';
+    const cls = c === 'Shipper' ? 'shipper' : c === '99 Min' ? 'min99' : 'otro';
+    return `<span class="courier-badge ${cls}">${c}</span>`;
+  };
+  const estadoColor = e => ({ CERRADO:'#42f5a7', ABIERTO:'#f5a542', CANCELADO:'#ff4d4d' })[(e||'').toUpperCase()] || '#888';
+
+  const rows = data.map(d => `<tr>
+    <td style="font-weight:600">${d.nom_cliente || '—'}</td>
+    <td><span class="estado-dot" style="background:${estadoColor(d.estado)}"></span>${d.estado || '—'}</td>
+    <td class="td-mono">${d.fecha_compromiso || '—'}</td>
+    <td class="td-mono">${d.fecha_despacho || '—'}</td>
+    <td class="td-mono td-accent">${d.bultos_reales || 0}</td>
+    <td>${badge(d.courier_sugerido)}</td>
+    <td class="td-mono">${fmt(d.costo_sugerido)}</td>
+    <td class="td-mono" style="color:var(--accent2)">${fmt(d.costo_99min)}</td>
+    <td class="td-mono" style="color:var(--accent)">${fmt(d.costo_shipper_xl)}</td>
+  </tr>`).join('');
+
+  document.getElementById('despTabla').innerHTML = rows ||
+    `<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:32px;font-family:'DM Mono',monospace;font-size:13px">Sin resultados</td></tr>`;
+}
+
+// ── CALENDARIO ────────────────────────────────────────────────────────────────
+function _getLunes(d) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const lunes = new Date(d);
+  lunes.setDate(d.getDate() + diff);
+  lunes.setHours(0,0,0,0);
+  return lunes;
+}
+
+function semanaOffset(n) {
+  if (!_calBase) _calBase = _getLunes(new Date());
+  _calBase.setDate(_calBase.getDate() + n * 7);
+  filtrarDespachos();
+}
+
+function renderCalendario(data) {
+  if (!_calBase) _calBase = _getLunes(new Date());
+  const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const today = new Date().toISOString().split('T')[0];
+
+  const byDate = {};
+  data.forEach(d => {
+    const key = d.fecha_compromiso || d.fecha_despacho;
+    if (key) { if (!byDate[key]) byDate[key] = []; byDate[key].push(d); }
+  });
+
+  const days = Array.from({length:7}, (_, i) => {
+    const d = new Date(_calBase);
+    d.setDate(_calBase.getDate() + i);
+    return d;
+  });
+
+  const fmtD = d => d.toLocaleDateString('es-CL', {day:'numeric', month:'short'});
+  document.getElementById('calTitulo').textContent = `${fmtD(days[0])} — ${fmtD(days[6])}`;
+
+  const fmtK = v => v != null ? '$' + Math.round(v/1000) + 'k' : '';
+  const cCls = c => c === 'Shipper' ? 'shipper' : c === '99 Min' ? 'min99' : 'otro';
+
+  document.getElementById('calGrid').innerHTML = days.map((d, i) => {
+    const key = d.toISOString().split('T')[0];
+    const items = byDate[key] || [];
+    const isToday = key === today;
+    const cards = items.map(desp => `
+      <div class="cal-card">
+        <div class="cal-card-name">${desp.nom_cliente || '—'}</div>
+        <div class="cal-card-sub">
+          <span>${desp.bultos_reales || 0} blt</span>
+          ${desp.courier_sugerido ? `<span class="courier-badge ${cCls(desp.courier_sugerido)}" style="font-size:9px;padding:1px 6px">${desp.courier_sugerido}</span>` : ''}
+          ${desp.costo_sugerido ? `<span>${fmtK(desp.costo_sugerido)}</span>` : ''}
+        </div>
+      </div>`).join('');
+    return `<div class="cal-col">
+      <div class="cal-day-header">${DIAS[i]}</div>
+      <div class="cal-day-num${isToday ? ' today' : ''}">${d.getDate()}</div>
+      ${cards || '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--border);text-align:center;padding:12px 0">·</div>'}
+    </div>`;
+  }).join('');
+}
+
 </script>
 </body>
 </html>

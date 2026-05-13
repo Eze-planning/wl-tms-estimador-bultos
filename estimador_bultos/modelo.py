@@ -21,6 +21,11 @@ load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 # Líneas que usan ratio ponderado por subclase
 LINEAS_POR_SUBCLASE = {"Vestuario Hombre", "Vestuario Kids"}
 
+# SKUs con ratio fijo conocido para órdenes Paris (no usar histórico)
+RATIOS_FIJOS_PARIS = {
+    "WL132107201000511": 50,  # 586712002 en Paris
+}
+
 
 def get_bq_client():
     project  = os.getenv("BQ_PROJECT")
@@ -212,32 +217,41 @@ def obtener_ratio_linea(cliente_norm, linea, ratios) -> float:
     return ratios["global"]
 
 
-def calcular_bultos_linea(df_linea, product_dim, ratios, cliente_norm, linea) -> tuple:
+def calcular_bultos_linea(df_linea, product_dim, ratios, cliente_norm, linea,
+                          ratios_fijos: dict = None) -> tuple:
     total_unidades = df_linea["unidades"].sum()
+    ratios_fijos = ratios_fijos or {}
+    ratio_pond = 0
+    niveles = set()
 
-    if linea in LINEAS_POR_SUBCLASE:
-        # Ratio ponderado por subclase
-        ratio_pond = 0
-        for _, row in df_linea.iterrows():
-            sku = str(row["sku"]).strip()
-            dim = product_dim[product_dim["sku"].astype(str).str.strip() == sku]
+    for _, row in df_linea.iterrows():
+        sku  = str(row["sku"]).strip()
+        peso = row["unidades"] / total_unidades if total_unidades > 0 else 0
+
+        if sku in ratios_fijos:
+            ratio = ratios_fijos[sku]
+            niveles.add("Ratio Fijo")
+        elif linea in LINEAS_POR_SUBCLASE:
+            dim      = product_dim[product_dim["sku"].astype(str).str.strip() == sku]
             subclase = dim["subclase"].values[0] if len(dim) > 0 else None
             clase    = dim["clase"].values[0]    if len(dim) > 0 else None
             ratio    = obtener_ratio_subclase(cliente_norm, subclase, clase, ratios)
-            peso     = row["unidades"] / total_unidades if total_unidades > 0 else 0
-            ratio_pond += peso * ratio
-        nivel = "Ponderado por Subclase"
-    else:
-        ratio_pond = obtener_ratio_linea(cliente_norm, linea, ratios)
-        nivel = "Línea Completa"
+            niveles.add("Ponderado por Subclase")
+        else:
+            ratio = obtener_ratio_linea(cliente_norm, linea, ratios)
+            niveles.add("Línea Completa")
 
+        ratio_pond += peso * ratio
+
+    nivel = " + ".join(sorted(niveles)) if niveles else "Global"
     bultos = total_unidades / ratio_pond if ratio_pond > 0 else 0
     print(f"  [{linea}] método={nivel} ratio={ratio_pond:.1f} unidades={total_unidades} bultos={bultos:.1f}")
     return ratio_pond, bultos, nivel
 
 
 def procesar_pedido(df_pedido, product_dim, ratios, cliente_raw,
-                    col_sku, col_und, col_desc="", col_talla="") -> tuple:
+                    col_sku, col_und, col_desc="", col_talla="",
+                    ratios_fijos: dict = None) -> tuple:
     df_pedido = df_pedido.fillna("")
     cliente_norm = normalizar_cliente(cliente_raw, ratios["clientes_lista"])
 
@@ -270,7 +284,8 @@ def procesar_pedido(df_pedido, product_dim, ratios, cliente_raw,
     for linea, grupo in df_enrich.groupby("linea"):
         total_und_linea = grupo["unidades"].sum()
         ratio_final, bultos_linea, nivel = calcular_bultos_linea(
-            grupo, product_dim, ratios, cliente_norm, linea
+            grupo, product_dim, ratios, cliente_norm, linea,
+            ratios_fijos=ratios_fijos
         )
 
         resumen_linea.append({
@@ -346,12 +361,26 @@ def estimar_tienda_propia(filepath: str) -> dict:
     return {"detalle": detalle, "resumen_linea": resumen_linea, "resumen_orden": resumen_orden}
 
 
+def _resolver_sku_wl(df: pd.DataFrame, filepath: str) -> pd.DataFrame:
+    """Une la OC con la Mini Maestra (sheet 1) para obtener SKU WL confiable."""
+    mini = pd.read_excel(filepath, sheet_name=1, dtype=str)
+    mini.columns = [c.strip() for c in mini.columns]
+    mapping = dict(zip(
+        mini["SKU PARIS"].str.strip(),
+        mini["SKU HIJO WL"].str.strip()
+    ))
+    df = df.copy()
+    df["SKU WL"] = df["SKU Paris"].astype(str).str.strip().map(mapping)
+    return df
+
+
 def estimar_paris_xdb(filepath: str) -> dict:
     client      = get_bq_client()
     ratios      = cargar_ratios(client, "paris")
     product_dim = cargar_product_dim(client)
 
-    df = pd.read_excel(filepath, sheet_name="Original", dtype={"SKU WL": str})
+    df = pd.read_excel(filepath, sheet_name=0, dtype={"SKU Paris": str})
+    df = _resolver_sku_wl(df, filepath)
     df = df.where(pd.notnull(df), None)
 
     resumen_tiendas = []
@@ -361,7 +390,8 @@ def estimar_paris_xdb(filepath: str) -> dict:
         detalle, resumen_linea, _ = procesar_pedido(
             grupo, product_dim, ratios, "Paris",
             col_sku="SKU WL", col_und="Solicitado",
-            col_desc="Descripción", col_talla="Talla"
+            col_desc="Descripción", col_talla="Talla",
+            ratios_fijos=RATIOS_FIJOS_PARIS
         )
         df_det = pd.DataFrame(detalle)
         bultos_tienda = sum(r["Bultos_estimados"] for r in resumen_linea)
@@ -397,13 +427,79 @@ def estimar_paris_xdb(filepath: str) -> dict:
         "lineas":         resumen_linea_total,
     }
 
+    for r in detalle_total:
+        r["Tienda"]           = r.pop("tienda_destino")
+        r["Línea"]            = r.pop("linea")
+        r["Subclase"]         = r.pop("subclase")
+        r["Clase"]            = r.pop("clase")
+        r["Código producto"]  = r.pop("sku")
+        r["Descripción"]      = r.pop("descripcion")
+        r["Talla"]            = r.pop("talla")
+        r["Unidades pedidas"] = r.pop("unidades")
+        r["Ratio und/caja"]   = r.pop("ratio_und_caja")
+        r["Bultos estimados"] = r.pop("bultos_estimados")
+        r["Nivel fallback"]   = r.pop("nivel_fallback")
+
     return {"detalle": detalle_total, "resumen_tiendas": resumen_tiendas,
             "resumen_linea": resumen_linea_total, "resumen_orden": resumen_orden}
 
 
+def estimar_paris_stock(filepath: str) -> dict:
+    df = pd.read_excel(filepath, sheet_name=0, dtype={"Cód. Prod. Prov.": str})
+    df = df.where(pd.notnull(df), None)
+
+    detalle = []
+    for _, row in df.iterrows():
+        sku      = str(row.get("Cód. Prod. Prov.", "") or "").strip()
+        unidades = int(float(row.get("Solicitado", 0) or 0))
+        detalle.append({
+            "Código producto":  sku,
+            "Descripción":      row.get("Descripción", "") or "",
+            "Talla":            row.get("Talla", "") or "",
+            "Línea":            row.get("Departamento", "") or "",
+            "Subclase":         "",
+            "Clase":            "",
+            "Unidades pedidas": unidades,
+            "Ratio und/caja":   1,
+            "Bultos estimados": 1,
+            "Nivel fallback":   "Stock (1 SKU/caja)",
+        })
+
+    resumen_linea = []
+    for linea, grupo in pd.DataFrame(detalle).groupby("Línea"):
+        resumen_linea.append({
+            "Línea":            linea,
+            "SKUs":             grupo["Código producto"].nunique(),
+            "Unidades_totales": int(grupo["Unidades pedidas"].sum()),
+            "Bultos_estimados": int(grupo["Bultos estimados"].sum()),
+        })
+
+    n_orden_col = next((c for c in df.columns if "rden" in c and "N" in c), None)
+    resumen_orden = {
+        "tipo":           "paris_stock",
+        "n_orden":        str(df[n_orden_col].iloc[0]) if n_orden_col else "",
+        "total_skus":     len(df),
+        "total_unidades": int(df["Solicitado"].sum()),
+        "total_bultos":   len(df),
+        "lineas":         resumen_linea,
+    }
+
+    return {"detalle": detalle, "resumen_linea": resumen_linea, "resumen_orden": resumen_orden}
+
+
+def estimar_paris(filepath: str) -> dict:
+    df_header = pd.read_excel(filepath, sheet_name=0, nrows=1)
+    tipo_orden = ""
+    if "Tipo de Orden" in df_header.columns:
+        tipo_orden = str(df_header["Tipo de Orden"].iloc[0]).strip()
+    if tipo_orden == "Stock":
+        return estimar_paris_stock(filepath)
+    return estimar_paris_xdb(filepath)
+
+
 def estimar_bultos(filepath: str, tipo: str = "tienda_propia") -> dict:
-    if tipo == "paris_xdb":
-        return estimar_paris_xdb(filepath)
+    if tipo in ("paris_xdb", "paris"):
+        return estimar_paris(filepath)
     return estimar_tienda_propia(filepath)
 
 

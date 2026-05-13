@@ -9,11 +9,14 @@ import os
 import io
 import tempfile
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 
 from modelo import estimar_bultos
+from tarifario_99min import calcular_costo_99min
+from despachos import obtener_despachos
+from tarifario_shipper import calcular_costo_shipper
 
 app = FastAPI(title="Estimador de Bultos Wild Lama", version="2.0.0")
 
@@ -44,6 +47,12 @@ async def estimar(
 
     try:
         resultado = estimar_bultos(tmp_path, tipo)
+        if tipo == "tienda_propia":
+            orden = resultado["resumen_orden"]
+            n     = orden["total_bultos"]
+            pdv   = orden["punto_de_venta"]
+            resultado["costo_99min"]   = calcular_costo_99min(n, pdv)
+            resultado["costo_shipper"] = calcular_costo_shipper(n, pdv)
         return JSONResponse(content=resultado)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -84,6 +93,23 @@ async def estimar_excel(
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         os.unlink(tmp_path)
+
+
+@app.get("/despachos")
+async def despachos(
+    desde: str = Query(default=None),
+    hasta: str = Query(default=None),
+):
+    from datetime import date, timedelta
+    if not desde:
+        desde = (date.today() - timedelta(days=30)).isoformat()
+    if not hasta:
+        hasta = date.today().isoformat()
+    try:
+        data = obtener_despachos(desde, hasta)
+        return JSONResponse(content={"despachos": data, "desde": desde, "hasta": hasta})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

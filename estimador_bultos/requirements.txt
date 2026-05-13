@@ -4,6 +4,7 @@ pandas
 openpyxl
 google-cloud-bigquery
 google-auth
+db-dtypes
 python-dotenv
 pyarrow
 python-multipart
