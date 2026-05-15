@@ -9,6 +9,7 @@ import uuid
 import unicodedata
 import pandas as pd
 from pathlib import Path
+from rapidfuzz import process, fuzz
 
 SCHEDULE_PATH = os.getenv(
     "SCHEDULE_PATH",
@@ -132,7 +133,20 @@ def obtener_semana(lunes_iso: str) -> list:
     return result
 
 
+def resolver_tienda(nombre: str) -> str:
+    """Fuzzy-match un nombre contra las tiendas del schedule base."""
+    try:
+        tiendas = [e["tienda"] for e in cargar_schedule_base()]
+        if not tiendas:
+            return nombre
+        match = process.extractOne(nombre, tiendas, scorer=fuzz.WRatio, score_cutoff=65)
+        return match[0] if match else nombre
+    except Exception:
+        return nombre
+
+
 def guardar_override(lunes_iso: str, tienda: str, cambios: dict):
+    tienda = resolver_tienda(tienda)
     overrides = _load_overrides()
     if lunes_iso not in overrides:
         overrides[lunes_iso] = {}

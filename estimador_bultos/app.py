@@ -19,7 +19,7 @@ from despachos import obtener_despachos
 from tarifario_shipper import calcular_costo_shipper
 from programacion import (
     obtener_semana, guardar_override, eliminar_override, cargar_schedule_base,
-    agregar_extra, eliminar_extra
+    agregar_extra, eliminar_extra, resolver_tienda
 )
 
 app = FastAPI(title="Estimador de Bultos Wild Lama", version="2.0.0")
@@ -112,6 +112,14 @@ async def despachos(
     try:
         data = obtener_despachos(desde, hasta)
         return JSONResponse(content={"despachos": data, "desde": desde, "hasta": hasta})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/programacion/resolver_tienda")
+async def get_resolver_tienda(nombre: str = Query(...)):
+    try:
+        return {"tienda": resolver_tienda(nombre)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

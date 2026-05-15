@@ -281,9 +281,10 @@
       </div>
       <!-- Guardar en Programación -->
       <div class="save-prog-panel" id="savePanelProg">
-        <span class="save-prog-label">📅 Guardar en Programación:</span>
-        <span style="font-family:'Roboto Mono',monospace;font-size:12px;color:var(--text2)" id="savePanelTienda"></span>
+        <span class="save-prog-label">Guardar en Programación:</span>
         <span style="font-family:'Roboto Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)" id="savePanelBultos"></span>
+        <input list="savePanelTiendaList" class="form-input" id="savePanelTienda" placeholder="Tienda…" style="width:200px">
+        <datalist id="savePanelTiendaList"></datalist>
         <input type="date" class="form-input" id="savePanelSemana" style="width:150px">
         <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="guardarEnProg()">Guardar</button>
         <button class="btn-secondary" onclick="document.getElementById('savePanelProg').classList.remove('show')">✕</button>
@@ -577,10 +578,11 @@ function mostrarResultados(data) {
   // Panel guardar en programación
   if (orden.tipo === "tienda_propia" && orden.punto_de_venta) {
     const siguienteLunes = _getLunes(new Date(Date.now() + 7*24*3600*1000));
-    document.getElementById("savePanelTienda").textContent = orden.punto_de_venta;
     document.getElementById("savePanelBultos").textContent = Math.ceil(orden.total_bultos) + " bultos";
     document.getElementById("savePanelSemana").value = siguienteLunes.toISOString().split('T')[0];
     document.getElementById("savePanelProg").classList.add("show");
+    // Resolver tienda y poblar datalist
+    _cargarSavePanelTienda(orden.punto_de_venta);
   }
 
   document.getElementById("results").classList.add("show");
@@ -634,8 +636,28 @@ function renderCostos(c99, cShipper) {
   wrap.classList.add("show");
 }
 
+async function _cargarSavePanelTienda(pdv) {
+  try {
+    // Resolver nombre fuzzy en el backend
+    const res = await fetch(`${API_URL}/programacion/resolver_tienda?nombre=${encodeURIComponent(pdv)}`);
+    const json = await res.json();
+    document.getElementById("savePanelTienda").value = json.tienda || pdv;
+  } catch {
+    document.getElementById("savePanelTienda").value = pdv;
+  }
+  // Poblar datalist con todas las tiendas del schedule
+  try {
+    const res2 = await fetch(`${API_URL}/programacion`);
+    const json2 = await res2.json();
+    const dl = document.getElementById("savePanelTiendaList");
+    dl.innerHTML = (json2.schedule || [])
+      .map(e => `<option value="${e.tienda}">`)
+      .join("");
+  } catch {}
+}
+
 async function guardarEnProg() {
-  const tienda = document.getElementById("savePanelTienda").textContent;
+  const tienda = document.getElementById("savePanelTienda").value.trim();
   const bultos = parseInt(document.getElementById("savePanelBultos").textContent);
   const lunes  = document.getElementById("savePanelSemana").value;
   if (!lunes || !tienda) return;
@@ -646,7 +668,7 @@ async function guardarEnProg() {
       body: JSON.stringify({ lunes, tienda, cambios: { bultos_estimados: bultos } })
     });
     document.getElementById("savePanelProg").classList.remove("show");
-    alert(`✓ ${bultos} bultos guardados para ${tienda} semana ${lunes}`);
+    alert(`Guardado: ${bultos} bultos para ${tienda} (semana ${lunes})`);
   } catch(e) { alert("Error: " + e.message); }
 }
 
