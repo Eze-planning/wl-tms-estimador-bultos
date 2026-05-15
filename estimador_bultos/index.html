@@ -1217,7 +1217,8 @@ async function guardarOverride() {
       await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({lunes:_editCtx.lunesISO,tienda:_editCtx.tienda,cambios})});
     }
-    cerrarModal(); cargarSemana(_editCtx.lunesISO);
+    const lunes = _editCtx.lunesISO;
+    cerrarModal(); cargarSemana(lunes);
   } catch(e) { alert('Error: '+e.message); }
 }
 
@@ -1229,7 +1230,8 @@ async function eliminarOverride() {
     } else {
       await fetch(`${API_URL}/programacion/override?lunes=${encodeURIComponent(_editCtx.lunesISO)}&tienda=${encodeURIComponent(_editCtx.tienda)}`,{method:'DELETE'});
     }
-    cerrarModal(); cargarSemana(_editCtx.lunesISO);
+    const lunes = _editCtx.lunesISO;
+    cerrarModal(); cargarSemana(lunes);
   } catch(e) { alert('Error: '+e.message); }
 }
 
