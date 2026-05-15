@@ -218,60 +218,43 @@
   .print-header-week { font-size: 15px; font-weight: 600; color: var(--text); display: block; }
   @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } .prog-grid { grid-template-columns: repeat(3, 1fr); } }
   @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     @page { size: A4 landscape; margin: 8mm 10mm; }
-    html, body { height: 100% !important; margin: 0 !important; background: #fff !important; }
+    body { background: #fff !important; margin: 0 !important; }
     header, .tabs-nav, #tab-estimador, #tab-despachos, .modal-overlay,
     .no-print, .prog-toolbar, .prog-action-btn, .prog-add-btn { display: none !important; }
-    .container { max-width: 100% !important; padding: 0 !important; height: 100% !important; }
+    .container { max-width: 100% !important; padding: 0 !important; }
+    #tab-prog { display: block !important; padding: 0 !important; }
+    #progGrid { display: none !important; }
     .print-only { display: block !important; }
-    /* Tab-prog ocupa toda la página como columna flex */
-    #tab-prog {
-      display: flex !important;
-      flex-direction: column !important;
-      height: 194mm !important; /* 210mm A4 landscape alto - 8mm*2 márgenes */
-      padding: 0 !important;
-      overflow: hidden !important;
+    #printHeader { display: flex !important; }
+    /* Tabla de impresión: thead repite en cada página automáticamente */
+    #progTable {
+      display: table !important;
+      width: 100% !important;
+      border-collapse: collapse !important;
+      margin-top: 8px !important;
     }
-    /* Print header fijo arriba */
-    #printHeader { flex-shrink: 0 !important; margin-bottom: 8px !important; }
-    /* Grilla rellena el espacio restante */
-    .prog-grid {
-      flex: 1 !important;
-      min-height: 0 !important;
-      display: grid !important;
-      grid-template-columns: repeat(5, 1fr) !important;
-      gap: 5px !important;
-      align-items: stretch !important;
-      overflow: hidden !important;
+    #progTable thead { display: table-header-group !important; }
+    #progTable th {
+      font-family: 'Roboto Mono', monospace !important;
+      text-align: center !important;
+      padding: 5px 3px 8px !important;
+      border-bottom: 2px solid var(--border) !important;
+      color: var(--text2) !important;
+      width: 20% !important;
     }
-    /* Columnas como flex vertical */
-    .prog-col {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 4px !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
-    }
-    .prog-day-header { flex-shrink: 0 !important; font-size: 9px !important; padding: 4px 0 5px !important; margin-bottom: 2px !important; letter-spacing: 0.5px !important; }
-    /* Cada card ocupa su parte proporcional de la columna */
-    .prog-card {
-      flex: 1 !important;
-      min-height: 0 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      padding: 6px 8px !important;
-      border-radius: 6px !important;
-      overflow: hidden !important;
-    }
-    .prog-card-name { font-size: 10px !important; line-height: 1.3 !important; }
-    .prog-card-hora { font-size: 15px !important; margin: 3px 0 !important; flex-shrink: 0 !important; }
-    .prog-card-info { font-size: 8px !important; gap: 1px !important; }
-    .prog-card-bultos { font-size: 8px !important; margin-top: 4px !important; gap: 4px !important; flex-shrink: 0 !important; }
-    .prog-bulto-tag { font-size: 8px !important; padding: 1px 5px !important; }
-    .courier-badge { font-size: 7px !important; }
-    .prog-override-dot { font-size: 9px !important; }
+    #progTable th.today { color: var(--accent) !important; border-bottom-color: var(--accent) !important; }
+    #progTable .th-day { font-size: 11px !important; display: block !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 0.8px !important; }
+    #progTable .th-date { font-size: 10px !important; display: block !important; margin-top: 2px !important; font-weight: 400 !important; }
+    #progTable td { vertical-align: top !important; padding: 3px 2px !important; width: 20% !important; }
+    #progTable .prog-card { padding: 6px 8px !important; border-radius: 6px !important; margin-bottom: 4px !important; break-inside: avoid !important; page-break-inside: avoid !important; }
+    #progTable .prog-card-name { font-size: 10px !important; line-height: 1.3 !important; }
+    #progTable .prog-card-hora { font-size: 14px !important; margin: 2px 0 3px !important; }
+    #progTable .prog-card-info { font-size: 8px !important; gap: 1px !important; }
+    #progTable .prog-card-bultos { font-size: 8px !important; margin-top: 3px !important; gap: 4px !important; }
+    #progTable .prog-bulto-tag { font-size: 8px !important; padding: 1px 5px !important; }
+    #progTable .courier-badge { font-size: 7px !important; }
   }
 </style>
 </head>
@@ -449,6 +432,10 @@
       </div>
     </div>
     <div class="prog-grid" id="progGrid"></div>
+    <table id="progTable" class="print-only">
+      <thead id="progTableHead"></thead>
+      <tbody id="progTableBody"></tbody>
+    </table>
   </div><!-- /tab-prog -->
 
   <!-- ── Modal edición tienda ── -->
@@ -949,6 +936,36 @@ function irSemanaHoy() {
   cargarSemana(_progBase.toISOString().split('T')[0]);
 }
 
+function _cardHtml(e) {
+  const cPref = e.courier_preferencia || '';
+  const badgeCls = cPref.toLowerCase().includes('ship') ? 'shipper' : cPref.includes('99') ? 'min99' : '';
+  const hora = progView==='entrega'
+    ? (progCourier==='99min' ? e.hora_entrega_99min : e.hora_entrega_shipper)
+    : e.hora_salida;
+  const bultosHtml = (e.bultos_estimados || e.bultos_reales)
+    ? `<div class="prog-card-bultos">
+        ${e.bultos_estimados ? `<span class="prog-bulto-tag est">Est ${e.bultos_estimados}</span>` : ''}
+        ${e.bultos_reales    ? `<span class="prog-bulto-tag real">Real ${e.bultos_reales}</span>` : ''}
+       </div>` : '';
+  const cls = ['prog-card', e.override?'overridden':'', e.extra?'extra-entry':''].filter(Boolean).join(' ');
+  return `<div class="${cls}" onclick="openEditModal(${e._idx})">
+    <div class="prog-card-header">
+      <span class="prog-card-name">${e.tienda}</span>
+      <span class="prog-card-actions">
+        ${e.override ? '<span class="prog-override-dot" title="Modificado">✎</span>' : ''}
+        <button class="prog-action-btn" title="Ocultar esta semana" onclick="event.stopPropagation();ocultarTienda(${e._idx})">×</button>
+      </span>
+    </div>
+    <div class="prog-card-hora">${hora||'—'}</div>
+    <div class="prog-card-info">
+      ${badgeCls ? `<span><span class="courier-badge ${badgeCls}" style="font-size:9px">${cPref}</span></span>` : ''}
+      <span>⚡ ${(e.dia_entrega_99min||'—').slice(0,3)} ${e.hora_entrega_99min||''}</span>
+      <span>🚛 ${(e.dia_entrega_shipper||'—').slice(0,3)} ${e.hora_entrega_shipper||''}</span>
+    </div>
+    ${bultosHtml}
+  </div>`;
+}
+
 function renderSemana(schedule, lunesISO) {
   if (!lunesISO) return;
   const lunes=new Date(lunesISO+'T00:00:00'), DIAS=['Lun','Mar','Mié','Jue','Vie'];
@@ -966,50 +983,37 @@ function renderSemana(schedule, lunesISO) {
   const vistaLabel = {'envio':'Vista: Envío repo','salida':'Vista: Salida bodega','entrega':'Vista: Entrega'}[progView] || '';
   document.getElementById('printHeaderVista').textContent = vistaLabel;
 
-  document.getElementById('progGrid').innerHTML=Array.from({length:5},(_,i)=>{
+  // Grid para pantalla
+  document.getElementById('progGrid').innerHTML = Array.from({length:5},(_,i) => {
     const d=new Date(lunes); d.setDate(lunes.getDate()+i);
     const diso=d.toISOString().split('T')[0], isToday=diso===today;
-    const entries=byDia[i]||[];
-
-    const cards=entries.map(e=>{
-      const cPref = e.courier_preferencia || '';
-      const badgeCls = cPref.toLowerCase().includes('ship') ? 'shipper' : cPref.includes('99') ? 'min99' : '';
-      const hora = progView==='entrega'
-        ? (progCourier==='99min' ? e.hora_entrega_99min : e.hora_entrega_shipper)
-        : e.hora_salida;
-      const bultosHtml = (e.bultos_estimados || e.bultos_reales)
-        ? `<div class="prog-card-bultos">
-            ${e.bultos_estimados ? `<span class="prog-bulto-tag est">Est ${e.bultos_estimados}</span>` : ''}
-            ${e.bultos_reales    ? `<span class="prog-bulto-tag real">Real ${e.bultos_reales}</span>` : ''}
-          </div>` : '';
-      const classes = ['prog-card', e.override?'overridden':'', e.extra?'extra-entry':''].filter(Boolean).join(' ');
-      return `<div class="${classes}" onclick="openEditModal(${e._idx})">
-        <div class="prog-card-header">
-          <span class="prog-card-name">${e.tienda}</span>
-          <span class="prog-card-actions">
-            ${e.override ? '<span class="prog-override-dot" title="Modificado">✎</span>' : ''}
-            <button class="prog-action-btn" title="Ocultar esta semana" onclick="event.stopPropagation();ocultarTienda(${e._idx})">×</button>
-          </span>
-        </div>
-        <div class="prog-card-hora">${hora||'—'}</div>
-        <div class="prog-card-info">
-          ${badgeCls ? `<span><span class="courier-badge ${badgeCls}" style="font-size:9px">${cPref}</span></span>` : ''}
-          <span>⚡ ${(e.dia_entrega_99min||'—').slice(0,3)} ${e.hora_entrega_99min||''}</span>
-          <span>🚛 ${(e.dia_entrega_shipper||'—').slice(0,3)} ${e.hora_entrega_shipper||''}</span>
-        </div>
-        ${bultosHtml}
-      </div>`;
-    }).join('');
-
     return `<div class="prog-col">
       <div class="prog-day-header${isToday?' today':''}">
         <span>${DIAS[i]}</span>
         <span class="prog-day-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
       </div>
-      ${cards}
+      ${(byDia[i]||[]).map(e => _cardHtml(e)).join('')}
       <div class="prog-add-btn" onclick="abrirAddModal('${DIAS[i]}', ${i})">+ Agregar</div>
     </div>`;
   }).join('');
+
+  // Tabla para impresión: thead se repite automáticamente en cada página
+  document.getElementById('progTableHead').innerHTML = `<tr>${Array.from({length:5},(_,i) => {
+    const d=new Date(lunes); d.setDate(lunes.getDate()+i);
+    const isToday=d.toISOString().split('T')[0]===today;
+    return `<th class="${isToday?'today':''}">
+      <span class="th-day">${DIAS[i]}</span>
+      <span class="th-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
+    </th>`;
+  }).join('')}</tr>`;
+
+  const maxRows = Math.max(...[0,1,2,3,4].map(i => (byDia[i]||[]).length), 0);
+  document.getElementById('progTableBody').innerHTML = Array.from({length:maxRows},(_,row) =>
+    `<tr>${Array.from({length:5},(_,col) => {
+      const e=(byDia[col]||[])[row];
+      return `<td>${e ? _cardHtml(e) : ''}</td>`;
+    }).join('')}</tr>`
+  ).join('');
 }
 
 // ── Edit modal ──────────────────────────────────────────────────────────────
