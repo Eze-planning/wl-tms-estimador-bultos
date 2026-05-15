@@ -445,44 +445,55 @@ def estimar_paris_xdb(filepath: str) -> dict:
 
 
 def estimar_paris_stock(filepath: str) -> dict:
-    df = pd.read_excel(filepath, sheet_name=0, dtype={"Cód. Prod. Prov.": str})
+    df = pd.read_excel(filepath, sheet_name=0, dtype=str)
     df = df.where(pd.notnull(df), None)
 
-    detalle = []
-    for _, row in df.iterrows():
-        sku      = str(row.get("Cód. Prod. Prov.", "") or "").strip()
-        unidades = int(float(row.get("Solicitado", 0) or 0))
-        detalle.append({
-            "Código producto":  sku,
-            "Descripción":      row.get("Descripción", "") or "",
-            "Talla":            row.get("Talla", "") or "",
-            "Línea":            row.get("Departamento", "") or "",
-            "Subclase":         "",
-            "Clase":            "",
-            "Unidades pedidas": unidades,
-            "Ratio und/caja":   1,
-            "Bultos estimados": 1,
-            "Nivel fallback":   "Stock (1 SKU/caja)",
-        })
+    # Convertir Solicitado a numérico
+    df["Solicitado"] = pd.to_numeric(df["Solicitado"], errors="coerce").fillna(0).astype(int)
 
-    resumen_linea = []
-    for linea, grupo in pd.DataFrame(detalle).groupby("Línea"):
-        resumen_linea.append({
-            "Línea":            linea,
-            "SKUs":             grupo["Código producto"].nunique(),
-            "Unidades_totales": int(grupo["Unidades pedidas"].sum()),
-            "Bultos_estimados": int(grupo["Bultos estimados"].sum()),
-        })
+    client      = get_bq_client()
+    ratios      = cargar_ratios(client, "paris")
+    product_dim = cargar_product_dim(client)
 
-    n_orden_col = next((c for c in df.columns if "rden" in c and "N" in c), None)
+    # Usar SKU WL si está en el archivo, si no usar Cód. Prod. Prov.
+    sku_col = next(
+        (c for c in df.columns if "WILD" in c.upper() or "WL" in c.upper()),
+        next((c for c in df.columns if "Prod. Prov" in c or "PROV" in c.upper()), None)
+    )
+
+    desc_col = next((c for c in df.columns if "escripci" in c), "")
+    talla_col = "Talla" if "Talla" in df.columns else ""
+
+    detalle, resumen_linea, _ = procesar_pedido(
+        df, product_dim, ratios, "Paris",
+        col_sku=sku_col, col_und="Solicitado",
+        col_desc=desc_col, col_talla=talla_col,
+        ratios_fijos=RATIOS_FIJOS_PARIS
+    )
+
+    df_det = pd.DataFrame(detalle)
+    n_orden_col = next((c for c in df.columns if "rden" in c and c.upper().startswith("N")), None)
+
     resumen_orden = {
         "tipo":           "paris_stock",
         "n_orden":        str(df[n_orden_col].iloc[0]) if n_orden_col else "",
-        "total_skus":     len(df),
-        "total_unidades": int(df["Solicitado"].sum()),
-        "total_bultos":   len(df),
+        "total_skus":     df_det["sku"].nunique(),
+        "total_unidades": int(df_det["unidades"].sum()),
+        "total_bultos":   round(sum(r["Bultos_estimados"] for r in resumen_linea)),
         "lineas":         resumen_linea,
     }
+
+    for r in detalle:
+        r["Línea"]            = r.pop("linea")
+        r["Subclase"]         = r.pop("subclase")
+        r["Clase"]            = r.pop("clase")
+        r["Código producto"]  = r.pop("sku")
+        r["Descripción"]      = r.pop("descripcion")
+        r["Talla"]            = r.pop("talla")
+        r["Unidades pedidas"] = r.pop("unidades")
+        r["Ratio und/caja"]   = r.pop("ratio_und_caja")
+        r["Bultos estimados"] = r.pop("bultos_estimados")
+        r["Nivel fallback"]   = r.pop("nivel_fallback")
 
     return {"detalle": detalle, "resumen_linea": resumen_linea, "resumen_orden": resumen_orden}
 

@@ -18,7 +18,8 @@ from tarifario_99min import calcular_costo_99min
 from despachos import obtener_despachos
 from tarifario_shipper import calcular_costo_shipper
 from programacion import (
-    obtener_semana, guardar_override, eliminar_override, cargar_schedule_base
+    obtener_semana, guardar_override, eliminar_override, cargar_schedule_base,
+    agregar_extra, eliminar_extra
 )
 
 app = FastAPI(title="Estimador de Bultos Wild Lama", version="2.0.0")
@@ -148,6 +149,59 @@ async def delete_programacion_override(
     try:
         eliminar_override(lunes, tienda)
         return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/programacion/extra")
+async def post_programacion_extra(body: dict):
+    try:
+        agregar_extra(body["lunes"], body["entrada"])
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/programacion/extra")
+async def delete_programacion_extra(
+    lunes: str = Query(...),
+    id: str = Query(...)
+):
+    try:
+        eliminar_extra(lunes, id)
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/programacion/export")
+async def export_programacion(lunes: str = Query(...)):
+    try:
+        data = obtener_semana(lunes)
+        cols = [
+            "tienda", "dia_carga", "dia_salida", "hora_salida",
+            "courier_preferencia",
+            "dia_entrega_99min", "hora_entrega_99min",
+            "dia_entrega_shipper", "hora_entrega_shipper",
+            "bultos_estimados", "bultos_reales", "override", "extra",
+        ]
+        df = pd.DataFrame(data).reindex(columns=cols)
+        df.columns = [
+            "Tienda", "Día Carga", "Día Salida", "Hora Salida",
+            "Courier Preferencia",
+            "Entrega 99Min (día)", "Entrega 99Min (hora)",
+            "Entrega Shipper (día)", "Entrega Shipper (hora)",
+            "Bultos Estimados", "Bultos Reales", "Override", "Extra",
+        ]
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            df.to_excel(writer, sheet_name="Programación", index=False)
+        output.seek(0)
+        return StreamingResponse(
+            output,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=programacion_{lunes}.xlsx"}
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

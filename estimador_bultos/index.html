@@ -3,186 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estimador de Bultos — Wild Lama</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>TMS — Wild Lama</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222222;
-    --border: #2e2e2e;
-    --accent: #c8f542;
-    --accent2: #42f5a7;
-    --text: #f0f0f0;
-    --text2: #888;
-    --danger: #ff4d4d;
+    --bg:       #ffffff;
+    --surface:  #fafafa;
+    --surface2: #f2f2f2;
+    --border:   #e8e8e1;
+    --accent:   #e5632b;
+    --accent2:  #c94a1c;
+    --text:     #1c1d1d;
+    --text2:    #7a7a7a;
+    --danger:   #cc3300;
+    --success:  #2d7d3a;
+    --warn:     #c67c2e;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(200,245,66,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(200,245,66,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-  header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  body { background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; min-height: 100vh; }
+  .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+  /* ── Header ── */
+  header { padding: 20px 0 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
   .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
-  .logo-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-  .badge { font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; color: var(--text2); letter-spacing: 1px; }
-  .hero { padding: 64px 0 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
-  .hero-title { font-size: clamp(36px, 5vw, 56px); font-weight: 800; line-height: 1.05; letter-spacing: -2px; }
+  .logo-icon { width: 34px; height: 34px; background: var(--accent); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .logo-text { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+  .badge { font-family: 'Roboto Mono', monospace; font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; color: var(--text2); letter-spacing: 1px; }
+  /* ── Tabs ── */
+  .tab-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+  .tab-btn { font-family: 'Roboto Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 14px 20px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  /* ── Hero / Estimador ── */
+  .hero { padding: 48px 0 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .hero-title { font-size: clamp(32px, 4vw, 52px); font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; }
   .hero-title span { color: var(--accent); display: block; }
-  .hero-desc { margin-top: 20px; color: var(--text2); font-size: 15px; line-height: 1.7; font-weight: 400; }
-  .upload-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
-  .upload-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
-  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(200,245,66,0.04); }
+  .hero-desc { margin-top: 16px; color: var(--text2); font-size: 15px; line-height: 1.7; }
+  .upload-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; }
+  .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(229,99,43,0.04); }
   .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { font-size: 40px; margin-bottom: 16px; display: block; }
-  .upload-label { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-  .upload-hint { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); }
-  .file-selected { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(200,245,66,0.08); border: 1px solid rgba(200,245,66,0.3); border-radius: 8px; margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 13px; }
-  .file-selected .fname { color: var(--accent); flex: 1; }
+  .upload-icon { font-size: 36px; margin-bottom: 12px; display: block; }
+  .upload-label { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .upload-hint { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text2); }
+  .file-selected { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: rgba(229,99,43,0.07); border: 1px solid rgba(229,99,43,0.25); border-radius: 8px; margin-top: 14px; font-family: 'Roboto Mono', monospace; font-size: 12px; }
+  .file-selected .fname { color: var(--accent); flex: 1; font-weight: 500; }
   .file-selected .fsize { color: var(--text2); }
-  .btn-estimar { width: 100%; margin-top: 16px; padding: 16px; background: var(--accent); color: #0f0f0f; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-estimar:hover { transform: translateY(-1px); filter: brightness(1.1); }
-  .btn-estimar:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-primary { padding: 14px 20px; background: var(--accent); color: #fff; border: none; border-radius: 9px; font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .btn-primary.full { width: 100%; margin-top: 14px; }
+  .btn-secondary { padding: 8px 16px; background: transparent; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; font-family: 'Roboto Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { padding: 8px 16px; background: transparent; border: 1px solid rgba(204,51,0,0.3); color: var(--danger); border-radius: 8px; font-family: 'Roboto Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+  .btn-danger:hover { background: rgba(204,51,0,0.06); }
+  /* ── Loading ── */
   .loading { display: none; text-align: center; padding: 48px; }
   .loading.show { display: block; }
-  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text2); }
-  .results { display: none; padding: 0 0 64px; }
+  .loading-text { font-family: 'Roboto Mono', monospace; font-size: 12px; color: var(--text2); }
+  /* ── Error ── */
+  .error-msg { background: rgba(204,51,0,0.07); border: 1px solid rgba(204,51,0,0.25); border-radius: 9px; padding: 14px 18px; color: var(--danger); font-family: 'Roboto Mono', monospace; font-size: 12px; margin-top: 14px; display: none; }
+  .error-msg.show { display: block; }
+  /* ── Tipo selector ── */
+  .tipo-selector { margin-top: 14px; display: flex; gap: 7px; }
+  .tipo-btn { flex: 1; padding: 9px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .tipo-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(229,99,43,0.07); font-weight: 500; }
+  /* ── Results ── */
+  .results { display: none; padding: 0 0 56px; }
   .results.show { display: block; }
-  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 18px; position: relative; overflow: hidden; }
+  .summary-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .summary-card.highlight::before { background: var(--accent2); }
+  .summary-label { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+  .summary-value { font-size: 30px; font-weight: 700; letter-spacing: -1px; }
+  .summary-card.highlight .summary-value { color: var(--accent); }
+  .summary-sub { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); margin-top: 4px; }
   #costoWrap { display: none; }
   #costoWrap.show { display: block; }
-  .costo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
-  .costo-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
-  .costo-title { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; }
-  .costo-grid { display: flex; gap: 32px; align-items: baseline; flex-wrap: wrap; }
-  .costo-item { display: flex; flex-direction: column; gap: 4px; }
-  .costo-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
-  .costo-value { font-size: 18px; font-weight: 700; }
-  .costo-value.total { font-size: 28px; color: var(--accent2); letter-spacing: -0.5px; }
-  .costo-destino { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); margin-top: 8px; }
-  .costo-advertencia { font-family: 'DM Mono', monospace; font-size: 11px; color: #f5a542; margin-top: 8px; }
-  .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
-  .summary-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
-  .summary-card.highlight::after { background: var(--accent2); }
-  .summary-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-  .summary-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
-  .summary-card.highlight .summary-value { color: var(--accent2); }
-  .summary-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); margin-top: 4px; }
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .section-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
-  .btn-download { padding: 8px 16px; background: transparent; border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-  .btn-download:hover { background: rgba(200,245,66,0.1); }
-  .lineas-grid { display: grid; gap: 12px; margin-bottom: 40px; }
-  .linea-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 24px; transition: border-color 0.2s; }
-  .linea-row:hover { border-color: rgba(200,245,66,0.3); }
-  .linea-name { font-weight: 600; font-size: 15px; }
+  .costo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 18px 22px; position: relative; overflow: hidden; margin-bottom: 32px; }
+  .costo-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .costo-title { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.2px; }
+  .costo-advertencia { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--warn); margin-top: 8px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .divider { height: 1px; background: var(--border); margin: 32px 0; }
+  .lineas-grid { display: grid; gap: 10px; margin-bottom: 32px; }
+  .linea-row { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px 18px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 20px; transition: border-color 0.2s; }
+  .linea-row:hover { border-color: rgba(229,99,43,0.3); }
+  .linea-name { font-weight: 500; font-size: 14px; }
   .linea-stat { text-align: right; }
-  .linea-stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
-  .linea-stat-value { font-size: 20px; font-weight: 700; }
+  .linea-stat-label { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+  .linea-stat-value { font-size: 19px; font-weight: 600; }
   .linea-stat-value.accent { color: var(--accent); }
-  .linea-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .linea-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
   .linea-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
-  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .tiendas-grid { display: grid; gap: 9px; margin-bottom: 28px; }
+  .tienda-row { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 12px 18px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 20px; transition: border-color 0.2s; }
+  .tienda-row:hover { border-color: rgba(229,99,43,0.3); }
+  .tienda-name { font-weight: 500; font-size: 14px; }
+  .shipper-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .shipper-table th { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border); }
+  .shipper-table th:first-child { text-align: left; }
+  .shipper-table td { font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); }
+  .shipper-table td:first-child { text-align: left; font-family: 'Roboto', sans-serif; font-size: 13px; color: var(--text); }
+  .shipper-table tr:last-child td { border-bottom: none; }
+  .shipper-table .hl { color: var(--accent); font-weight: 600; font-size: 14px; }
+  .shipper-table .row-ruta td:first-child { color: var(--text2); font-size: 12px; }
+  /* save-to-prog panel */
+  .save-prog-panel { background: rgba(229,99,43,0.07); border: 1px solid rgba(229,99,43,0.2); border-radius: 10px; padding: 16px 20px; margin-top: 20px; display: none; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .save-prog-panel.show { display: flex; }
+  .save-prog-label { font-size: 13px; font-weight: 500; color: var(--accent); }
+  /* ── Tables ── */
   table { width: 100%; border-collapse: collapse; }
   thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
-  th { padding: 12px 16px; text-align: left; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500; }
-  td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid rgba(46,46,46,0.6); }
+  th { padding: 11px 14px; text-align: left; font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+  td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
-  .td-mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+  tr:hover td { background: rgba(0,0,0,0.02); }
+  .td-mono { font-family: 'Roboto Mono', monospace; font-size: 12px; }
   .td-accent { color: var(--accent); font-weight: 600; }
   .td-muted { color: var(--text2); }
-  .badge-nivel { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
-  .badge-nivel.sku { border-color: var(--accent2); color: var(--accent2); }
-  .badge-nivel.fallback { border-color: #f5a542; color: #f5a542; }
-  .search-bar { padding: 10px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; width: 240px; outline: none; transition: border-color 0.2s; }
-  .search-bar:focus { border-color: var(--accent); }
-  .error-msg { background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.3); border-radius: 10px; padding: 16px 20px; color: var(--danger); font-family: 'DM Mono', monospace; font-size: 13px; margin-top: 16px; display: none; }
-  .error-msg.show { display: block; }
-  .tipo-selector { margin-top: 16px; display: flex; gap: 8px; }
-  .tipo-btn { flex: 1; padding: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text2); font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; text-align: center; letter-spacing: 0.5px; }
-  .tipo-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,245,66,0.08); }
-  .tiendas-grid { display: grid; gap: 10px; margin-bottom: 32px; }
-  .tienda-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 24px; transition: border-color 0.2s; }
-  .tienda-row:hover { border-color: rgba(200,245,66,0.3); }
-  .tienda-name { font-weight: 600; font-size: 14px; }
-  .divider { height: 1px; background: var(--border); margin: 40px 0; }
-  .shipper-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-  .shipper-table th { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border); }
-  .shipper-table th:first-child { text-align: left; }
-  .shipper-table td { font-family: 'DM Mono', monospace; font-size: 13px; padding: 8px 10px; text-align: right; border-bottom: 1px solid rgba(46,46,46,0.5); }
-  .shipper-table td:first-child { text-align: left; font-family: 'Syne', sans-serif; font-size: 13px; color: var(--text); }
-  .shipper-table tr:last-child td { border-bottom: none; }
-  .shipper-table .hl { color: var(--accent2); font-weight: 700; font-size: 15px; }
-  .shipper-table .row-direct td:first-child { font-weight: 600; }
-  .shipper-table .row-ruta td:first-child { color: var(--text2); font-size: 12px; }
-  @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } }
-  /* ── Programación ── */
-  .prog-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 48px; }
-  .prog-col { display: flex; flex-direction: column; gap: 8px; }
-  .prog-day-header { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); padding: 8px 0; text-align: center; border-bottom: 1px solid var(--border); margin-bottom: 4px; display: flex; flex-direction: column; gap: 3px; text-transform: uppercase; letter-spacing: 1px; }
-  .prog-day-header.today { color: var(--accent); border-bottom-color: var(--accent); }
-  .prog-day-date { font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--text2); }
-  .prog-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s; }
-  .prog-card:hover { border-color: rgba(200,245,66,0.4); }
-  .prog-card.overridden { border-color: rgba(245,165,66,0.5); background: rgba(245,165,66,0.04); }
-  .prog-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-  .prog-card-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
-  .prog-override-dot { color: #f5a542; font-size: 9px; margin-top: 1px; flex-shrink: 0; }
-  .prog-card-hora { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; color: var(--accent); margin: 5px 0 4px; line-height: 1; }
-  .prog-card-info { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); display: flex; flex-direction: column; gap: 2px; }
-  .prog-empty { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--border); text-align: center; padding: 12px 0; }
-  /* Modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 420px; max-width: 92vw; }
-  .modal-title { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
-  .modal-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); margin-top: 4px; margin-bottom: 24px; }
-  .modal-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-  .modal-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
-  .modal-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 10px; }
-  /* ── Tabs ── */
-  .tab-nav { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
-  .tab-btn { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; padding: 14px 22px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; }
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .badge-nivel { font-family: 'Roboto Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); }
+  .badge-nivel.sku { border-color: var(--accent); color: var(--accent); }
+  .badge-nivel.fallback { border-color: var(--warn); color: var(--warn); }
+  /* ── Inputs ── */
+  .form-input { padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: 'Roboto Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
+  .form-input:focus { border-color: var(--accent); }
+  input[type="date"].form-input { color-scheme: light; }
   /* ── Despachos ── */
-  .desp-filters { display: flex; gap: 10px; align-items: center; padding: 24px 0 20px; flex-wrap: wrap; }
-  .desp-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); }
-  .desp-input { padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
-  .desp-input:focus { border-color: var(--accent); }
-  input[type="date"].desp-input { color-scheme: dark; }
+  .desp-filters { display: flex; gap: 9px; align-items: center; padding: 22px 0 18px; flex-wrap: wrap; }
+  .desp-label { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text2); }
   .view-toggle { display: flex; gap: 4px; margin-left: auto; }
-  .view-btn { padding: 7px 16px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; }
-  .view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,245,66,0.06); }
-  .desp-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 48px; }
+  .view-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); border-radius: 6px; font-family: 'Roboto Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+  .view-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(229,99,43,0.06); font-weight: 500; }
+  .desp-table-wrap { border: 1px solid var(--border); border-radius: 11px; overflow: hidden; margin-bottom: 40px; }
   .desp-table { width: 100%; border-collapse: collapse; }
-  .desp-table th { padding: 11px 14px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; background: var(--surface2); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
-  .desp-table td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid rgba(46,46,46,0.5); white-space: nowrap; }
+  .desp-table th { padding: 10px 13px; font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; background: var(--surface2); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .desp-table td { padding: 9px 13px; font-size: 13px; border-bottom: 1px solid var(--border); white-space: nowrap; }
   .desp-table tr:last-child td { border-bottom: none; }
-  .desp-table tr:hover td { background: rgba(255,255,255,0.02); }
-  .courier-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 12px; display: inline-block; }
-  .courier-badge.shipper { background: rgba(200,245,66,0.1); color: var(--accent); border: 1px solid rgba(200,245,66,0.25); }
-  .courier-badge.min99 { background: rgba(66,245,167,0.1); color: var(--accent2); border: 1px solid rgba(66,245,167,0.25); }
-  .courier-badge.otro { background: rgba(136,136,136,0.12); color: var(--text2); border: 1px solid var(--border); }
+  .desp-table tr:hover td { background: rgba(0,0,0,0.02); }
+  .courier-badge { font-family: 'Roboto Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 12px; display: inline-block; white-space: nowrap; }
+  .courier-badge.shipper { background: rgba(229,99,43,0.1); color: var(--accent); border: 1px solid rgba(229,99,43,0.25); }
+  .courier-badge.min99 { background: rgba(28,29,29,0.07); color: var(--text); border: 1px solid rgba(28,29,29,0.15); }
+  .courier-badge.otro { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
   .estado-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-  /* ── Calendario ── */
-  .cal-nav { display: flex; align-items: center; gap: 16px; padding: 8px 0 20px; }
-  .cal-nav-btn { padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 12px; transition: border-color 0.2s; }
-  .cal-nav-btn:hover { border-color: var(--accent); }
-  .cal-title { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 48px; }
+  /* ── Calendario despachos ── */
+  .cal-nav { display: flex; align-items: center; gap: 14px; padding: 8px 0 18px; }
+  .cal-nav-btn { padding: 7px 13px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; cursor: pointer; font-family: 'Roboto Mono', monospace; font-size: 11px; transition: border-color 0.2s; }
+  .cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .cal-title { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 9px; margin-bottom: 40px; }
   .cal-col { display: flex; flex-direction: column; gap: 6px; }
-  .cal-day-header { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); text-align: center; padding: 6px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-  .cal-day-num { font-size: 22px; font-weight: 800; text-align: right; font-family: 'DM Mono', monospace; color: var(--text2); line-height: 1; margin-bottom: 8px; }
+  .cal-day-header { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-align: center; padding: 5px 0; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); margin-bottom: 3px; }
+  .cal-day-num { font-size: 20px; font-weight: 700; text-align: right; font-family: 'Roboto Mono', monospace; color: var(--text2); line-height: 1; margin-bottom: 6px; }
   .cal-day-num.today { color: var(--accent); }
-  .cal-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; transition: border-color 0.15s; }
-  .cal-card:hover { border-color: rgba(200,245,66,0.3); }
-  .cal-card-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
-  .cal-card-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); margin-top: 4px; display: flex; gap: 6px; align-items: center; }
+  .cal-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 9px; transition: border-color 0.15s; }
+  .cal-card:hover { border-color: rgba(229,99,43,0.3); }
+  .cal-card-name { font-size: 11px; font-weight: 600; line-height: 1.3; }
+  .cal-card-sub { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); margin-top: 3px; display: flex; gap: 5px; align-items: center; }
+  /* ── Programación ── */
+  .prog-toolbar { display: flex; align-items: center; gap: 8px; padding: 18px 0 16px; flex-wrap: wrap; }
+  .prog-view-group { display: flex; gap: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .prog-view-btn { padding: 6px 14px; border: none; background: transparent; color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 5px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .prog-view-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
+  .prog-courier-group { display: flex; gap: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .prog-courier-btn { padding: 6px 14px; border: none; background: transparent; color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
+  .prog-courier-btn.active { background: var(--text); color: #fff; font-weight: 500; }
+  .prog-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 11px; margin-bottom: 48px; }
+  .prog-col { display: flex; flex-direction: column; gap: 7px; }
+  .prog-day-header { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); padding: 7px 0; text-align: center; border-bottom: 2px solid var(--border); margin-bottom: 2px; display: flex; flex-direction: column; gap: 2px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .prog-day-header.today { color: var(--accent); border-bottom-color: var(--accent); }
+  .prog-day-date { font-size: 11px; letter-spacing: 0; text-transform: none; }
+  .prog-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 11px; cursor: pointer; transition: border-color 0.15s; position: relative; }
+  .prog-card:hover { border-color: rgba(229,99,43,0.4); background: rgba(229,99,43,0.02); }
+  .prog-card.overridden { border-color: rgba(198,124,46,0.45); background: rgba(198,124,46,0.04); }
+  .prog-card.extra-entry { border-style: dashed; border-color: rgba(229,99,43,0.35); }
+  .prog-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
+  .prog-card-name { font-size: 12px; font-weight: 600; line-height: 1.3; flex: 1; }
+  .prog-card-actions { display: flex; gap: 3px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+  .prog-card:hover .prog-card-actions { opacity: 1; }
+  .prog-action-btn { width: 18px; height: 18px; border: 1px solid var(--border); background: var(--bg); border-radius: 4px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: all 0.15s; }
+  .prog-action-btn:hover { border-color: var(--danger); color: var(--danger); }
+  .prog-override-dot { color: var(--warn); font-size: 9px; }
+  .prog-card-hora { font-family: 'Roboto Mono', monospace; font-size: 19px; font-weight: 700; color: var(--accent); margin: 5px 0 4px; line-height: 1; }
+  .prog-card-info { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); display: flex; flex-direction: column; gap: 2px; }
+  .prog-card-bultos { font-family: 'Roboto Mono', monospace; font-size: 11px; margin-top: 6px; display: flex; gap: 8px; align-items: center; }
+  .prog-bulto-tag { padding: 2px 7px; border-radius: 10px; font-size: 10px; }
+  .prog-bulto-tag.est { background: rgba(229,99,43,0.1); color: var(--accent); border: 1px solid rgba(229,99,43,0.2); }
+  .prog-bulto-tag.real { background: rgba(45,125,58,0.1); color: var(--success); border: 1px solid rgba(45,125,58,0.2); }
+  .prog-add-btn { border: 1px dashed var(--border); border-radius: 8px; padding: 8px; text-align: center; font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .prog-add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(229,99,43,0.03); }
+  .prog-empty { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--border); text-align: center; padding: 12px 0; }
+  /* ── Modal ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 460px; max-width: 92vw; box-shadow: 0 12px 40px rgba(0,0,0,0.12); max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .modal-sub { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text2); margin-top: 4px; margin-bottom: 22px; }
+  .modal-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .modal-label { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+  .modal-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; gap: 10px; }
+  .modal-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .modal-toggle input { accent-color: var(--danger); cursor: pointer; }
+  .modal-toggle-label { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--danger); }
+  @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } .prog-grid { grid-template-columns: repeat(3, 1fr); } }
 </style>
 </head>
 <body>
@@ -195,88 +223,95 @@
         <div class="logo-sub">Warehouse Intelligence</div>
       </div>
     </div>
-    <div class="badge">TMS · v1.0</div>
+    <div class="badge">TMS · v2.0</div>
   </header>
+
   <nav class="tab-nav">
     <button class="tab-btn active" id="tab-btn-estimador" onclick="setTab('estimador')">Estimador</button>
     <button class="tab-btn" id="tab-btn-despachos" onclick="setTab('despachos')">Despachos</button>
     <button class="tab-btn" id="tab-btn-prog" onclick="setTab('prog')">Programación</button>
   </nav>
 
+  <!-- ── TAB ESTIMADOR ── -->
   <div id="tab-estimador">
-  <section class="hero">
-    <div>
-      <h1 class="hero-title">Estimador<span>de Bultos</span></h1>
-      <p class="hero-desc">Sube el archivo de reposición y obtén una estimación inteligente de la cantidad de bultos por línea, basada en el histórico real de embalaje.</p>
-    </div>
-    <div class="upload-card">
-      <div class="upload-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".xlsx,.xls">
-        <span class="upload-icon">📦</span>
-        <div class="upload-label">Arrastra el archivo Excel</div>
-        <div class="upload-hint">o haz clic para seleccionar · .xlsx / .xls</div>
+    <section class="hero">
+      <div>
+        <h1 class="hero-title">Estimador<span>de Bultos</span></h1>
+        <p class="hero-desc">Sube el archivo de reposición y obtén una estimación inteligente de la cantidad de bultos por línea, basada en el histórico real de embalaje.</p>
       </div>
-      <div class="file-selected" id="fileSelected" style="display:none">
-        <span>📄</span>
-        <span class="fname" id="fileName"></span>
-        <span class="fsize" id="fileSize"></span>
-      </div>
-      <div class="tipo-selector">
-        <button class="tipo-btn active" id="btnTiendaPropia" onclick="setTipo('tienda_propia')">Tienda propia</button>
-        <button class="tipo-btn" id="btnParisXdb" onclick="setTipo('paris_xdb')">Paris</button>
-      </div>
-      <div class="error-msg" id="errorMsg"></div>
-      <button class="btn-estimar" id="btnEstimar" disabled onclick="estimar()">
-        <span>⚡</span> Estimar bultos
-      </button>
-    </div>
-  </section>
-
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div class="loading-text">Consultando histórico en BigQuery...</div>
-  </div>
-
-  <div class="results" id="results">
-    <div class="summary-grid" id="summaryGrid"></div>
-    <div id="costoWrap" style="margin-bottom:40px">
-      <div class="costo-card" id="costoCard" style="position:relative;overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
-          <div class="costo-title" style="margin-bottom:0">Costos de envío</div>
-          <div id="costoDestLabel" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)"></div>
+      <div class="upload-card">
+        <div class="upload-zone" id="dropZone">
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+          <span class="upload-icon">📦</span>
+          <div class="upload-label">Arrastra el archivo Excel</div>
+          <div class="upload-hint">o haz clic para seleccionar · .xlsx / .xls</div>
         </div>
-        <table class="shipper-table" id="costoTable"></table>
-        <div id="costoAdvert" class="costo-advertencia"></div>
+        <div class="file-selected" id="fileSelected" style="display:none">
+          <span>📄</span>
+          <span class="fname" id="fileName"></span>
+          <span class="fsize" id="fileSize"></span>
+        </div>
+        <div class="tipo-selector">
+          <button class="tipo-btn active" id="btnTiendaPropia" onclick="setTipo('tienda_propia')">Tienda propia</button>
+          <button class="tipo-btn" id="btnParisXdb" onclick="setTipo('paris_xdb')">Paris</button>
+        </div>
+        <div class="error-msg" id="errorMsg"></div>
+        <button class="btn-primary full" id="btnEstimar" disabled onclick="estimar()">
+          ⚡ Estimar bultos
+        </button>
       </div>
+    </section>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div class="loading-text">Consultando histórico en BigQuery...</div>
     </div>
-    <div class="divider"></div>
-    <div id="tiendasSection" style="display:none">
-      <div class="section-header">
-        <div class="section-title">Bultos por Tienda</div>
+
+    <div class="results" id="results">
+      <div class="summary-grid" id="summaryGrid"></div>
+      <div id="costoWrap">
+        <div class="costo-card" id="costoCard">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+            <div class="costo-title">Costos de envío</div>
+            <div id="costoDestLabel" style="font-family:'Roboto Mono',monospace;font-size:11px;color:var(--text2)"></div>
+          </div>
+          <table class="shipper-table" id="costoTable"></table>
+          <div id="costoAdvert" class="costo-advertencia"></div>
+        </div>
       </div>
-      <div class="tiendas-grid" id="tiendasGrid"></div>
+      <!-- Guardar en Programación -->
+      <div class="save-prog-panel" id="savePanelProg">
+        <span class="save-prog-label">📅 Guardar en Programación:</span>
+        <span style="font-family:'Roboto Mono',monospace;font-size:12px;color:var(--text2)" id="savePanelTienda"></span>
+        <span style="font-family:'Roboto Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)" id="savePanelBultos"></span>
+        <input type="date" class="form-input" id="savePanelSemana" style="width:150px">
+        <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="guardarEnProg()">Guardar</button>
+        <button class="btn-secondary" onclick="document.getElementById('savePanelProg').classList.remove('show')">✕</button>
+      </div>
       <div class="divider"></div>
+      <div id="tiendasSection" style="display:none">
+        <div class="section-header"><div class="section-title">Bultos por Tienda</div></div>
+        <div class="tiendas-grid" id="tiendasGrid"></div>
+        <div class="divider"></div>
+      </div>
+      <div class="section-header"><div class="section-title">Bultos por Línea</div></div>
+      <div class="lineas-grid" id="lineasGrid"></div>
     </div>
-    <div class="section-header">
-      <div class="section-title">Bultos por Línea</div>
-    </div>
-    <div class="lineas-grid" id="lineasGrid"></div>
-  </div>
   </div><!-- /tab-estimador -->
 
   <!-- ── TAB DESPACHOS ── -->
   <div id="tab-despachos" style="display:none">
-    <div style="padding:40px 0 0">
-      <h1 style="font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-1.5px">Despachos<span style="color:var(--accent)">.</span></h1>
+    <div style="padding:36px 0 0">
+      <h1 style="font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-1.5px">Despachos<span style="color:var(--accent)">.</span></h1>
       <p style="color:var(--text2);font-size:14px;margin-top:8px;line-height:1.6">Historial de salidas · Courier óptimo calculado automáticamente</p>
     </div>
     <div class="desp-filters">
       <span class="desp-label">Desde</span>
-      <input type="date" class="desp-input" id="despDesde">
+      <input type="date" class="form-input" id="despDesde">
       <span class="desp-label">Hasta</span>
-      <input type="date" class="desp-input" id="despHasta">
-      <input type="text" class="desp-input" id="despSearch" placeholder="Filtrar tienda..." style="width:180px" oninput="filtrarDespachos()">
-      <button class="btn-estimar" style="width:auto;padding:9px 20px;margin:0;font-size:13px" onclick="cargarDespachos()">Consultar</button>
+      <input type="date" class="form-input" id="despHasta">
+      <input type="text" class="form-input" id="despSearch" placeholder="Filtrar tienda..." style="width:170px" oninput="filtrarDespachos()">
+      <button class="btn-primary" style="padding:9px 18px;font-size:13px;margin:0" onclick="cargarDespachos()">Consultar</button>
       <div class="view-toggle">
         <button class="view-btn active" id="btnVista-lista" onclick="setVista('lista')">Lista</button>
         <button class="view-btn" id="btnVista-cal" onclick="setVista('cal')">Calendario</button>
@@ -287,8 +322,6 @@
       <div class="loading-text" style="margin-top:12px">Consultando BigQuery...</div>
     </div>
     <div id="despError" class="error-msg"></div>
-
-    <!-- Lista -->
     <div id="vistaLista">
       <div class="desp-table-wrap">
         <table class="desp-table">
@@ -301,8 +334,6 @@
         </table>
       </div>
     </div>
-
-    <!-- Calendario -->
     <div id="vistaCal" style="display:none">
       <div class="cal-nav">
         <button class="cal-nav-btn" onclick="semanaOffset(-1)">← Anterior</button>
@@ -315,45 +346,125 @@
 
   <!-- ── TAB PROGRAMACIÓN ── -->
   <div id="tab-prog" style="display:none">
-    <div style="padding:40px 0 0">
-      <h1 style="font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-1.5px">Programación<span style="color:var(--accent)">.</span></h1>
-      <p style="color:var(--text2);font-size:14px;margin-top:8px;line-height:1.6">Schedule semanal de despachos · Click en una tienda para editar semanas especiales</p>
+    <div style="padding:36px 0 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
+      <div>
+        <h1 style="font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-1.5px">Programación<span style="color:var(--accent)">.</span></h1>
+        <p style="color:var(--text2);font-size:14px;margin-top:6px">Schedule semanal de despachos · Click para editar</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-secondary" onclick="exportarProg()">↓ Excel</button>
+      </div>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;padding:24px 0 20px">
+
+    <!-- Semana nav + View toggle -->
+    <div class="prog-toolbar">
       <button class="cal-nav-btn" onclick="semanaProgOffset(-1)">← Anterior</button>
-      <div class="cal-title" id="progTitulo"></div>
+      <div class="cal-title" id="progTitulo" style="min-width:180px"></div>
       <button class="cal-nav-btn" onclick="semanaProgOffset(+1)">Siguiente →</button>
-      <button class="cal-nav-btn" onclick="irSemanaHoy()" style="margin-left:8px;border-color:var(--accent);color:var(--accent)">Hoy</button>
-      <div id="progLoadingIndicator" style="display:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);margin-left:8px">Cargando...</div>
+      <button class="cal-nav-btn" onclick="irSemanaHoy()" style="border-color:var(--accent);color:var(--accent)">Hoy</button>
+
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="prog-view-group">
+          <button class="prog-view-btn" id="pv-envio" onclick="setProgView('envio')">Envío repo</button>
+          <button class="prog-view-btn active" id="pv-salida" onclick="setProgView('salida')">Salida</button>
+          <button class="prog-view-btn" id="pv-entrega" onclick="setProgView('entrega')">Entrega</button>
+        </div>
+        <div class="prog-courier-group" id="progCourierGroup" style="display:none">
+          <button class="prog-courier-btn active" id="pc-shipper" onclick="setProgCourier('shipper')">Shipper</button>
+          <button class="prog-courier-btn" id="pc-99min" onclick="setProgCourier('99min')">99 Min</button>
+        </div>
+        <span id="progLoadingIndicator" style="display:none;font-family:'Roboto Mono',monospace;font-size:11px;color:var(--text2)">Cargando...</span>
+      </div>
     </div>
+
     <div id="progError" class="error-msg"></div>
     <div class="prog-grid" id="progGrid"></div>
   </div><!-- /tab-prog -->
 
-  <!-- Modal edición override -->
+  <!-- ── Modal edición tienda ── -->
   <div class="modal-overlay" id="editModal" onclick="if(event.target===this)cerrarModal()">
     <div class="modal-box">
       <div class="modal-title" id="editTiendaNombre"></div>
       <div class="modal-sub" id="editSemanaLabel"></div>
-      <div class="modal-field">
-        <div class="modal-label">Día de Salida</div>
-        <select id="editDiaSalida" class="desp-input" style="width:100%">
-          <option value="Lunes">Lunes</option>
-          <option value="Martes">Martes</option>
-          <option value="Miércoles">Miércoles</option>
-          <option value="Jueves">Jueves</option>
-          <option value="Viernes">Viernes</option>
-        </select>
+
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Día de Salida</div>
+          <select id="editDiaSalida" class="form-input" style="width:100%">
+            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Hora de Salida</div>
+          <input type="time" id="editHoraSalida" class="form-input" style="width:100%">
+        </div>
       </div>
-      <div class="modal-field">
-        <div class="modal-label">Hora de Salida</div>
-        <input type="time" id="editHoraSalida" class="desp-input" style="width:100%">
+
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Bultos Estimados</div>
+          <input type="number" id="editBultosEst" class="form-input" min="0" placeholder="—" style="width:100%">
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Bultos Reales</div>
+          <input type="number" id="editBultosReal" class="form-input" min="0" placeholder="—" style="width:100%">
+        </div>
       </div>
+
+      <div class="modal-field" style="margin-top:4px">
+        <label class="modal-toggle">
+          <input type="checkbox" id="editOcultar">
+          <span class="modal-toggle-label">Ocultar esta tienda para esta semana</span>
+        </label>
+      </div>
+
       <div class="modal-actions">
-        <button id="btnResetOv" class="btn-download" style="color:var(--danger);border-color:rgba(255,77,77,0.4)" onclick="eliminarOverride()">Volver al default</button>
-        <div style="display:flex;gap:10px">
-          <button class="btn-download" onclick="cerrarModal()">Cancelar</button>
-          <button class="btn-estimar" style="width:auto;padding:10px 24px;margin:0;font-size:13px" onclick="guardarOverride()">Guardar</button>
+        <button id="btnResetOv" class="btn-danger" onclick="eliminarOverride()">Volver al default</button>
+        <div style="display:flex;gap:9px">
+          <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+          <button class="btn-primary" style="padding:10px 22px" onclick="guardarOverride()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal agregar tienda extra ── -->
+  <div class="modal-overlay" id="addModal" onclick="if(event.target===this)cerrarAddModal()">
+    <div class="modal-box">
+      <div class="modal-title">Agregar tienda</div>
+      <div class="modal-sub" id="addModalSub"></div>
+
+      <div class="modal-field">
+        <div class="modal-label">Tienda</div>
+        <input type="text" id="addTienda" class="form-input" placeholder="Nombre de tienda o cliente" style="width:100%" list="addTiendaList">
+        <datalist id="addTiendaList"></datalist>
+      </div>
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Día de Salida</div>
+          <select id="addDiaSalida" class="form-input" style="width:100%">
+            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Hora de Salida</div>
+          <input type="time" id="addHoraSalida" class="form-input" value="11:00" style="width:100%">
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Bultos Estimados</div>
+        <input type="number" id="addBultosEst" class="form-input" min="0" placeholder="—" style="width:100%">
+      </div>
+
+      <div class="modal-actions">
+        <div></div>
+        <div style="display:flex;gap:9px">
+          <button class="btn-secondary" onclick="cerrarAddModal()">Cancelar</button>
+          <button class="btn-primary" style="padding:10px 22px" onclick="confirmarAgregar()">Agregar</button>
         </div>
       </div>
     </div>
@@ -363,9 +474,11 @@
 
 <script>
 const API_URL = "http://localhost:8080";
-let currentFile = null;
-let currentTipo = "tienda_propia";
+let currentFile   = null;
+let currentTipo   = "tienda_propia";
+let _lastResultData = null;
 
+// ── Drag & drop ──────────────────────────────────────────────────────────────
 const dropZone = document.getElementById("dropZone");
 dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
@@ -387,19 +500,21 @@ function setTipo(tipo) {
   document.getElementById("btnParisXdb").classList.toggle("active", tipo === "paris_xdb");
 }
 
+// ── Estimar ──────────────────────────────────────────────────────────────────
 async function estimar() {
   if (!currentFile) return;
   document.getElementById("loading").classList.add("show");
   document.getElementById("results").classList.remove("show");
   document.getElementById("btnEstimar").disabled = true;
   document.getElementById("errorMsg").classList.remove("show");
-  const formData = new FormData();
-  formData.append("file", currentFile);
-  formData.append("tipo", currentTipo);
+  const fd = new FormData();
+  fd.append("file", currentFile);
+  fd.append("tipo", currentTipo);
   try {
-    const res = await fetch(`${API_URL}/estimar`, { method: "POST", body: formData });
+    const res = await fetch(`${API_URL}/estimar`, { method: "POST", body: fd });
     if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Error al procesar"); }
-    mostrarResultados(await res.json());
+    _lastResultData = await res.json();
+    mostrarResultados(_lastResultData);
   } catch(e) {
     document.getElementById("errorMsg").textContent = "❌ " + e.message;
     document.getElementById("errorMsg").classList.add("show");
@@ -413,40 +528,37 @@ function mostrarResultados(data) {
   const orden = data.resumen_orden;
   const esXdb = orden.tipo === "paris_xdb";
   document.getElementById("costoWrap").classList.remove("show");
+  document.getElementById("savePanelProg").classList.remove("show");
 
   if (orden.tipo === "paris_stock") {
     document.getElementById("summaryGrid").innerHTML = `
-      <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:22px;letter-spacing:-0.5px">${orden.n_orden}</div><div class="summary-sub">Stock · Cd Omnicanal</div></div>
-      <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">filas en la orden</div></div>
+      <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:20px">${orden.n_orden}</div><div class="summary-sub">Stock · Cd Omnicanal</div></div>
+      <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias</div></div>
       <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
-      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${orden.total_bultos.toLocaleString()}</div><div class="summary-sub">1 SKU por caja</div></div>
-    `;
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${orden.total_bultos.toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>`;
     document.getElementById("tiendasSection").style.display = "none";
   } else if (esXdb) {
     document.getElementById("summaryGrid").innerHTML = `
-      <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:22px;letter-spacing:-0.5px">${orden.n_orden}</div><div class="summary-sub">${orden.total_tiendas} tiendas destino</div></div>
+      <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:20px">${orden.n_orden}</div><div class="summary-sub">${orden.total_tiendas} tiendas destino</div></div>
       <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
       <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
-      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>
-    `;
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>`;
     const maxT = Math.max(...(orden.tiendas||[]).map(t => t.Bultos_estimados));
     document.getElementById("tiendasGrid").innerHTML = (orden.tiendas||[])
       .sort((a,b) => b.Bultos_estimados - a.Bultos_estimados)
-      .map(t => `
-        <div class="tienda-row">
-          <div><div class="tienda-name">${t.Tienda}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${(t.Bultos_estimados/maxT*100)}%"></div></div></div>
-          <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${t.SKUs}</div></div>
-          <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${t.Unidades}</div></div>
-          <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(t.Bultos_estimados)}</div></div>
-        </div>`).join("");
+      .map(t => `<div class="tienda-row">
+        <div><div class="tienda-name">${t.Tienda}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${t.Bultos_estimados/maxT*100}%"></div></div></div>
+        <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${t.SKUs}</div></div>
+        <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${t.Unidades}</div></div>
+        <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(t.Bultos_estimados)}</div></div>
+      </div>`).join("");
     document.getElementById("tiendasSection").style.display = "block";
-  } else if (!esXdb) {
+  } else {
     document.getElementById("summaryGrid").innerHTML = `
-      <div class="summary-card"><div class="summary-label">Punto de venta</div><div class="summary-value" style="font-size:18px;letter-spacing:-0.5px">${orden.punto_de_venta}</div><div class="summary-sub">${(orden.fecha_compromiso||"").split("T")[0]}</div></div>
+      <div class="summary-card"><div class="summary-label">Punto de venta</div><div class="summary-value" style="font-size:16px;letter-spacing:-0.3px">${orden.punto_de_venta}</div><div class="summary-sub">${(orden.fecha_compromiso||"").split("T")[0]}</div></div>
       <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
       <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
-      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>
-    `;
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${Math.ceil(orden.total_bultos).toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>`;
     document.getElementById("tiendasSection").style.display = "none";
   }
 
@@ -454,14 +566,23 @@ function mostrarResultados(data) {
   const maxB = Math.max(...lineas.map(l => l.Bultos_estimados), 1);
   document.getElementById("lineasGrid").innerHTML = lineas.map(l => `
     <div class="linea-row">
-      <div><div class="linea-name">${l["Línea"] || l.linea || "Sin línea"}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${(l.Bultos_estimados/maxB*100)}%"></div></div></div>
+      <div><div class="linea-name">${l["Línea"] || l.linea || "Sin línea"}</div><div class="linea-bar"><div class="linea-bar-fill" style="width:${l.Bultos_estimados/maxB*100}%"></div></div></div>
       <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${l.SKUs}</div></div>
       <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${l.Unidades_totales}</div></div>
       <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(l.Bultos_estimados)}</div></div>
-    </div>
-  `).join("");
+    </div>`).join("");
 
   renderCostos(data.costo_99min, data.costo_shipper);
+
+  // Panel guardar en programación
+  if (orden.tipo === "tienda_propia" && orden.punto_de_venta) {
+    const siguienteLunes = _getLunes(new Date(Date.now() + 7*24*3600*1000));
+    document.getElementById("savePanelTienda").textContent = orden.punto_de_venta;
+    document.getElementById("savePanelBultos").textContent = Math.ceil(orden.total_bultos) + " bultos";
+    document.getElementById("savePanelSemana").value = siguienteLunes.toISOString().split('T')[0];
+    document.getElementById("savePanelProg").classList.add("show");
+  }
+
   document.getElementById("results").classList.add("show");
   document.getElementById("results").scrollIntoView({ behavior: "smooth" });
 }
@@ -470,66 +591,70 @@ function renderCostos(c99, cShipper) {
   const wrap = document.getElementById("costoWrap");
   if (!c99 && !cShipper) { wrap.classList.remove("show"); return; }
   const fmt = v => v != null ? "$ " + Math.round(v).toLocaleString("es-CL") : "—";
-
   document.getElementById("costoAdvert").textContent = cShipper?.advertencia || c99?.advertencia || "";
 
   if (cShipper && !cShipper.advertencia) {
-    const d      = cShipper.directo;
-    const rutas  = cShipper.rutas || [];
-    const t99    = c99?.costo_total ?? null;
+    const d = cShipper.directo;
+    const rutas = cShipper.rutas || [];
+    const t99 = c99?.costo_total ?? null;
     document.getElementById("costoDestLabel").textContent = cShipper.destino || "";
 
-    const delta = (sXL) => {
+    const delta = sXL => {
       if (t99 == null || sXL == null) return "";
       const pct = Math.round((sXL / t99 - 1) * 100);
-      const sign = pct > 0 ? "+" : "";
-      const color = pct > 0 ? "#f5a542" : "var(--accent2)";
-      return `<span style="font-family:'DM Mono',monospace;font-size:10px;color:${color}">${sign}${pct}%</span>`;
+      const color = pct > 0 ? "var(--warn)" : "var(--success)";
+      return `<span style="font-family:'Roboto Mono',monospace;font-size:10px;color:${color}">${pct>0?"+":""}${pct}%</span>`;
     };
-
     const pionetaNote = v => v > 0
-      ? `<br><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text2)">+ $${(v).toLocaleString("es-CL")} pioneta</span>`
+      ? `<br><span style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--text2)">+ $${v.toLocaleString("es-CL")} pioneta</span>`
       : "";
 
     let rows = "";
     if (rutas.length > 0) {
       rows = rutas.map(r => `<tr class="row-ruta">
         <td>${r.nombre} <span style="color:var(--text2);font-size:11px">÷${r.n_tiendas}</span>${pionetaNote(r.pioneta)}</td>
-        <td>${fmt(r.por_tienda_L)}</td>
-        <td class="hl">${fmt(r.por_tienda_XL)} ${delta(r.por_tienda_XL)}</td>
-        <td>${fmt(t99)}</td>
+        <td>${fmt(r.por_tienda_L)}</td><td class="hl">${fmt(r.por_tienda_XL)} ${delta(r.por_tienda_XL)}</td><td>${fmt(t99)}</td>
       </tr>`).join("");
       rows += `<tr style="opacity:0.4;font-size:12px">
-        <td>Directo (sin combinar)</td>
-        <td>${fmt(d.costo_L)}</td>
-        <td>${fmt(d.costo_XL)}${d.costo_rampla != null ? ` · <span style="font-size:10px">Rampla ${fmt(d.costo_rampla)}</span>` : ""}</td>
-        <td>—</td>
+        <td>Directo (sin combinar)</td><td>${fmt(d.costo_L)}</td>
+        <td>${fmt(d.costo_XL)}${d.costo_rampla!=null?` · <span style="font-size:10px">Rampla ${fmt(d.costo_rampla)}</span>`:""}</td><td>—</td>
       </tr>`;
     } else {
       rows = `<tr class="row-direct">
         <td>Directo${pionetaNote(d.pioneta)}</td>
-        <td>${fmt(d.costo_L)}</td>
-        <td class="hl">${fmt(d.costo_XL)} ${delta(d.costo_XL)}</td>
-        <td>${fmt(t99)}</td>
+        <td>${fmt(d.costo_L)}</td><td class="hl">${fmt(d.costo_XL)} ${delta(d.costo_XL)}</td><td>${fmt(t99)}</td>
       </tr>`;
     }
-
-    document.getElementById("costoTable").innerHTML = `
-      <thead><tr><th>Opción</th><th>Shipper L</th><th>Shipper XL</th><th>99 Min</th></tr></thead>
-      <tbody>${rows}</tbody>`;
+    document.getElementById("costoTable").innerHTML =
+      `<thead><tr><th>Opción</th><th>Shipper L</th><th>Shipper XL</th><th>99 Min</th></tr></thead><tbody>${rows}</tbody>`;
   } else {
     document.getElementById("costoTable").innerHTML = "";
     document.getElementById("costoDestLabel").textContent = "";
   }
-
   wrap.classList.add("show");
+}
+
+async function guardarEnProg() {
+  const tienda = document.getElementById("savePanelTienda").textContent;
+  const bultos = parseInt(document.getElementById("savePanelBultos").textContent);
+  const lunes  = document.getElementById("savePanelSemana").value;
+  if (!lunes || !tienda) return;
+  try {
+    await fetch(`${API_URL}/programacion/override`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ lunes, tienda, cambios: { bultos_estimados: bultos } })
+    });
+    document.getElementById("savePanelProg").classList.remove("show");
+    alert(`✓ ${bultos} bultos guardados para ${tienda} semana ${lunes}`);
+  } catch(e) { alert("Error: " + e.message); }
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
 function setTab(tab) {
-  ['estimador', 'despachos', 'prog'].forEach(t => {
-    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
-    document.getElementById('tab-btn-' + t).classList.toggle('active', t === tab);
+  ['estimador','despachos','prog'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+    document.getElementById('tab-btn-'+t).classList.toggle('active', t===tab);
   });
   if (tab === 'despachos' && despData.length === 0) cargarDespachos();
   if (tab === 'prog' && !progLunesISO) {
@@ -543,10 +668,9 @@ function setTab(tab) {
 let despData = [];
 let _calBase = null;
 
-(function initDespDates() {
-  const today = new Date();
-  const hace30 = new Date(today);
-  hace30.setDate(today.getDate() - 30);
+(function() {
+  const today = new Date(), hace30 = new Date(today);
+  hace30.setDate(today.getDate()-30);
   document.getElementById('despDesde').value = hace30.toISOString().split('T')[0];
   document.getElementById('despHasta').value = today.toISOString().split('T')[0];
 })();
@@ -554,62 +678,92 @@ let _calBase = null;
 async function cargarDespachos() {
   const desde = document.getElementById('despDesde').value;
   const hasta = document.getElementById('despHasta').value;
-  const loading = document.getElementById('loadingDesp');
-  const errorEl = document.getElementById('despError');
-  loading.style.display = 'block';
-  errorEl.classList.remove('show');
-  despData = [];
+  const ld = document.getElementById('loadingDesp'), er = document.getElementById('despError');
+  ld.style.display='block'; er.classList.remove('show'); despData=[];
   try {
     const res = await fetch(`${API_URL}/despachos?desde=${desde}&hasta=${hasta}`);
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Error al consultar'); }
-    despData = (await res.json()).despachos || [];
+    if (!res.ok) { const e=await res.json(); throw new Error(e.detail||'Error'); }
+    despData = (await res.json()).despachos||[];
     filtrarDespachos();
-  } catch(e) {
-    errorEl.textContent = '❌ ' + e.message;
-    errorEl.classList.add('show');
-  } finally {
-    loading.style.display = 'none';
-  }
+  } catch(e) { er.textContent='❌ '+e.message; er.classList.add('show'); }
+  finally { ld.style.display='none'; }
 }
 
 function filtrarDespachos() {
-  const q = (document.getElementById('despSearch').value || '').toLowerCase();
-  const filtered = q ? despData.filter(d => (d.nom_cliente || '').toLowerCase().includes(q)) : despData;
-  const enLista = document.getElementById('vistaLista').style.display !== 'none';
-  if (enLista) renderLista(filtered); else renderCalendario(filtered);
+  const q=(document.getElementById('despSearch').value||'').toLowerCase();
+  const filtered=q?despData.filter(d=>(d.nom_cliente||'').toLowerCase().includes(q)):despData;
+  const enLista=document.getElementById('vistaLista').style.display!=='none';
+  if(enLista) renderLista(filtered); else renderCalendario(filtered);
 }
 
-function setVista(vista) {
-  document.getElementById('vistaLista').style.display = vista === 'lista' ? 'block' : 'none';
-  document.getElementById('vistaCal').style.display  = vista === 'cal'   ? 'block' : 'none';
-  document.getElementById('btnVista-lista').classList.toggle('active', vista === 'lista');
-  document.getElementById('btnVista-cal').classList.toggle('active',   vista === 'cal');
+function setVista(v) {
+  document.getElementById('vistaLista').style.display=v==='lista'?'block':'none';
+  document.getElementById('vistaCal').style.display=v==='cal'?'block':'none';
+  document.getElementById('btnVista-lista').classList.toggle('active',v==='lista');
+  document.getElementById('btnVista-cal').classList.toggle('active',v==='cal');
   filtrarDespachos();
 }
 
 function renderLista(data) {
-  const fmt = v => v != null ? '$ ' + Math.round(v).toLocaleString('es-CL') : '—';
-  const badge = c => {
-    if (!c) return '<span class="courier-badge otro">—</span>';
-    const cls = c === 'Shipper' ? 'shipper' : c === '99 Min' ? 'min99' : 'otro';
+  const fmt=v=>v!=null?'$ '+Math.round(v).toLocaleString('es-CL'):'—';
+  const badge=c=>{
+    if(!c) return '<span class="courier-badge otro">—</span>';
+    const cls=c==='Shipper'?'shipper':c==='99 Min'?'min99':'otro';
     return `<span class="courier-badge ${cls}">${c}</span>`;
   };
-  const estadoColor = e => ({ CERRADO:'#42f5a7', ABIERTO:'#f5a542', CANCELADO:'#ff4d4d' })[(e||'').toUpperCase()] || '#888';
-
-  const rows = data.map(d => `<tr>
-    <td style="font-weight:600">${d.nom_cliente || '—'}</td>
-    <td><span class="estado-dot" style="background:${estadoColor(d.estado)}"></span>${d.estado || '—'}</td>
-    <td class="td-mono">${d.fecha_compromiso || '—'}</td>
-    <td class="td-mono">${d.fecha_despacho || '—'}</td>
-    <td class="td-mono td-accent">${d.bultos_reales || 0}</td>
+  const estadoColor=e=>({CERRADO:'#2d7d3a',ABIERTO:'var(--warn)',CANCELADO:'var(--danger)'}[(e||'').toUpperCase()]||'#aaa');
+  const rows=data.map(d=>`<tr>
+    <td style="font-weight:500">${d.nom_cliente||'—'}</td>
+    <td><span class="estado-dot" style="background:${estadoColor(d.estado)}"></span>${d.estado||'—'}</td>
+    <td class="td-mono">${d.fecha_compromiso||'—'}</td>
+    <td class="td-mono">${d.fecha_despacho||'—'}</td>
+    <td class="td-mono td-accent">${d.bultos_reales||0}</td>
     <td>${badge(d.courier_sugerido)}</td>
     <td class="td-mono">${fmt(d.costo_sugerido)}</td>
-    <td class="td-mono" style="color:var(--accent2)">${fmt(d.costo_99min)}</td>
+    <td class="td-mono" style="color:var(--text2)">${fmt(d.costo_99min)}</td>
     <td class="td-mono" style="color:var(--accent)">${fmt(d.costo_shipper_xl)}</td>
   </tr>`).join('');
+  document.getElementById('despTabla').innerHTML=rows||
+    `<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:32px;font-family:'Roboto Mono',monospace;font-size:12px">Sin resultados</td></tr>`;
+}
 
-  document.getElementById('despTabla').innerHTML = rows ||
-    `<tr><td colspan="9" style="text-align:center;color:var(--text2);padding:32px;font-family:'DM Mono',monospace;font-size:13px">Sin resultados</td></tr>`;
+// ── Calendario despachos ───────────────────────────────────────────────────────
+function _getLunes(d) {
+  const day=d.getDay(), diff=day===0?-6:1-day, l=new Date(d);
+  l.setDate(d.getDate()+diff); l.setHours(0,0,0,0); return l;
+}
+
+function semanaOffset(n) {
+  if(!_calBase) _calBase=_getLunes(new Date());
+  _calBase.setDate(_calBase.getDate()+n*7);
+  filtrarDespachos();
+}
+
+function renderCalendario(data) {
+  if(!_calBase) _calBase=_getLunes(new Date());
+  const DIAS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], today=new Date().toISOString().split('T')[0];
+  const byDate={};
+  data.forEach(d=>{ const k=d.fecha_compromiso||d.fecha_despacho; if(k){if(!byDate[k])byDate[k]=[]; byDate[k].push(d);} });
+  const days=Array.from({length:7},(_,i)=>{ const d=new Date(_calBase); d.setDate(_calBase.getDate()+i); return d; });
+  const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+  document.getElementById('calTitulo').textContent=`${fmtD(days[0])} — ${fmtD(days[6])}`;
+  const fmtK=v=>v!=null?'$'+Math.round(v/1000)+'k':'';
+  const cCls=c=>c==='Shipper'?'shipper':c==='99 Min'?'min99':'otro';
+  document.getElementById('calGrid').innerHTML=days.map((d,i)=>{
+    const key=d.toISOString().split('T')[0], isToday=key===today, items=byDate[key]||[];
+    const cards=items.map(desp=>`<div class="cal-card">
+      <div class="cal-card-name">${desp.nom_cliente||'—'}</div>
+      <div class="cal-card-sub">
+        <span>${desp.bultos_reales||0} blt</span>
+        ${desp.courier_sugerido?`<span class="courier-badge ${cCls(desp.courier_sugerido)}" style="font-size:9px;padding:1px 5px">${desp.courier_sugerido}</span>`:''}
+        ${desp.costo_sugerido?`<span>${fmtK(desp.costo_sugerido)}</span>`:''}
+      </div></div>`).join('');
+    return `<div class="cal-col">
+      <div class="cal-day-header">${DIAS[i]}</div>
+      <div class="cal-day-num${isToday?' today':''}">${d.getDate()}</div>
+      ${cards||`<div style="font-family:'Roboto Mono',monospace;font-size:10px;color:var(--border);text-align:center;padding:10px 0">·</div>`}
+    </div>`;
+  }).join('');
 }
 
 // ── PROGRAMACIÓN ─────────────────────────────────────────────────────────────
@@ -617,81 +771,104 @@ let progSemanaData = [];
 let progLunesISO   = '';
 let _progBase      = null;
 let _editCtx       = null;
+let _addDiaCtx     = null;
+let progView       = 'salida';
+let progCourier    = 'shipper';
 
-const DIA_OFFSET = {
-  'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5
-};
+const DIA_OFFSET = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5};
 
 function _dNorm(s) {
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 }
 
+function _diaField(entry) {
+  if (progView === 'envio')   return entry.dia_carga;
+  if (progView === 'entrega') return progCourier === '99min' ? entry.dia_entrega_99min : entry.dia_entrega_shipper;
+  return entry.dia_salida;
+}
+
+function setProgView(v) {
+  progView = v;
+  ['envio','salida','entrega'].forEach(x => document.getElementById('pv-'+x).classList.toggle('active', x===v));
+  document.getElementById('progCourierGroup').style.display = v==='entrega' ? 'flex' : 'none';
+  renderSemana(progSemanaData, progLunesISO);
+}
+
+function setProgCourier(c) {
+  progCourier = c;
+  ['shipper','99min'].forEach(x => document.getElementById('pc-'+x).classList.toggle('active', x===c));
+  renderSemana(progSemanaData, progLunesISO);
+}
+
 async function cargarSemana(lunesISO) {
   progLunesISO = lunesISO;
-  const ind = document.getElementById('progLoadingIndicator');
-  const err = document.getElementById('progError');
-  ind.style.display = 'inline';
-  err.classList.remove('show');
+  const ind = document.getElementById('progLoadingIndicator'), err = document.getElementById('progError');
+  ind.style.display='inline'; err.classList.remove('show');
   try {
     const res = await fetch(`${API_URL}/programacion/semana?lunes=${lunesISO}`);
-    if (!res.ok) { const e = await res.json(); throw new Error(e.detail||'Error'); }
-    progSemanaData = (await res.json()).schedule || [];
+    if (!res.ok) { const e=await res.json(); throw new Error(e.detail||'Error'); }
+    progSemanaData = (await res.json()).schedule||[];
     renderSemana(progSemanaData, lunesISO);
-  } catch(e) {
-    err.textContent = '❌ ' + e.message;
-    err.classList.add('show');
-  } finally {
-    ind.style.display = 'none';
-  }
+  } catch(e) { err.textContent='❌ '+e.message; err.classList.add('show'); }
+  finally { ind.style.display='none'; }
 }
 
 function semanaProgOffset(n) {
-  if (!_progBase) _progBase = _getLunes(new Date());
-  _progBase.setDate(_progBase.getDate() + n * 7);
+  if(!_progBase) _progBase=_getLunes(new Date());
+  _progBase.setDate(_progBase.getDate()+n*7);
   cargarSemana(_progBase.toISOString().split('T')[0]);
 }
 
 function irSemanaHoy() {
-  _progBase = _getLunes(new Date());
+  _progBase=_getLunes(new Date());
   cargarSemana(_progBase.toISOString().split('T')[0]);
 }
 
 function renderSemana(schedule, lunesISO) {
-  const lunes = new Date(lunesISO + 'T00:00:00');
-  const DIAS  = ['Lun','Mar','Mié','Jue','Vie'];
-  const today = new Date().toISOString().split('T')[0];
-
-  // Agrupar por offset de día de salida
-  const byDia = {0:[],1:[],2:[],3:[],4:[]};
-  schedule.forEach((entry, idx) => {
-    const off = DIA_OFFSET[_dNorm(entry.dia_salida)];
-    if (off !== undefined && off < 5) byDia[off].push({ ...entry, _idx: idx });
+  if (!lunesISO) return;
+  const lunes=new Date(lunesISO+'T00:00:00'), DIAS=['Lun','Mar','Mié','Jue','Vie'];
+  const today=new Date().toISOString().split('T')[0];
+  const byDia={0:[],1:[],2:[],3:[],4:[]};
+  schedule.forEach((entry,idx) => {
+    const off = DIA_OFFSET[_dNorm(_diaField(entry)||'')];
+    if (off !== undefined && off < 5) byDia[off].push({...entry, _idx: idx});
   });
+  const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+  const viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
+  document.getElementById('progTitulo').textContent=`${fmtD(lunes)} — ${fmtD(viernes)}`;
 
-  const fmtD = d => d.toLocaleDateString('es-CL', {day:'numeric', month:'short'});
-  const viernes = new Date(lunes); viernes.setDate(lunes.getDate() + 4);
-  document.getElementById('progTitulo').textContent = `${fmtD(lunes)} — ${fmtD(viernes)}`;
+  document.getElementById('progGrid').innerHTML=Array.from({length:5},(_,i)=>{
+    const d=new Date(lunes); d.setDate(lunes.getDate()+i);
+    const diso=d.toISOString().split('T')[0], isToday=diso===today;
+    const entries=byDia[i]||[];
 
-  document.getElementById('progGrid').innerHTML = Array.from({length:5}, (_, i) => {
-    const d = new Date(lunes);
-    d.setDate(lunes.getDate() + i);
-    const diso    = d.toISOString().split('T')[0];
-    const isToday = diso === today;
-    const entries = byDia[i] || [];
-
-    const cards = entries.map(e => {
-      const d99  = e.dia_entrega_99min  ? e.dia_entrega_99min.slice(0,3)  : '—';
-      const dsh  = e.dia_entrega_shipper ? e.dia_entrega_shipper.slice(0,3) : '—';
-      return `<div class="prog-card${e.override?' overridden':''}" onclick="openEditModal(${e._idx})">
+    const cards=entries.map(e=>{
+      const cPref = e.courier_preferencia || '';
+      const badgeCls = cPref.toLowerCase().includes('ship') ? 'shipper' : cPref.includes('99') ? 'min99' : '';
+      const hora = progView==='entrega'
+        ? (progCourier==='99min' ? e.hora_entrega_99min : e.hora_entrega_shipper)
+        : e.hora_salida;
+      const bultosHtml = (e.bultos_estimados || e.bultos_reales)
+        ? `<div class="prog-card-bultos">
+            ${e.bultos_estimados ? `<span class="prog-bulto-tag est">Est ${e.bultos_estimados}</span>` : ''}
+            ${e.bultos_reales    ? `<span class="prog-bulto-tag real">Real ${e.bultos_reales}</span>` : ''}
+          </div>` : '';
+      const classes = ['prog-card', e.override?'overridden':'', e.extra?'extra-entry':''].filter(Boolean).join(' ');
+      return `<div class="${classes}" onclick="openEditModal(${e._idx})">
         <div class="prog-card-header">
           <span class="prog-card-name">${e.tienda}</span>
-          ${e.override ? '<span class="prog-override-dot" title="Modificado esta semana">✎</span>' : ''}
+          <span class="prog-card-actions">
+            ${e.override ? '<span class="prog-override-dot" title="Modificado">✎</span>' : ''}
+            <button class="prog-action-btn" title="Ocultar esta semana" onclick="event.stopPropagation();ocultarTienda(${e._idx})">×</button>
+          </span>
         </div>
-        <div class="prog-card-hora">${e.hora_salida || '—'}</div>
+        <div class="prog-card-hora">${hora||'—'}</div>
         <div class="prog-card-info">
-          <span>⚡ ${d99} ${e.hora_entrega_99min}</span>
-          <span>🚛 ${dsh} ${e.hora_entrega_shipper}</span>
+          ${badgeCls ? `<span><span class="courier-badge ${badgeCls}" style="font-size:9px">${cPref}</span></span>` : ''}
+          <span>⚡ ${(e.dia_entrega_99min||'—').slice(0,3)} ${e.hora_entrega_99min||''}</span>
+          <span>🚛 ${(e.dia_entrega_shipper||'—').slice(0,3)} ${e.hora_entrega_shipper||''}</span>
         </div>
+        ${bultosHtml}
       </div>`;
     }).join('');
 
@@ -700,117 +877,139 @@ function renderSemana(schedule, lunesISO) {
         <span>${DIAS[i]}</span>
         <span class="prog-day-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
       </div>
-      ${cards || '<div class="prog-empty">·</div>'}
+      ${cards}
+      <div class="prog-add-btn" onclick="abrirAddModal('${DIAS[i]}', ${i})">+ Agregar</div>
     </div>`;
   }).join('');
 }
 
+// ── Edit modal ──────────────────────────────────────────────────────────────
 function openEditModal(idx) {
   const entry = progSemanaData[idx];
   if (!entry) return;
-  _editCtx = { tienda: entry.tienda, lunesISO: progLunesISO, isOverride: entry.override };
-
-  const lunes = new Date(progLunesISO + 'T00:00:00');
-  const viernes = new Date(lunes); viernes.setDate(lunes.getDate() + 4);
-  const fmtD = d => d.toLocaleDateString('es-CL', {day:'numeric', month:'short'});
-
+  _editCtx = {tienda: entry.tienda, lunesISO: progLunesISO, isOverride: entry.override, isExtra: entry.extra, extraId: entry._id};
+  const lunes=new Date(progLunesISO+'T00:00:00'), viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
+  const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
   document.getElementById('editTiendaNombre').textContent = entry.tienda;
   document.getElementById('editSemanaLabel').textContent  = `Semana ${fmtD(lunes)} — ${fmtD(viernes)}`;
-  document.getElementById('editDiaSalida').value  = entry.dia_salida;
-  document.getElementById('editHoraSalida').value = entry.hora_salida;
+  document.getElementById('editDiaSalida').value  = entry.dia_salida || 'Lunes';
+  document.getElementById('editHoraSalida').value = entry.hora_salida || '';
+  document.getElementById('editBultosEst').value  = entry.bultos_estimados || '';
+  document.getElementById('editBultosReal').value = entry.bultos_reales || '';
+  document.getElementById('editOcultar').checked  = false;
   document.getElementById('btnResetOv').style.display = entry.override ? 'inline-flex' : 'none';
   document.getElementById('editModal').classList.add('open');
 }
 
 async function guardarOverride() {
   if (!_editCtx) return;
-  const cambios = {
-    dia_salida:  document.getElementById('editDiaSalida').value,
-    hora_salida: document.getElementById('editHoraSalida').value,
-  };
+  const ocultar = document.getElementById('editOcultar').checked;
+  let cambios = ocultar
+    ? { visible: false }
+    : {
+        dia_salida:        document.getElementById('editDiaSalida').value,
+        hora_salida:       document.getElementById('editHoraSalida').value,
+        bultos_estimados:  parseInt(document.getElementById('editBultosEst').value)||null,
+        bultos_reales:     parseInt(document.getElementById('editBultosReal').value)||null,
+      };
   try {
-    await fetch(`${API_URL}/programacion/override`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ lunes: _editCtx.lunesISO, tienda: _editCtx.tienda, cambios })
-    });
-    cerrarModal();
-    cargarSemana(_editCtx.lunesISO);
-  } catch(e) { alert('Error al guardar: ' + e.message); }
+    if (_editCtx.isExtra) {
+      // Update extra entry: delete old, add new
+      await fetch(`${API_URL}/programacion/extra?lunes=${_editCtx.lunesISO}&id=${_editCtx.extraId}`, {method:'DELETE'});
+      if (!ocultar) {
+        const entry = progSemanaData.find(e=>e.tienda===_editCtx.tienda && e._id===_editCtx.extraId);
+        await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({lunes:_editCtx.lunesISO,entrada:{...entry,...cambios}})});
+      }
+    } else {
+      await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({lunes:_editCtx.lunesISO,tienda:_editCtx.tienda,cambios})});
+    }
+    cerrarModal(); cargarSemana(_editCtx.lunesISO);
+  } catch(e) { alert('Error: '+e.message); }
 }
 
 async function eliminarOverride() {
   if (!_editCtx) return;
   try {
-    await fetch(`${API_URL}/programacion/override?lunes=${_editCtx.lunesISO}&tienda=${encodeURIComponent(_editCtx.tienda)}`, { method: 'DELETE' });
-    cerrarModal();
-    cargarSemana(_editCtx.lunesISO);
-  } catch(e) { alert('Error: ' + e.message); }
+    if (_editCtx.isExtra) {
+      await fetch(`${API_URL}/programacion/extra?lunes=${_editCtx.lunesISO}&id=${_editCtx.extraId}`,{method:'DELETE'});
+    } else {
+      await fetch(`${API_URL}/programacion/override?lunes=${encodeURIComponent(_editCtx.lunesISO)}&tienda=${encodeURIComponent(_editCtx.tienda)}`,{method:'DELETE'});
+    }
+    cerrarModal(); cargarSemana(_editCtx.lunesISO);
+  } catch(e) { alert('Error: '+e.message); }
+}
+
+async function ocultarTienda(idx) {
+  const entry = progSemanaData[idx];
+  if (!entry) return;
+  try {
+    if (entry.extra) {
+      await fetch(`${API_URL}/programacion/extra?lunes=${progLunesISO}&id=${entry._id}`,{method:'DELETE'});
+    } else {
+      await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({lunes:progLunesISO,tienda:entry.tienda,cambios:{visible:false}})});
+    }
+    cargarSemana(progLunesISO);
+  } catch(e) { alert('Error: '+e.message); }
 }
 
 function cerrarModal() {
-  document.getElementById('editModal').classList.remove('open');
-  _editCtx = null;
+  document.getElementById('editModal').classList.remove('open'); _editCtx=null;
 }
 
-// ── CALENDARIO ────────────────────────────────────────────────────────────────
-function _getLunes(d) {
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const lunes = new Date(d);
-  lunes.setDate(d.getDate() + diff);
-  lunes.setHours(0,0,0,0);
-  return lunes;
+// ── Add modal ────────────────────────────────────────────────────────────────
+function abrirAddModal(diaLabel, diaOffset) {
+  _addDiaCtx = diaOffset;
+  const DIAS_ESP=['Lunes','Martes','Miércoles','Jueves','Viernes'];
+  const lunes=new Date(progLunesISO+'T00:00:00'), fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+  const viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
+  document.getElementById('addModalSub').textContent=`Semana ${fmtD(lunes)} — ${fmtD(viernes)}`;
+  document.getElementById('addTienda').value='';
+  document.getElementById('addDiaSalida').value=DIAS_ESP[diaOffset]||'Lunes';
+  document.getElementById('addHoraSalida').value='11:00';
+  document.getElementById('addBultosEst').value='';
+  // Populate datalist with existing tiendas
+  const dl=document.getElementById('addTiendaList');
+  dl.innerHTML=progSemanaData.filter((e,i,a)=>a.findIndex(x=>x.tienda===e.tienda)===i)
+    .map(e=>`<option value="${e.tienda}">`).join('');
+  document.getElementById('addModal').classList.add('open');
 }
 
-function semanaOffset(n) {
-  if (!_calBase) _calBase = _getLunes(new Date());
-  _calBase.setDate(_calBase.getDate() + n * 7);
-  filtrarDespachos();
+async function confirmarAgregar() {
+  const tienda=document.getElementById('addTienda').value.trim();
+  const diaSalida=document.getElementById('addDiaSalida').value;
+  const horaSalida=document.getElementById('addHoraSalida').value;
+  const bultosEst=parseInt(document.getElementById('addBultosEst').value)||null;
+  if (!tienda) { alert('Ingresa el nombre de la tienda'); return; }
+  const baseTienda=progSemanaData.find(e=>e.tienda===tienda);
+  const entrada={
+    tienda, dia_salida: diaSalida, hora_salida: horaSalida,
+    dia_carga: diaSalida,
+    dia_entrega_99min:    baseTienda?.dia_entrega_99min||'',
+    hora_entrega_99min:   baseTienda?.hora_entrega_99min||'',
+    dia_entrega_shipper:  baseTienda?.dia_entrega_shipper||'',
+    hora_entrega_shipper: baseTienda?.hora_entrega_shipper||'',
+    courier_preferencia:  baseTienda?.courier_preferencia||'',
+    lt_99min: baseTienda?.lt_99min||0,
+    lt_shipper: baseTienda?.lt_shipper||0,
+    bultos_estimados: bultosEst,
+  };
+  try {
+    await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({lunes:progLunesISO,entrada})});
+    cerrarAddModal(); cargarSemana(progLunesISO);
+  } catch(e) { alert('Error: '+e.message); }
 }
 
-function renderCalendario(data) {
-  if (!_calBase) _calBase = _getLunes(new Date());
-  const DIAS = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-  const today = new Date().toISOString().split('T')[0];
+function cerrarAddModal() {
+  document.getElementById('addModal').classList.remove('open'); _addDiaCtx=null;
+}
 
-  const byDate = {};
-  data.forEach(d => {
-    const key = d.fecha_compromiso || d.fecha_despacho;
-    if (key) { if (!byDate[key]) byDate[key] = []; byDate[key].push(d); }
-  });
-
-  const days = Array.from({length:7}, (_, i) => {
-    const d = new Date(_calBase);
-    d.setDate(_calBase.getDate() + i);
-    return d;
-  });
-
-  const fmtD = d => d.toLocaleDateString('es-CL', {day:'numeric', month:'short'});
-  document.getElementById('calTitulo').textContent = `${fmtD(days[0])} — ${fmtD(days[6])}`;
-
-  const fmtK = v => v != null ? '$' + Math.round(v/1000) + 'k' : '';
-  const cCls = c => c === 'Shipper' ? 'shipper' : c === '99 Min' ? 'min99' : 'otro';
-
-  document.getElementById('calGrid').innerHTML = days.map((d, i) => {
-    const key = d.toISOString().split('T')[0];
-    const items = byDate[key] || [];
-    const isToday = key === today;
-    const cards = items.map(desp => `
-      <div class="cal-card">
-        <div class="cal-card-name">${desp.nom_cliente || '—'}</div>
-        <div class="cal-card-sub">
-          <span>${desp.bultos_reales || 0} blt</span>
-          ${desp.courier_sugerido ? `<span class="courier-badge ${cCls(desp.courier_sugerido)}" style="font-size:9px;padding:1px 6px">${desp.courier_sugerido}</span>` : ''}
-          ${desp.costo_sugerido ? `<span>${fmtK(desp.costo_sugerido)}</span>` : ''}
-        </div>
-      </div>`).join('');
-    return `<div class="cal-col">
-      <div class="cal-day-header">${DIAS[i]}</div>
-      <div class="cal-day-num${isToday ? ' today' : ''}">${d.getDate()}</div>
-      ${cards || '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--border);text-align:center;padding:12px 0">·</div>'}
-    </div>`;
-  }).join('');
+function exportarProg() {
+  if (!progLunesISO) return;
+  window.open(`${API_URL}/programacion/export?lunes=${progLunesISO}`, '_blank');
 }
 
 </script>

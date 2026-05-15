@@ -5,6 +5,7 @@ Programación semanal de despachos: schedule base desde Excel + overrides por se
 """
 import os
 import json
+import uuid
 import unicodedata
 import pandas as pd
 from pathlib import Path
@@ -55,16 +56,17 @@ def cargar_schedule_base() -> list:
     df = df.where(pd.notnull(df), None)
     cols = list(df.columns)
 
-    c_tienda  = _find_col(cols, ["tienda"])
-    c_carga   = _find_col(cols, ["carga"])
-    c_sal_dia = _find_col(cols, ["dia de salida", "salida"])
-    c_sal_hr  = _find_col(cols, ["hora de salida", "hora sal"])
-    c_99_dia  = _find_col(cols, ["entrega 99"])
-    c_99_hr   = _find_col(cols, ["hora de entrega 99", "hora entrega 99"])
-    c_99_lt   = _find_col(cols, ["lt 99"])
-    c_sh_dia  = _find_col(cols, ["entrega shipper"])
-    c_sh_hr   = _find_col(cols, ["hora de entrega shipper", "hora entrega ship"])
-    c_sh_lt   = _find_col(cols, ["lt shipper"])
+    c_tienda   = _find_col(cols, ["tienda"])
+    c_carga    = _find_col(cols, ["carga"])
+    c_sal_dia  = _find_col(cols, ["dia de salida", "salida"])
+    c_sal_hr   = _find_col(cols, ["hora de salida", "hora sal"])
+    c_99_dia   = _find_col(cols, ["entrega 99"])
+    c_99_hr    = _find_col(cols, ["hora de entrega 99", "hora entrega 99"])
+    c_99_lt    = _find_col(cols, ["lt 99"])
+    c_sh_dia   = _find_col(cols, ["entrega shipper"])
+    c_sh_hr    = _find_col(cols, ["hora de entrega shipper", "hora entrega ship"])
+    c_sh_lt    = _find_col(cols, ["lt shipper"])
+    c_courier  = _find_col(cols, ["courier preferencia", "courier pref", "preferencia"])
 
     schedule = []
     for _, row in df.iterrows():
@@ -82,6 +84,7 @@ def cargar_schedule_base() -> list:
             "dia_entrega_shipper":  str(row.get(c_sh_dia) or "").strip(),
             "hora_entrega_shipper": _fmt_hora(row.get(c_sh_hr)),
             "lt_shipper":           int(row.get(c_sh_lt) or 0),
+            "courier_preferencia":  str(row.get(c_courier) or "").strip() if c_courier else "",
         })
     return schedule
 
@@ -105,12 +108,27 @@ def obtener_semana(lunes_iso: str) -> list:
     result = []
     for entry in base:
         e = dict(entry)
-        if e["tienda"] in week_ov:
-            e.update(week_ov[e["tienda"]])
+        ov = week_ov.get(e["tienda"], {})
+        if ov.get("visible") is False:
+            continue
+        if ov:
+            e.update({k: v for k, v in ov.items() if k != "visible"})
             e["override"] = True
         else:
             e["override"] = False
+        e.setdefault("bultos_estimados", None)
+        e.setdefault("bultos_reales", None)
+        e.setdefault("extra", False)
         result.append(e)
+
+    for extra in week_ov.get("__extras", []):
+        e = dict(extra)
+        e["override"] = True
+        e["extra"] = True
+        e.setdefault("bultos_estimados", None)
+        e.setdefault("bultos_reales", None)
+        result.append(e)
+
     return result
 
 
@@ -118,7 +136,9 @@ def guardar_override(lunes_iso: str, tienda: str, cambios: dict):
     overrides = _load_overrides()
     if lunes_iso not in overrides:
         overrides[lunes_iso] = {}
-    overrides[lunes_iso][tienda] = cambios
+    existing = overrides[lunes_iso].get(tienda, {})
+    existing.update(cambios)
+    overrides[lunes_iso][tienda] = existing
     _save_overrides(overrides)
 
 
@@ -126,6 +146,28 @@ def eliminar_override(lunes_iso: str, tienda: str):
     overrides = _load_overrides()
     if lunes_iso in overrides and tienda in overrides[lunes_iso]:
         del overrides[lunes_iso][tienda]
-        if not overrides[lunes_iso]:
-            del overrides[lunes_iso]
+        if not overrides[lunes_iso] or list(overrides[lunes_iso].keys()) == ["__extras"]:
+            if not overrides[lunes_iso].get("__extras"):
+                del overrides[lunes_iso]
+        _save_overrides(overrides)
+
+
+def agregar_extra(lunes_iso: str, entrada: dict):
+    overrides = _load_overrides()
+    if lunes_iso not in overrides:
+        overrides[lunes_iso] = {}
+    if "__extras" not in overrides[lunes_iso]:
+        overrides[lunes_iso]["__extras"] = []
+    entrada["_id"] = str(uuid.uuid4())[:8]
+    overrides[lunes_iso]["__extras"].append(entrada)
+    _save_overrides(overrides)
+
+
+def eliminar_extra(lunes_iso: str, extra_id: str):
+    overrides = _load_overrides()
+    if lunes_iso in overrides and "__extras" in overrides[lunes_iso]:
+        overrides[lunes_iso]["__extras"] = [
+            e for e in overrides[lunes_iso]["__extras"]
+            if e.get("_id") != extra_id
+        ]
         _save_overrides(overrides)
