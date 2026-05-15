@@ -180,6 +180,7 @@
   .prog-card[draggable=true]:active { cursor: grabbing; }
   .prog-card.dragging { opacity: 0.35; box-shadow: none !important; }
   .prog-card.drag-over { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .prog-col.col-drag-over { background: rgba(229,99,43,0.06); border-radius: 10px; outline: 1.5px dashed var(--accent); }
   .prog-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 11px; margin-bottom: 48px; }
   .prog-col { display: flex; flex-direction: column; gap: 7px; }
   .prog-day-header { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); padding: 7px 0; text-align: center; border-bottom: 2px solid var(--border); margin-bottom: 2px; display: flex; flex-direction: column; gap: 2px; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -900,6 +901,7 @@ let progOrdenes    = {};   // {diaLabel_view: ['tienda1', ...]}
 let _progByDia     = {};   // {colIdx: [entries]} — visible fuera de renderSemana para DnD
 let _dragSrc       = null; // {col, tienda}
 const DIAS_PROG    = ['Lun','Mar','Mié','Jue','Vie'];
+const DIAS_FULL    = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
 
 const DIA_OFFSET = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5};
 
@@ -1006,6 +1008,27 @@ function onCardDragOver(ev) {
 function onCardDragLeave(ev) {
   ev.currentTarget.classList.remove('drag-over');
 }
+function _diaFieldName() {
+  if (progView === 'envio')   return 'dia_carga';
+  if (progView === 'entrega') return progCourier === '99min' ? 'dia_entrega_99min' : 'dia_entrega_shipper';
+  return 'dia_salida';
+}
+
+async function _crossColumnDrop(srcTienda, tgtCol) {
+  const nuevoDia = DIAS_FULL[tgtCol];
+  try {
+    await fetch(`${API_URL}/programacion/override`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        lunes: progLunesISO,
+        tienda: srcTienda,
+        cambios: { [_diaFieldName()]: nuevoDia }
+      })
+    });
+    cargarSemana(progLunesISO);
+  } catch(e) { console.error(e); }
+}
+
 function onCardDrop(ev) {
   ev.preventDefault(); ev.stopPropagation();
   const tgt = ev.currentTarget;
@@ -1013,8 +1036,15 @@ function onCardDrop(ev) {
   if (!_dragSrc) return;
   const tgtCol    = +tgt.dataset.col;
   const tgtTienda = tgt.dataset.tienda;
-  if (_dragSrc.tienda === tgtTienda || _dragSrc.col !== tgtCol) return;
-  // Reordenar en el array del estado
+  if (_dragSrc.tienda === tgtTienda) return;
+
+  if (_dragSrc.col !== tgtCol) {
+    // Arrastrar a otra columna: cambiar el día, mantener hora
+    const src = _dragSrc; _dragSrc = null;
+    _crossColumnDrop(src.tienda, tgtCol);
+    return;
+  }
+  // Misma columna: reordenar
   const col = _dragSrc.col;
   const tiendas = (_progByDia[col] || []).map(e => e.tienda);
   const from = tiendas.indexOf(_dragSrc.tienda);
@@ -1031,9 +1061,28 @@ function onCardDrop(ev) {
     body: JSON.stringify({ lunes: progLunesISO, dia_vista: key, tiendas })
   });
 }
+
+function onColDragOver(ev, colIdx) {
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  if (_dragSrc && _dragSrc.col !== colIdx)
+    ev.currentTarget.classList.add('col-drag-over');
+}
+function onColDragLeave(ev) {
+  ev.currentTarget.classList.remove('col-drag-over');
+}
+function onColDrop(ev, colIdx) {
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('col-drag-over');
+  if (!_dragSrc || _dragSrc.col === colIdx) return;
+  const src = _dragSrc; _dragSrc = null;
+  _crossColumnDrop(src.tienda, colIdx);
+}
+
 function onCardDragEnd(ev) {
   _dragSrc = null;
   document.querySelectorAll('.prog-card').forEach(c => c.classList.remove('dragging','drag-over'));
+  document.querySelectorAll('.prog-col').forEach(c => c.classList.remove('col-drag-over'));
 }
 
 function _cardHtml(e, colIdx) {
@@ -1097,7 +1146,7 @@ function renderSemana(schedule, lunesISO) {
   document.getElementById('progGrid').innerHTML = Array.from({length:5},(_,i) => {
     const d=new Date(lunes); d.setDate(lunes.getDate()+i);
     const diso=d.toISOString().split('T')[0], isToday=diso===today;
-    return `<div class="prog-col">
+    return `<div class="prog-col" ondragover="onColDragOver(event,${i})" ondragleave="onColDragLeave(event)" ondrop="onColDrop(event,${i})">
       <div class="prog-day-header${isToday?' today':''}">
         <span>${DIAS_PROG[i]}</span>
         <span class="prog-day-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
