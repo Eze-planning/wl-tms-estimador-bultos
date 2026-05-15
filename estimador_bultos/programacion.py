@@ -68,6 +68,7 @@ def cargar_schedule_base() -> list:
     c_sh_hr    = _find_col(cols, ["hora de entrega shipper", "hora entrega ship"])
     c_sh_lt    = _find_col(cols, ["lt shipper"])
     c_courier  = _find_col(cols, ["courier preferencia", "courier pref", "preferencia"])
+    c_canal    = _find_col(cols, ["canal"])
 
     schedule = []
     for _, row in df.iterrows():
@@ -86,6 +87,7 @@ def cargar_schedule_base() -> list:
             "hora_entrega_shipper": _fmt_hora(row.get(c_sh_hr)),
             "lt_shipper":           int(row.get(c_sh_lt) or 0),
             "courier_preferencia":  str(row.get(c_courier) or "").strip() if c_courier else "",
+            "canal":               str(row.get(c_canal) or "").strip() if c_canal else "",
         })
     return schedule
 

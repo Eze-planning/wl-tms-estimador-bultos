@@ -172,6 +172,10 @@
   .prog-courier-group { display: flex; gap: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
   .prog-courier-btn { padding: 6px 14px; border: none; background: transparent; color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
   .prog-courier-btn.active { background: var(--text); color: #fff; font-weight: 500; }
+  .prog-canal-group { display: flex; gap: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+  .prog-canal-btn { padding: 6px 14px; border: none; background: transparent; color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 5px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .prog-canal-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
+  .canal-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0px 5px; font-family: 'Roboto Mono', monospace; font-size: 9px; color: var(--text2); margin-bottom: 2px; }
   .prog-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 11px; margin-bottom: 48px; }
   .prog-col { display: flex; flex-direction: column; gap: 7px; }
   .prog-day-header { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); padding: 7px 0; text-align: center; border-bottom: 2px solid var(--border); margin-bottom: 2px; display: flex; flex-direction: column; gap: 2px; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -419,6 +423,7 @@
           <button class="prog-courier-btn active" id="pc-shipper" onclick="setProgCourier('shipper')">Shipper</button>
           <button class="prog-courier-btn" id="pc-99min" onclick="setProgCourier('99min')">99 Min</button>
         </div>
+        <div class="prog-canal-group" id="progCanalGroup" style="display:none"></div>
         <span id="progLoadingIndicator" style="display:none;font-family:'Roboto Mono',monospace;font-size:11px;color:var(--text2)">Cargando...</span>
       </div>
     </div>
@@ -886,6 +891,7 @@ let _editCtx       = null;
 let _addDiaCtx     = null;
 let progView       = 'salida';
 let progCourier    = 'shipper';
+let progCanal      = '';
 
 const DIA_OFFSET = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5};
 
@@ -912,6 +918,25 @@ function setProgCourier(c) {
   renderSemana(progSemanaData, progLunesISO);
 }
 
+function setProgCanal(c) {
+  progCanal = c;
+  document.querySelectorAll('.prog-canal-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.canal === c)
+  );
+  renderSemana(progSemanaData, progLunesISO);
+}
+
+function _poblarCanalFilter(schedule) {
+  const canales = [...new Set(schedule.map(e => e.canal).filter(Boolean))].sort();
+  const grp = document.getElementById('progCanalGroup');
+  if (!canales.length) { grp.style.display = 'none'; return; }
+  grp.style.display = 'flex';
+  grp.innerHTML = `<button class="prog-canal-btn active" data-canal="" onclick="setProgCanal('')">Todos</button>`
+    + canales.map(c => `<button class="prog-canal-btn" data-canal="${c}" onclick="setProgCanal('${c}')">${c}</button>`).join('');
+  // reset selection when data reloads
+  progCanal = '';
+}
+
 async function cargarSemana(lunesISO) {
   progLunesISO = lunesISO;
   const ind = document.getElementById('progLoadingIndicator'), err = document.getElementById('progError');
@@ -920,6 +945,7 @@ async function cargarSemana(lunesISO) {
     const res = await fetch(`${API_URL}/programacion/semana?lunes=${lunesISO}`);
     if (!res.ok) { const e=await res.json(); throw new Error(e.detail||'Error'); }
     progSemanaData = (await res.json()).schedule||[];
+    _poblarCanalFilter(progSemanaData);
     renderSemana(progSemanaData, lunesISO);
   } catch(e) { err.textContent='❌ '+e.message; err.classList.add('show'); }
   finally { ind.style.display='none'; }
@@ -956,6 +982,7 @@ function _cardHtml(e) {
         <button class="prog-action-btn" title="Ocultar esta semana" onclick="event.stopPropagation();ocultarTienda(${e._idx})">×</button>
       </span>
     </div>
+    ${e.canal ? `<div><span class="canal-badge">${e.canal}</span></div>` : ''}
     <div class="prog-card-hora">${hora||'—'}</div>
     <div class="prog-card-info">
       ${badgeCls ? `<span><span class="courier-badge ${badgeCls}" style="font-size:9px">${cPref}</span></span>` : ''}
@@ -972,6 +999,7 @@ function renderSemana(schedule, lunesISO) {
   const today=new Date().toISOString().split('T')[0];
   const byDia={0:[],1:[],2:[],3:[],4:[]};
   schedule.forEach((entry,idx) => {
+    if (progCanal && entry.canal !== progCanal) return;
     const off = DIA_OFFSET[_dNorm(_diaField(entry)||'')];
     if (off !== undefined && off < 5) byDia[off].push({...entry, _idx: idx});
   });
@@ -981,7 +1009,8 @@ function renderSemana(schedule, lunesISO) {
   document.getElementById('progTitulo').textContent = tituloSemana;
   document.getElementById('printHeaderSemana').textContent = tituloSemana;
   const vistaLabel = {'envio':'Vista: Envío repo','salida':'Vista: Salida bodega','entrega':'Vista: Entrega'}[progView] || '';
-  document.getElementById('printHeaderVista').textContent = vistaLabel;
+  const canalLabel = progCanal ? ` · Canal: ${progCanal}` : '';
+  document.getElementById('printHeaderVista').textContent = vistaLabel + canalLabel;
 
   // Grid para pantalla
   document.getElementById('progGrid').innerHTML = Array.from({length:5},(_,i) => {
