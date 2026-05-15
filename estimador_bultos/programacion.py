@@ -179,6 +179,20 @@ def agregar_extra(lunes_iso: str, entrada: dict):
     _save_overrides(overrides)
 
 
+def obtener_ordenes(lunes_iso: str) -> dict:
+    return _load_overrides().get(lunes_iso, {}).get('__ordenes', {})
+
+
+def guardar_orden(lunes_iso: str, dia_vista: str, tiendas: list):
+    overrides = _load_overrides()
+    if lunes_iso not in overrides:
+        overrides[lunes_iso] = {}
+    if '__ordenes' not in overrides[lunes_iso]:
+        overrides[lunes_iso]['__ordenes'] = {}
+    overrides[lunes_iso]['__ordenes'][dia_vista] = tiendas
+    _save_overrides(overrides)
+
+
 def eliminar_extra(lunes_iso: str, extra_id: str):
     overrides = _load_overrides()
     if lunes_iso in overrides and "__extras" in overrides[lunes_iso]:

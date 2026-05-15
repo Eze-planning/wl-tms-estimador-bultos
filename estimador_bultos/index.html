@@ -176,6 +176,10 @@
   .prog-canal-btn { padding: 6px 14px; border: none; background: transparent; color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 5px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .prog-canal-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
   .canal-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0px 5px; font-family: 'Roboto Mono', monospace; font-size: 9px; color: var(--text2); margin-bottom: 2px; }
+  .prog-card[draggable=true] { cursor: grab; }
+  .prog-card[draggable=true]:active { cursor: grabbing; }
+  .prog-card.dragging { opacity: 0.35; box-shadow: none !important; }
+  .prog-card.drag-over { outline: 2px solid var(--accent); outline-offset: -2px; }
   .prog-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 11px; margin-bottom: 48px; }
   .prog-col { display: flex; flex-direction: column; gap: 7px; }
   .prog-day-header { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); padding: 7px 0; text-align: center; border-bottom: 2px solid var(--border); margin-bottom: 2px; display: flex; flex-direction: column; gap: 2px; text-transform: uppercase; letter-spacing: 0.8px; }
@@ -892,6 +896,10 @@ let _addDiaCtx     = null;
 let progView       = 'salida';
 let progCourier    = 'shipper';
 let progCanal      = '';
+let progOrdenes    = {};   // {diaLabel_view: ['tienda1', ...]}
+let _progByDia     = {};   // {colIdx: [entries]} — visible fuera de renderSemana para DnD
+let _dragSrc       = null; // {col, tienda}
+const DIAS_PROG    = ['Lun','Mar','Mié','Jue','Vie'];
 
 const DIA_OFFSET = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5};
 
@@ -944,7 +952,9 @@ async function cargarSemana(lunesISO) {
   try {
     const res = await fetch(`${API_URL}/programacion/semana?lunes=${lunesISO}`);
     if (!res.ok) { const e=await res.json(); throw new Error(e.detail||'Error'); }
-    progSemanaData = (await res.json()).schedule||[];
+    const payload = await res.json();
+    progSemanaData = payload.schedule || [];
+    progOrdenes    = payload.ordenes  || {};
     _poblarCanalFilter(progSemanaData);
     renderSemana(progSemanaData, lunesISO);
   } catch(e) { err.textContent='❌ '+e.message; err.classList.add('show'); }
@@ -962,7 +972,71 @@ function irSemanaHoy() {
   cargarSemana(_progBase.toISOString().split('T')[0]);
 }
 
-function _cardHtml(e) {
+function _parseHora(h) {
+  if (!h || h === '—') return 9999;
+  const p = h.split(':').map(Number);
+  return p[0] * 60 + (p[1] || 0);
+}
+function _horaOrden(entry) {
+  if (progView === 'entrega') return progCourier === '99min' ? entry.hora_entrega_99min : entry.hora_entrega_shipper;
+  return entry.hora_salida;
+}
+function _applyOrden(entries, colIdx) {
+  const key = DIAS_PROG[colIdx] + '_' + progView;
+  const orden = progOrdenes[key];
+  const sorted = [...entries].sort((a, b) => _parseHora(_horaOrden(a)) - _parseHora(_horaOrden(b)));
+  if (!orden || !orden.length) return sorted;
+  const inOrden  = orden.map(t => sorted.find(e => e.tienda === t)).filter(Boolean);
+  const restante = sorted.filter(e => !orden.includes(e.tienda));
+  return [...inOrden, ...restante];
+}
+
+// ── Drag & Drop ───────────────────────────────────────────────────────────────
+function onCardDragStart(ev) {
+  const c = ev.currentTarget;
+  _dragSrc = { col: +c.dataset.col, tienda: c.dataset.tienda };
+  ev.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => c.classList.add('dragging'), 0);
+}
+function onCardDragOver(ev) {
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  ev.currentTarget.classList.add('drag-over');
+}
+function onCardDragLeave(ev) {
+  ev.currentTarget.classList.remove('drag-over');
+}
+function onCardDrop(ev) {
+  ev.preventDefault(); ev.stopPropagation();
+  const tgt = ev.currentTarget;
+  tgt.classList.remove('drag-over');
+  if (!_dragSrc) return;
+  const tgtCol    = +tgt.dataset.col;
+  const tgtTienda = tgt.dataset.tienda;
+  if (_dragSrc.tienda === tgtTienda || _dragSrc.col !== tgtCol) return;
+  // Reordenar en el array del estado
+  const col = _dragSrc.col;
+  const tiendas = (_progByDia[col] || []).map(e => e.tienda);
+  const from = tiendas.indexOf(_dragSrc.tienda);
+  const to   = tiendas.indexOf(tgtTienda);
+  if (from === -1 || to === -1) return;
+  tiendas.splice(from, 1);
+  tiendas.splice(to, 0, _dragSrc.tienda);
+  const key = DIAS_PROG[col] + '_' + progView;
+  progOrdenes[key] = tiendas;
+  _dragSrc = null;
+  renderSemana(progSemanaData, progLunesISO);
+  fetch(`${API_URL}/programacion/orden`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ lunes: progLunesISO, dia_vista: key, tiendas })
+  });
+}
+function onCardDragEnd(ev) {
+  _dragSrc = null;
+  document.querySelectorAll('.prog-card').forEach(c => c.classList.remove('dragging','drag-over'));
+}
+
+function _cardHtml(e, colIdx) {
   const cPref = e.courier_preferencia || '';
   const badgeCls = cPref.toLowerCase().includes('ship') ? 'shipper' : cPref.includes('99') ? 'min99' : '';
   const hora = progView==='entrega'
@@ -974,7 +1048,11 @@ function _cardHtml(e) {
         ${e.bultos_reales    ? `<span class="prog-bulto-tag real">Real ${e.bultos_reales}</span>` : ''}
        </div>` : '';
   const cls = ['prog-card', e.override?'overridden':'', e.extra?'extra-entry':''].filter(Boolean).join(' ');
-  return `<div class="${cls}" onclick="openEditModal(${e._idx})">
+  const safeT = (e.tienda||'').replace(/"/g,'&quot;');
+  return `<div class="${cls}" draggable="true" data-col="${colIdx}" data-tienda="${safeT}"
+    ondragstart="onCardDragStart(event)" ondragover="onCardDragOver(event)"
+    ondragleave="onCardDragLeave(event)" ondrop="onCardDrop(event)"
+    ondragend="onCardDragEnd(event)" onclick="openEditModal(${e._idx})">
     <div class="prog-card-header">
       <span class="prog-card-name">${e.tienda}</span>
       <span class="prog-card-actions">
@@ -995,14 +1073,17 @@ function _cardHtml(e) {
 
 function renderSemana(schedule, lunesISO) {
   if (!lunesISO) return;
-  const lunes=new Date(lunesISO+'T00:00:00'), DIAS=['Lun','Mar','Mié','Jue','Vie'];
+  const lunes=new Date(lunesISO+'T00:00:00');
   const today=new Date().toISOString().split('T')[0];
-  const byDia={0:[],1:[],2:[],3:[],4:[]};
+  _progByDia = {0:[],1:[],2:[],3:[],4:[]};
   schedule.forEach((entry,idx) => {
     if (progCanal && entry.canal !== progCanal) return;
     const off = DIA_OFFSET[_dNorm(_diaField(entry)||'')];
-    if (off !== undefined && off < 5) byDia[off].push({...entry, _idx: idx});
+    if (off !== undefined && off < 5) _progByDia[off].push({...entry, _idx: idx});
   });
+  // Aplicar orden (custom o time-sort)
+  for (let i=0; i<5; i++) _progByDia[i] = _applyOrden(_progByDia[i], i);
+  const byDia = _progByDia;
   const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
   const viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
   const tituloSemana = `${fmtD(lunes)} — ${fmtD(viernes)}`;
@@ -1018,11 +1099,11 @@ function renderSemana(schedule, lunesISO) {
     const diso=d.toISOString().split('T')[0], isToday=diso===today;
     return `<div class="prog-col">
       <div class="prog-day-header${isToday?' today':''}">
-        <span>${DIAS[i]}</span>
+        <span>${DIAS_PROG[i]}</span>
         <span class="prog-day-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
       </div>
-      ${(byDia[i]||[]).map(e => _cardHtml(e)).join('')}
-      <div class="prog-add-btn" onclick="abrirAddModal('${DIAS[i]}', ${i})">+ Agregar</div>
+      ${(byDia[i]||[]).map(e => _cardHtml(e, i)).join('')}
+      <div class="prog-add-btn" onclick="abrirAddModal('${DIAS_PROG[i]}', ${i})">+ Agregar</div>
     </div>`;
   }).join('');
 
@@ -1031,7 +1112,7 @@ function renderSemana(schedule, lunesISO) {
     const d=new Date(lunes); d.setDate(lunes.getDate()+i);
     const isToday=d.toISOString().split('T')[0]===today;
     return `<th class="${isToday?'today':''}">
-      <span class="th-day">${DIAS[i]}</span>
+      <span class="th-day">${DIAS_PROG[i]}</span>
       <span class="th-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
     </th>`;
   }).join('')}</tr>`;
@@ -1040,7 +1121,7 @@ function renderSemana(schedule, lunesISO) {
   document.getElementById('progTableBody').innerHTML = Array.from({length:maxRows},(_,row) =>
     `<tr>${Array.from({length:5},(_,col) => {
       const e=(byDia[col]||[])[row];
-      return `<td>${e ? _cardHtml(e) : ''}</td>`;
+      return `<td>${e ? _cardHtml(e, col) : ''}</td>`;
     }).join('')}</tr>`
   ).join('');
 }
