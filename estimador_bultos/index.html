@@ -211,6 +211,18 @@
   .modal-toggle input { accent-color: var(--danger); cursor: pointer; }
   .modal-toggle-label { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--danger); }
   @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } .prog-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background: #fff !important; }
+    header, .tabs-nav, #tab-estimador, #tab-despachos, .modal-overlay { display: none !important; }
+    #tab-prog { display: block !important; }
+    .no-print, .prog-toolbar, .prog-action-btn, .prog-add-btn { display: none !important; }
+    h1 { font-size: 22px !important; }
+    .prog-grid { grid-template-columns: repeat(5, 1fr) !important; gap: 8px !important; }
+    .prog-col { break-inside: avoid; }
+    .prog-card { break-inside: avoid; page-break-inside: avoid; }
+    .container { padding: 0 16px !important; }
+  }
 </style>
 </head>
 <body>
@@ -283,9 +295,8 @@
       <div class="save-prog-panel" id="savePanelProg">
         <span class="save-prog-label">Guardar en Programación:</span>
         <span style="font-family:'Roboto Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)" id="savePanelBultos"></span>
-        <input list="savePanelTiendaList" class="form-input" id="savePanelTienda" placeholder="Tienda…" style="width:200px">
-        <datalist id="savePanelTiendaList"></datalist>
-        <input type="date" class="form-input" id="savePanelSemana" style="width:150px">
+        <select class="form-input" id="savePanelTienda" style="width:220px"></select>
+        <select class="form-input" id="savePanelSemana" style="width:170px"></select>
         <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="guardarEnProg()">Guardar</button>
         <button class="btn-secondary" onclick="document.getElementById('savePanelProg').classList.remove('show')">✕</button>
       </div>
@@ -354,6 +365,7 @@
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-secondary" onclick="exportarProg()">↓ Excel</button>
+        <button class="btn-secondary no-print" onclick="imprimirProg()">⎙ PDF / Imagen</button>
       </div>
     </div>
 
@@ -577,11 +589,8 @@ function mostrarResultados(data) {
 
   // Panel guardar en programación
   if (orden.tipo === "tienda_propia" && orden.punto_de_venta) {
-    const siguienteLunes = _getLunes(new Date(Date.now() + 7*24*3600*1000));
     document.getElementById("savePanelBultos").textContent = Math.ceil(orden.total_bultos) + " bultos";
-    document.getElementById("savePanelSemana").value = siguienteLunes.toISOString().split('T')[0];
     document.getElementById("savePanelProg").classList.add("show");
-    // Resolver tienda y poblar datalist
     _cargarSavePanelTienda(orden.punto_de_venta);
   }
 
@@ -636,28 +645,59 @@ function renderCostos(c99, cShipper) {
   wrap.classList.add("show");
 }
 
-async function _cargarSavePanelTienda(pdv) {
-  try {
-    // Resolver nombre fuzzy en el backend
-    const res = await fetch(`${API_URL}/programacion/resolver_tienda?nombre=${encodeURIComponent(pdv)}`);
-    const json = await res.json();
-    document.getElementById("savePanelTienda").value = json.tienda || pdv;
-  } catch {
-    document.getElementById("savePanelTienda").value = pdv;
+function _normTienda(s) {
+  return s.toLowerCase().replace(/repo\s*-\s*/i,'').replace(/gt\s*-\s*/i,'').trim();
+}
+function _bestTiendaMatch(pdv, tiendas) {
+  const key = _normTienda(pdv);
+  // Exact after normalization
+  const exact = tiendas.find(t => _normTienda(t) === key);
+  if (exact) return exact;
+  // Contains both ways
+  const contains = tiendas.find(t => { const tn=_normTienda(t); return tn.includes(key)||key.includes(tn); });
+  if (contains) return contains;
+  // Best word overlap (words > 3 chars)
+  const words = key.split(/\s+/).filter(w=>w.length>3);
+  let best=null, bestScore=0;
+  for (const t of tiendas) {
+    const tn=_normTienda(t);
+    const score = words.filter(w=>tn.includes(w)).length;
+    if (score>bestScore) { bestScore=score; best=t; }
   }
-  // Poblar datalist con todas las tiendas del schedule
+  return bestScore>0 ? best : tiendas[0] || null;
+}
+function _proximosLunes(n=8) {
+  const today=new Date(); today.setHours(0,0,0,0);
+  const dow=today.getDay(), daysToMon=dow===1?0:(8-dow)%7||7;
+  const first=new Date(today); first.setDate(today.getDate()+daysToMon);
+  return Array.from({length:n},(_,i)=>{ const d=new Date(first); d.setDate(first.getDate()+i*7); return d; });
+}
+
+async function _cargarSavePanelTienda(pdv) {
+  const selT = document.getElementById("savePanelTienda");
+  const selS = document.getElementById("savePanelSemana");
+  // Poblar semanas (próximas 8)
+  const lunes = _proximosLunes(8);
+  selS.innerHTML = lunes.map(d => {
+    const iso = d.toISOString().split('T')[0];
+    const label = d.toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});
+    return `<option value="${iso}">Semana ${label}</option>`;
+  }).join('');
+  // Poblar tiendas desde el schedule
   try {
-    const res2 = await fetch(`${API_URL}/programacion`);
-    const json2 = await res2.json();
-    const dl = document.getElementById("savePanelTiendaList");
-    dl.innerHTML = (json2.schedule || [])
-      .map(e => `<option value="${e.tienda}">`)
-      .join("");
-  } catch {}
+    const res = await fetch(`${API_URL}/programacion`);
+    const json = await res.json();
+    const tiendas = (json.schedule||[]).map(e=>e.tienda).filter((v,i,a)=>a.indexOf(v)===i).sort();
+    selT.innerHTML = tiendas.map(t=>`<option value="${t}">${t}</option>`).join('');
+    const best = _bestTiendaMatch(pdv, tiendas);
+    if (best) selT.value = best;
+  } catch {
+    selT.innerHTML = `<option value="${pdv}">${pdv}</option>`;
+  }
 }
 
 async function guardarEnProg() {
-  const tienda = document.getElementById("savePanelTienda").value.trim();
+  const tienda = document.getElementById("savePanelTienda").value;
   const bultos = parseInt(document.getElementById("savePanelBultos").textContent);
   const lunes  = document.getElementById("savePanelSemana").value;
   if (!lunes || !tienda) return;
@@ -670,6 +710,10 @@ async function guardarEnProg() {
     document.getElementById("savePanelProg").classList.remove("show");
     alert(`Guardado: ${bultos} bultos para ${tienda} (semana ${lunes})`);
   } catch(e) { alert("Error: " + e.message); }
+}
+
+function imprimirProg() {
+  window.print();
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
