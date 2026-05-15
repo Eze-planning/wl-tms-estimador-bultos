@@ -17,6 +17,9 @@ from modelo import estimar_bultos
 from tarifario_99min import calcular_costo_99min
 from despachos import obtener_despachos
 from tarifario_shipper import calcular_costo_shipper
+from programacion import (
+    obtener_semana, guardar_override, eliminar_override, cargar_schedule_base
+)
 
 app = FastAPI(title="Estimador de Bultos Wild Lama", version="2.0.0")
 
@@ -108,6 +111,43 @@ async def despachos(
     try:
         data = obtener_despachos(desde, hasta)
         return JSONResponse(content={"despachos": data, "desde": desde, "hasta": hasta})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/programacion")
+async def get_programacion():
+    try:
+        return JSONResponse(content={"schedule": cargar_schedule_base()})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/programacion/semana")
+async def get_programacion_semana(lunes: str = Query(...)):
+    try:
+        return JSONResponse(content={"schedule": obtener_semana(lunes), "lunes": lunes})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/programacion/override")
+async def post_programacion_override(body: dict):
+    try:
+        guardar_override(body["lunes"], body["tienda"], body["cambios"])
+        return {"ok": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/programacion/override")
+async def delete_programacion_override(
+    lunes: str = Query(...),
+    tienda: str = Query(...)
+):
+    try:
+        eliminar_override(lunes, tienda)
+        return {"ok": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
