@@ -11,11 +11,12 @@ import pandas as pd
 from pathlib import Path
 from rapidfuzz import process, fuzz
 
-SCHEDULE_PATH = os.getenv(
+SCHEDULE_PATH  = os.getenv(
     "SCHEDULE_PATH",
     r"G:\Unidades compartidas\2.- Wild Lama\Logistics & Planning\Warehouse Manager & Logistics (Ezequiel)\Warehouse\17. Claude\TMS\Programación\BBDD Programación.xlsx"
 )
-OVERRIDES_PATH = Path(__file__).parent / "overrides_programacion.json"
+OVERRIDES_PATH     = Path(__file__).parent / "overrides_programacion.json"
+SCHEDULE_BASE_JSON = Path(__file__).parent / "schedule_base.json"
 
 
 def _norm(s: str) -> str:
@@ -52,7 +53,7 @@ def _fmt_hora(v) -> str:
     return s
 
 
-def cargar_schedule_base() -> list:
+def _parse_excel_schedule() -> list:
     df = pd.read_excel(SCHEDULE_PATH, sheet_name=0)
     df = df.where(pd.notnull(df), None)
     cols = list(df.columns)
@@ -90,6 +91,24 @@ def cargar_schedule_base() -> list:
             "canal":               str(row.get(c_canal) or "").strip() if c_canal else "",
         })
     return schedule
+
+
+def cargar_schedule_base() -> list:
+    # Intentar Excel primero; si no está disponible, usar JSON cacheado
+    try:
+        schedule = _parse_excel_schedule()
+        # Guardar copia JSON para que Cloud Run (sin Excel) pueda usarla
+        with open(SCHEDULE_BASE_JSON, "w", encoding="utf-8") as f:
+            json.dump(schedule, f, ensure_ascii=False, indent=2)
+        return schedule
+    except Exception:
+        pass
+
+    if SCHEDULE_BASE_JSON.exists():
+        with open(SCHEDULE_BASE_JSON, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    return []
 
 
 def _load_overrides() -> dict:

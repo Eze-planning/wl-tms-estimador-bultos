@@ -2,6 +2,7 @@
 *.json
 !estimador_bultos/overrides_programacion.json
 !estimador_bultos/users.json
+!estimador_bultos/schedule_base.json
 downloads/
 __pycache__/
 *.log
