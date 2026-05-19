@@ -1,0 +1,36 @@
+{
+  "users": [
+    {
+      "id": "54dfd32a",
+      "username": "ezequiel.ortiz@wildlama.com",
+      "password": "$2b$12$.sh8dEDNkrEFN3FyzO88weKe5pFUdTSUVGgMYY9mtwhON3r1HzQkW",
+      "role": "admin",
+      "nombre": "Ezequiel Ortiz",
+      "activo": true
+    },
+    {
+      "id": "443c9440",
+      "username": "opsb2beds@edarkstore.cl",
+      "password": "$2b$12$dPbSjv59Sflns/o2MJ.YiebyJvL6t3SwukEOcExYDvDymWFrtFU1C",
+      "role": "bodega",
+      "nombre": "eDS Despachos",
+      "activo": true
+    },
+    {
+      "id": "2181dbac",
+      "username": "planning@wildlama.com",
+      "password": "$2b$12$jQDbSGnx13PKE0qKObYbzeFmnK8aCTSEmZSFS5RDvHJ2EMzMH9tj.",
+      "role": "logistica",
+      "nombre": "Planning & Logistic",
+      "activo": true
+    },
+    {
+      "id": "5b005250",
+      "username": "Oscar Astudillo",
+      "password": "$2b$12$i4S7v2MXRaEEYTNb2SJmDOSZO1Zs0BVqsuUrkvhvsQ5lj77HjRDp2",
+      "role": "transportes",
+      "nombre": "Shipper Logistic",
+      "activo": true
+    }
+  ]
+}

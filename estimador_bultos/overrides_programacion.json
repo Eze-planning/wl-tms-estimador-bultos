@@ -1,0 +1,443 @@
+{
+  "2026-05-18": {
+    "Tienda Mallplaza Antofagasta": {
+      "bultos_estimados": 39
+    },
+    "Tienda Antofagasta": {
+      "bultos_estimados": 50,
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "99 Minutos",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Miércoles",
+      "hora_entrega_shipper": "20:00",
+      "tipo_camion": "XL",
+      "ruta_override": null,
+      "tienda": "Tienda Antofagasta",
+      "costo_manual": 2200000
+    },
+    "__ordenes": {
+      "Mié_salida": [
+        "Tienda Chicureo",
+        "Tienda Laguna",
+        "Tienda La Serena",
+        "Ecommerce 2",
+        "Tienda Marina",
+        "Falabella"
+      ],
+      "Lun_salida": [
+        "Ripley",
+        "Tienda Antofagasta",
+        "Tienda Osorno",
+        "Tienda Puerto Montt",
+        "Tienda Puerto Varas",
+        "Tienda Pucon",
+        "Ecommerce 2",
+        "Tienda Vitacura",
+        "Tienda Parque Arauco"
+      ],
+      "Mar_salida": [
+        "Paris",
+        "Tienda Mall Curicó",
+        "TIenda Talca",
+        "Tienda Chillan",
+        "Tienda Trebol",
+        "Tienda Los Ángeles",
+        "Tienda Costanera",
+        "Tienda Pichilemu",
+        "Tienda San Fernando"
+      ]
+    },
+    "Tienda Temuco": {
+      "visible": false
+    },
+    "Tienda Osorno": {
+      "bultos_estimados": 50,
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "07:00"
+    },
+    "Ecommerce 1": {
+      "visible": false
+    },
+    "__extras": [
+      {
+        "tienda": "Ecommerce 2",
+        "dia_salida": "Miércoles",
+        "hora_salida": "14:00",
+        "dia_carga": "Lunes",
+        "dia_entrega_99min": "Miércoles",
+        "hora_entrega_99min": "09:00",
+        "dia_entrega_shipper": "Miércoles",
+        "hora_entrega_shipper": "15:00",
+        "courier_preferencia": "Shipper",
+        "lt_99min": 0,
+        "lt_shipper": 0,
+        "bultos_estimados": 253,
+        "_id": "7cd5df32",
+        "override": true,
+        "extra": true,
+        "bultos_reales": null,
+        "rutas_disponibles": [
+          "Santiago combinado",
+          "Pichilemu + San Fernando",
+          "Sur: Curicó-Talca-Chillán-Trébol-LA",
+          "Largo: Temuco-Pucón-PV-PM-Osorno",
+          "Largo + Coyhaique",
+          "Norte: Chicureo-Laguna-La Serena",
+          "Norte + Antofagasta"
+        ],
+        "costo_estimado": 130000,
+        "ruta_nombre": "Directo",
+        "n_sharing": null,
+        "tipo_camion": "XL",
+        "ruta_override": "directo",
+        "costo_es_manual": false
+      }
+    ],
+    "Tienda Pucon": {
+      "bultos_estimados": 38,
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": 38,
+      "dia_entrega_99min": "Miércoles",
+      "courier_preferencia": "Shipper",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "17:00",
+      "tienda": "Tienda Pucon",
+      "tipo_camion": "XL",
+      "ruta_override": null
+    },
+    "Tienda Puerto Montt": {
+      "bultos_estimados": 30,
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "09:00"
+    },
+    "Tienda Puerto Varas": {
+      "bultos_estimados": 46,
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "11:00"
+    },
+    "Tienda Nueva Costanera": {
+      "visible": false
+    },
+    "Tienda Parque Arauco": {
+      "dia_salida": "Lunes",
+      "dia_entrega_shipper": "Lunes",
+      "bultos_estimados": 100,
+      "tienda": "Tienda Parque Arauco",
+      "hora_salida": "14:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "directo",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "20:00"
+    },
+    "Ripley": {
+      "dia_salida": "Lunes",
+      "hora_salida": "09:00",
+      "bultos_estimados": null,
+      "bultos_reales": null,
+      "dia_entrega_shipper": "Lunes",
+      "courier_preferencia": "Shipper",
+      "dia_entrega_99min": "Viernes",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "11:00",
+      "tipo_camion": "XL",
+      "ruta_override": "directo",
+      "tienda": "Ripley",
+      "ordenes_compra": [
+        {
+          "oc": "2316357",
+          "hora_cita": "11:00",
+          "bultos_estimados": 105,
+          "bultos_reales": 105
+        }
+      ]
+    },
+    "Tienda Mall Curicó": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Martes",
+      "bultos_estimados": 63
+    },
+    "TIenda Talca": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Martes",
+      "bultos_estimados": 66
+    },
+    "Tienda Chillan": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Martes",
+      "bultos_estimados": 31
+    },
+    "Tienda Trebol": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Miércoles",
+      "bultos_estimados": 174
+    },
+    "Tienda Los Ángeles": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Miércoles",
+      "bultos_estimados": 67
+    },
+    "Tienda Pichilemu": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Miércoles",
+      "bultos_estimados": 63,
+      "tienda": "Tienda Pichilemu",
+      "hora_salida": "14:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "Pichilemu + San Fernando",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "10:00",
+      "costo_manual": null
+    },
+    "Tienda San Fernando": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Miércoles",
+      "bultos_estimados": 81,
+      "tienda": "Tienda San Fernando",
+      "hora_salida": "14:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "Pichilemu + San Fernando",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "07:00",
+      "costo_manual": null
+    },
+    "Tienda Chicureo": {
+      "dia_salida": "Miércoles",
+      "dia_entrega_shipper": "Miércoles",
+      "hora_salida": "11:00",
+      "bultos_estimados": 26,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "dia_entrega_99min": "Martes",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "12:00"
+    },
+    "Tienda La Serena": {
+      "dia_salida": "Miércoles",
+      "hora_salida": "11:00",
+      "bultos_estimados": 61,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "dia_entrega_shipper": "Miércoles",
+      "tipo_camion": "XL",
+      "ruta_override": "Norte: Chicureo-Laguna-La Serena",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "20:00"
+    },
+    "Tienda Laguna": {
+      "dia_salida": "Miércoles",
+      "dia_entrega_shipper": "Miércoles",
+      "hora_salida": "11:00",
+      "bultos_estimados": 29,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "14:00"
+    },
+    "Tienda Concon": {
+      "visible": false
+    },
+    "Tienda Costanera": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Martes",
+      "bultos_estimados": 144
+    },
+    "Paris": {
+      "dia_salida": "Martes",
+      "dia_entrega_shipper": "Martes",
+      "hora_salida": "08:00",
+      "bultos_estimados": null,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "directo",
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "09:45",
+      "tienda": "Paris",
+      "ordenes_compra": [
+        {
+          "oc": "458300",
+          "hora_cita": "09:45",
+          "bultos_estimados": 20,
+          "bultos_reales": null
+        },
+        {
+          "oc": "458289",
+          "hora_cita": "10:00",
+          "bultos_estimados": 2,
+          "bultos_reales": null
+        },
+        {
+          "oc": "458678",
+          "hora_cita": "10:15",
+          "bultos_estimados": 37,
+          "bultos_reales": null
+        }
+      ]
+    },
+    "Mayoristas": {
+      "dia_salida": "Viernes",
+      "dia_entrega_shipper": "Viernes",
+      "hora_salida": "10:00",
+      "bultos_estimados": null,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "directo",
+      "dia_entrega_99min": "Viernes",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "11:00",
+      "tienda": "Mayoristas"
+    },
+    "Falabella": {
+      "dia_salida": "Miércoles"
+    },
+    "Tienda Coyhaique": {
+      "visible": false
+    },
+    "Tienda Vitacura": {
+      "bultos_estimados": 61,
+      "dia_salida": "Lunes",
+      "hora_salida": "14:00",
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "17:00",
+      "tienda": "Tienda Vitacura",
+      "tipo_camion": "XL",
+      "ruta_override": "Santiago combinado",
+      "dia_entrega_99min": "Lunes",
+      "dia_entrega_shipper": "Lunes"
+    },
+    "Ecommerce 2": {
+      "dia_entrega_shipper": "Lunes",
+      "dia_salida": "Lunes",
+      "hora_salida": "14:00",
+      "bultos_estimados": 200,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "Santiago combinado",
+      "dia_entrega_99min": "Lunes",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "15:00",
+      "tienda": "Ecommerce 2"
+    },
+    "Tienda Vespucio": {
+      "dia_entrega_shipper": "Martes",
+      "dia_salida": "Martes",
+      "dia_entrega_99min": "Martes",
+      "visible": false
+    },
+    "Tienda Marina": {
+      "dia_salida": "Miércoles",
+      "hora_salida": "14:00",
+      "bultos_estimados": 68,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": "directo",
+      "dia_entrega_99min": "Jueves",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Miércoles",
+      "hora_entrega_shipper": "20:00"
+    }
+  },
+  "2026-05-11": {
+    "Tienda Chicureo": {
+      "dia_salida": "Miércoles"
+    },
+    "Tienda Temuco": {
+      "visible": false
+    },
+    "Tienda Nueva Costanera": {
+      "visible": false
+    },
+    "Tienda Osorno": {
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_estimados": 50,
+      "bultos_reales": null
+    },
+    "Tienda Antofagasta": {
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_estimados": 50,
+      "bultos_reales": null
+    },
+    "Tienda Pucon": {
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_estimados": 30,
+      "bultos_reales": null
+    },
+    "Tienda Puerto Montt": {
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_estimados": 30,
+      "bultos_reales": null
+    },
+    "Ripley": {
+      "dia_salida": "Lunes",
+      "hora_salida": "09:00",
+      "bultos_estimados": null,
+      "bultos_reales": null,
+      "courier_preferencia": "Shipper",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "08:00"
+    },
+    "__ordenes": {
+      "Lun_salida": [
+        "Ripley",
+        "Tienda Antofagasta",
+        "Tienda Osorno",
+        "Tienda Pucon",
+        "Tienda Puerto Montt",
+        "Tienda Puerto Varas",
+        "Ecommerce 1",
+        "Tienda Vitacura"
+      ]
+    }
+  },
+  "2026-05-25": {
+    "Tienda Chicureo": {
+      "dia_salida": "Miércoles",
+      "dia_entrega_99min": "Miércoles",
+      "dia_entrega_shipper": "Miércoles"
+    }
+  }
+}

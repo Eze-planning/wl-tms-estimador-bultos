@@ -1,5 +1,7 @@
 .env
 *.json
+!estimador_bultos/overrides_programacion.json
+!estimador_bultos/users.json
 downloads/
 __pycache__/
 *.log
