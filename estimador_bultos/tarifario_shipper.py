@@ -79,12 +79,12 @@ RUTAS = [
     },
     {
         "nombre":   "Norte: Chicureo-Laguna-La Serena",
-        "destinos": ["CHICUREO", "LAGUNA", "MARINA", "LA SERENA"],
+        "destinos": ["CHICUREO", "LAGUNA", "LA SERENA"],
         "L":   600_000, "XL":   750_000, "pioneta": False,
     },
     {
         "nombre":   "Norte + Antofagasta",
-        "destinos": ["CHICUREO", "LAGUNA", "MARINA", "LA SERENA", "ANTOFAGASTA"],
+        "destinos": ["CHICUREO", "LAGUNA", "LA SERENA", "ANTOFAGASTA"],
         "L": 1_200_000, "XL": 1_700_000, "pioneta": False,
     },
 ]
@@ -104,6 +104,7 @@ TIENDA_DESTINO = {
     "Tienda Marina":             "MARINA",
     "Tienda Concon":             "MARINA",
     "Ecommerce":                 "ECOMMERCE",
+    "Ecommerce 1":               "ECOMMERCE",
     "Tienda Parque Arauco":      "PARQUE ARAUCO",
     "Tienda Mall Parque Arauco": "PARQUE ARAUCO",
     "Tienda Costanera":          "COSTANERA",
@@ -121,8 +122,10 @@ TIENDA_DESTINO = {
     "Tienda Chillan":            "CHILLAN",
     "Tienda Trebol":             "CONCEPCION",
     "Tienda Mallplaza Trebol":   "CONCEPCION",
-    "Tienda Los Ángeles":        "LOS ANGELES",
-    "Tienda Los Angeles":        "LOS ANGELES",
+    "Tienda Los Ángeles":            "LOS ANGELES",
+    "Tienda Los Angeles":            "LOS ANGELES",
+    "Tienda Mallplaza Los Ángeles":  "LOS ANGELES",
+    "Tienda Mallplaza Los Angeles":  "LOS ANGELES",
     "Tienda Temuco":             "TEMUCO",
     "Tienda Pucon":              "PUCON",
     "Tienda Puerto Montt":       "PUERTO MONTT",
@@ -136,6 +139,11 @@ TIENDA_DESTINO = {
 }
 
 _TIENDAS_LISTA = list(TIENDA_DESTINO.keys())
+
+
+def resolver_destino(tienda: str) -> str | None:
+    """Mapeo público tienda → código de destino tarifario."""
+    return _resolver_destino(tienda)
 
 
 def _resolver_destino(tienda: str) -> str | None:

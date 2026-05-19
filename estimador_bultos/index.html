@@ -177,6 +177,53 @@
   .prog-canal-btn.active { background: var(--accent); color: #fff; font-weight: 500; }
   .canal-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0px 5px; font-family: 'Roboto Mono', monospace; font-size: 9px; color: var(--text2); margin-bottom: 2px; }
   .prog-card[draggable=true] { cursor: grab; }
+
+  /* ── Filtro de propiedades ── */
+  .prog-props-wrap { position: relative; }
+  .prog-props-btn  { padding: 6px 12px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .prog-props-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .prog-props-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(229,99,43,0.06); }
+  .prog-props-panel { position: absolute; top: calc(100% + 6px); right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 4px; z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.10); min-width: 195px; display: none; }
+  .prog-props-panel.open { display: block; }
+  .prog-props-item { display: flex; align-items: center; gap: 9px; padding: 6px 12px; font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text); cursor: pointer; border-radius: 6px; user-select: none; }
+  .prog-props-item:hover { background: var(--surface2); }
+  .prog-props-item input[type=checkbox] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }
+  /* ── Dropdowns filtro toolbar ── */
+  .prog-dd-wrap  { position: relative; }
+  .prog-dd-btn   { display: flex; align-items: center; gap: 5px; padding: 6px 12px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-family: 'Roboto Mono', monospace; font-size: 11px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .prog-dd-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .prog-dd-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(229,99,43,0.06); }
+  .prog-dd-arrow { font-size: 9px; }
+  .prog-dd-panel { position: absolute; top: calc(100% + 6px); left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 6px 4px; z-index: 200; box-shadow: 0 4px 20px rgba(0,0,0,0.10); min-width: 185px; display: none; }
+  .prog-dd-panel.open { display: block; }
+  .prog-dd-item  { display: block; width: 100%; text-align: left; padding: 7px 12px; border: none; background: transparent; font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text); cursor: pointer; border-radius: 6px; }
+  .prog-dd-item:hover { background: var(--surface2); }
+  .prog-dd-item.active { color: var(--accent); font-weight: 500; }
+
+  /* ── Clases de ocultamiento (pantalla e impresión) ── */
+  #progGrid.hide-hora    .prog-card-hora,
+  #progTable.hide-hora   .prog-card-hora    { display: none !important; }
+  #progGrid.hide-info    .prog-card-info,
+  #progTable.hide-info   .prog-card-info    { display: none !important; }
+  #progGrid.hide-bultos  .prog-card-bultos,
+  #progTable.hide-bultos .prog-card-bultos  { display: none !important; }
+  #progGrid.hide-costo   .prog-card-costo,
+  #progGrid.hide-costo   .prog-card-ruta,
+  #progTable.hide-costo  .prog-card-costo,
+  #progTable.hide-costo  .prog-card-ruta    { display: none !important; }
+  #progGrid.hide-courier .courier-badge,
+  #progTable.hide-courier .courier-badge    { display: none !important; }
+  #progGrid.hide-canal   .canal-badge,
+  #progTable.hide-canal  .canal-badge       { display: none !important; }
+  #progGrid.hide-oc      .prog-card-ocs,
+  #progTable.hide-oc     .prog-card-ocs     { display: none !important; }
+  /* ── OC en tarjetas ── */
+  .prog-card-ocs  { margin-top:5px; display:flex; flex-direction:column; gap:2px; }
+  .prog-card-oc   { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  .prog-oc-num    { font-family:'Roboto Mono',monospace; font-size:9px; color:var(--text2); min-width:0; flex-shrink:0; }
+  /* ── OC en modal ── */
+  .oc-row { display:flex; gap:6px; align-items:center; margin-bottom:5px; }
+  .oc-row .form-input { min-width:0; }
   .prog-card[draggable=true]:active { cursor: grabbing; }
   .prog-card.dragging { opacity: 0.35; box-shadow: none !important; }
   .prog-card.drag-over { outline: 2px solid var(--accent); outline-offset: -2px; }
@@ -190,19 +237,23 @@
   .prog-card:hover { border-color: rgba(229,99,43,0.4); background: rgba(229,99,43,0.02); }
   .prog-card.overridden { border-color: rgba(198,124,46,0.45); background: rgba(198,124,46,0.04); }
   .prog-card.extra-entry { border-style: dashed; border-color: rgba(229,99,43,0.35); }
+  .prog-card.readonly { cursor: default; }
+  .prog-card.readonly:hover { border-color: var(--border); background: var(--surface); }
   .prog-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
-  .prog-card-name { font-size: 12px; font-weight: 600; line-height: 1.3; flex: 1; }
+  .prog-card-name { font-size: 14px; font-weight: 700; line-height: 1.25; flex: 1; letter-spacing: -0.2px; }
   .prog-card-actions { display: flex; gap: 3px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
   .prog-card:hover .prog-card-actions { opacity: 1; }
   .prog-action-btn { width: 18px; height: 18px; border: 1px solid var(--border); background: var(--bg); border-radius: 4px; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: all 0.15s; }
   .prog-action-btn:hover { border-color: var(--danger); color: var(--danger); }
   .prog-override-dot { color: var(--warn); font-size: 9px; }
-  .prog-card-hora { font-family: 'Roboto Mono', monospace; font-size: 19px; font-weight: 700; color: var(--accent); margin: 5px 0 4px; line-height: 1; }
+  .prog-card-hora { font-family: 'Roboto Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); margin: 4px 0 4px; line-height: 1; }
   .prog-card-info { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--text2); display: flex; flex-direction: column; gap: 2px; }
   .prog-card-bultos { font-family: 'Roboto Mono', monospace; font-size: 11px; margin-top: 6px; display: flex; gap: 8px; align-items: center; }
   .prog-bulto-tag { padding: 2px 7px; border-radius: 10px; font-size: 10px; }
   .prog-bulto-tag.est { background: rgba(229,99,43,0.1); color: var(--accent); border: 1px solid rgba(229,99,43,0.2); }
   .prog-bulto-tag.real { background: rgba(45,125,58,0.1); color: var(--success); border: 1px solid rgba(45,125,58,0.2); }
+  .prog-card-costo { font-family: 'Roboto Mono', monospace; font-size: 10px; font-weight: 600; color: #2a7a4b; margin-top: 4px; }
+  .prog-card-ruta  { font-family: 'Roboto Mono', monospace; font-size: 9px; color: var(--text2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .prog-add-btn { border: 1px dashed var(--border); border-radius: 8px; padding: 8px; text-align: center; font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--text2); cursor: pointer; transition: all 0.15s; }
   .prog-add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(229,99,43,0.03); }
   .prog-empty { font-family: 'Roboto Mono', monospace; font-size: 10px; color: var(--border); text-align: center; padding: 12px 0; }
@@ -226,6 +277,33 @@
   .print-header-meta { font-family: 'Roboto Mono', monospace; font-size: 13px; color: var(--text2); text-align: right; }
   .print-header-week { font-size: 15px; font-weight: 600; color: var(--text); display: block; }
   @media (max-width: 768px) { .hero { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } .linea-row { grid-template-columns: 1fr 1fr; } .prog-grid { grid-template-columns: repeat(3, 1fr); } }
+  /* ── Login overlay ── */
+  .login-overlay { position:fixed; inset:0; background:var(--bg); z-index:1000; display:flex; align-items:center; justify-content:center; }
+  .login-overlay.hidden { display:none; }
+  .login-box { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:44px 36px; width:360px; max-width:92vw; box-shadow:0 12px 48px rgba(0,0,0,0.08); }
+  .login-logo-wrap { display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:28px; }
+  .login-field { margin-bottom:14px; display:flex; flex-direction:column; gap:5px; }
+  .login-error { background:rgba(204,51,0,0.07); border:1px solid rgba(204,51,0,0.25); border-radius:8px; padding:10px 14px; color:var(--danger); font-family:'Roboto Mono',monospace; font-size:12px; margin-bottom:12px; display:none; }
+  .login-error.show { display:block; }
+  /* ── Permisos por rol ── */
+  body.no-edit .edit-only { display:none !important; }
+  body.no-costos .costos-only { display:none !important; }
+  body.no-costos .prog-card-costo, body.no-costos .prog-card-ruta { display:none !important; }
+  /* ── Header user ── */
+  .header-user { display:flex; align-items:center; gap:10px; }
+  .header-nombre { font-family:'Roboto Mono',monospace; font-size:11px; color:var(--text2); }
+  .header-role-badge { font-family:'Roboto Mono',monospace; font-size:10px; padding:2px 8px; border-radius:12px; background:var(--surface2); border:1px solid var(--border); color:var(--text2); }
+  /* ── Admin tabla usuarios ── */
+  .admin-wrap { border:1px solid var(--border); border-radius:11px; overflow:hidden; margin-bottom:40px; }
+  .admin-table { width:100%; border-collapse:collapse; }
+  .admin-table th { font-family:'Roboto Mono',monospace; font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:0.8px; padding:9px 14px; text-align:left; border-bottom:1px solid var(--border); background:var(--surface2); white-space:nowrap; }
+  .admin-table td { padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); }
+  .admin-table tr:last-child td { border-bottom:none; }
+  .admin-table tr:hover td { background:rgba(0,0,0,0.02); }
+  .role-badge { font-family:'Roboto Mono',monospace; font-size:10px; padding:2px 8px; border-radius:12px; background:var(--surface2); border:1px solid var(--border); color:var(--text2); white-space:nowrap; }
+  .role-badge.rb-admin { border-color:rgba(229,99,43,0.4); color:var(--accent); background:rgba(229,99,43,0.07); }
+  .role-badge.rb-logistica { border-color:rgba(45,125,58,0.4); color:var(--success); background:rgba(45,125,58,0.07); }
+  .role-badge.rb-readonly { border-color:rgba(28,29,29,0.2); color:var(--text2); }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     @page { size: A4 landscape; margin: 8mm 10mm; }
@@ -258,11 +336,13 @@
     #progTable .th-date { font-size: 10px !important; display: block !important; margin-top: 2px !important; font-weight: 400 !important; }
     #progTable td { vertical-align: top !important; padding: 3px 2px !important; width: 20% !important; }
     #progTable .prog-card { padding: 6px 8px !important; border-radius: 6px !important; margin-bottom: 4px !important; break-inside: avoid !important; page-break-inside: avoid !important; }
-    #progTable .prog-card-name { font-size: 10px !important; line-height: 1.3 !important; }
-    #progTable .prog-card-hora { font-size: 14px !important; margin: 2px 0 3px !important; }
+    #progTable .prog-card-name { font-size: 11px !important; font-weight: 700 !important; line-height: 1.25 !important; }
+    #progTable .prog-card-hora { font-size: 15px !important; margin: 2px 0 3px !important; }
     #progTable .prog-card-info { font-size: 8px !important; gap: 1px !important; }
     #progTable .prog-card-bultos { font-size: 8px !important; margin-top: 3px !important; gap: 4px !important; }
     #progTable .prog-bulto-tag { font-size: 8px !important; padding: 1px 5px !important; }
+    #progTable .prog-card-costo { font-size: 8px !important; margin-top: 2px !important; }
+    #progTable .prog-card-ruta  { font-size: 7px !important; margin-top: 1px !important; }
     #progTable .courier-badge { font-size: 7px !important; }
   }
 </style>
@@ -277,13 +357,19 @@
         <div class="logo-sub">Warehouse Intelligence</div>
       </div>
     </div>
-    <div class="badge">TMS · v2.0</div>
+    <div id="headerUser" class="header-user" style="display:none">
+      <span class="header-nombre" id="headerNombre"></span>
+      <span class="header-role-badge" id="headerRole"></span>
+      <button class="btn-secondary" onclick="logout()" style="padding:5px 12px;font-size:11px">Salir</button>
+    </div>
+    <div class="badge" id="headerBadge">TMS · v2.0</div>
   </header>
 
   <nav class="tab-nav">
     <button class="tab-btn active" id="tab-btn-estimador" onclick="setTab('estimador')">Estimador</button>
     <button class="tab-btn" id="tab-btn-despachos" onclick="setTab('despachos')">Despachos</button>
     <button class="tab-btn" id="tab-btn-prog" onclick="setTab('prog')">Programación</button>
+    <button class="tab-btn" id="tab-btn-admin" onclick="setTab('admin')" style="display:none">Admin</button>
   </nav>
 
   <!-- ── TAB ESTIMADOR ── -->
@@ -323,7 +409,7 @@
 
     <div class="results" id="results">
       <div class="summary-grid" id="summaryGrid"></div>
-      <div id="costoWrap">
+      <div id="costoWrap" class="costos-only">
         <div class="costo-card" id="costoCard">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
             <div class="costo-title">Costos de envío</div>
@@ -334,13 +420,14 @@
         </div>
       </div>
       <!-- Guardar en Programación -->
-      <div class="save-prog-panel" id="savePanelProg">
+      <div class="save-prog-panel edit-only" id="savePanelProg">
         <span class="save-prog-label">Guardar en Programación:</span>
         <span style="font-family:'Roboto Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)" id="savePanelBultos"></span>
-        <select class="form-input" id="savePanelTienda" style="width:220px"></select>
-        <select class="form-input" id="savePanelSemana" style="width:170px"></select>
+        <select class="form-input" id="savePanelTienda" style="width:220px" onchange="actualizarSavePanelEntradas()"></select>
+        <select class="form-input" id="savePanelSemana" style="width:170px" onchange="actualizarSavePanelEntradas()"></select>
+        <select class="form-input" id="savePanelEntrada" style="width:210px;display:none" title="Seleccionar cuál entrada recibe los bultos"></select>
         <button class="btn-primary" style="padding:8px 16px;font-size:13px" onclick="guardarEnProg()">Guardar</button>
-        <button class="btn-secondary" onclick="document.getElementById('savePanelProg').classList.remove('show')">✕</button>
+        <button class="btn-secondary" onclick="document.getElementById('savePanelProg').classList.remove('show');_savePanelOC=null">✕</button>
       </div>
       <div class="divider"></div>
       <div id="tiendasSection" style="display:none">
@@ -419,16 +506,30 @@
       <button class="cal-nav-btn" onclick="irSemanaHoy()" style="border-color:var(--accent);color:var(--accent)">Hoy</button>
 
       <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div class="prog-view-group">
-          <button class="prog-view-btn" id="pv-envio" onclick="setProgView('envio')">Envío repo</button>
-          <button class="prog-view-btn active" id="pv-salida" onclick="setProgView('salida')">Salida</button>
-          <button class="prog-view-btn" id="pv-entrega" onclick="setProgView('entrega')">Entrega</button>
+        <div class="prog-dd-wrap" id="progVistaDd">
+          <button class="prog-dd-btn" id="progVistaBtn" onclick="toggleProgDd('progVistaDd')"><span id="progVistaLabel">Vista: Salida</span> <span class="prog-dd-arrow">▾</span></button>
+          <div class="prog-dd-panel" id="progVistaPanel">
+            <button class="prog-dd-item" data-v="envio" onclick="setProgView('envio')">Envío repo</button>
+            <button class="prog-dd-item active" data-v="salida" onclick="setProgView('salida')">Salida</button>
+            <button class="prog-dd-item" data-v="entrega" onclick="setProgView('entrega')">Entrega</button>
+          </div>
         </div>
-        <div class="prog-courier-group" id="progCourierGroup" style="display:none">
-          <button class="prog-courier-btn active" id="pc-shipper" onclick="setProgCourier('shipper')">Shipper</button>
-          <button class="prog-courier-btn" id="pc-99min" onclick="setProgCourier('99min')">99 Min</button>
+        <div class="prog-dd-wrap" id="progCanalDd" style="display:none">
+          <button class="prog-dd-btn" id="progCanalBtn" onclick="toggleProgDd('progCanalDd')"><span id="progCanalLabel">Canales</span> <span class="prog-dd-arrow">▾</span></button>
+          <div class="prog-dd-panel" id="progCanalPanel"></div>
         </div>
-        <div class="prog-canal-group" id="progCanalGroup" style="display:none"></div>
+        <div class="prog-dd-wrap" id="progCourierDd">
+          <button class="prog-dd-btn" id="progCourierBtn" onclick="toggleProgDd('progCourierDd')"><span id="progCourierLabel">Courier</span> <span class="prog-dd-arrow">▾</span></button>
+          <div class="prog-dd-panel" id="progCourierPanel">
+            <button class="prog-dd-item active" data-c="" onclick="setProgCourier('')">Todos</button>
+            <button class="prog-dd-item" data-c="shipper" onclick="setProgCourier('shipper')">Shipper</button>
+            <button class="prog-dd-item" data-c="99min" onclick="setProgCourier('99min')">99 Minutos</button>
+          </div>
+        </div>
+        <div class="prog-dd-wrap" id="progPropsWrap">
+          <button class="prog-dd-btn" id="progPropsBtn" onclick="togglePropsPanel()"><span>Propiedades</span> <span class="prog-dd-arrow">▾</span></button>
+          <div class="prog-dd-panel" id="progPropsPanel"></div>
+        </div>
         <span id="progLoadingIndicator" style="display:none;font-family:'Roboto Mono',monospace;font-size:11px;color:var(--text2)">Cargando...</span>
       </div>
     </div>
@@ -454,7 +555,13 @@
       <div class="modal-title" id="editTiendaNombre"></div>
       <div class="modal-sub" id="editSemanaLabel"></div>
 
-      <div class="modal-2col">
+      <div class="modal-field" style="margin-top:8px">
+        <div class="modal-label">Tienda</div>
+        <input type="text" id="editTienda" class="form-input" style="width:100%" list="editTiendaList">
+        <datalist id="editTiendaList"></datalist>
+      </div>
+
+      <div class="modal-2col" style="margin-top:8px">
         <div class="modal-field">
           <div class="modal-label">Día de Salida</div>
           <select id="editDiaSalida" class="form-input" style="width:100%">
@@ -471,12 +578,83 @@
 
       <div class="modal-2col">
         <div class="modal-field">
+          <div class="modal-label">Día Entrega 99min</div>
+          <select id="editDiaEntrega99" class="form-input" style="width:100%">
+            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Hora Entrega 99min</div>
+          <input type="time" id="editHoraEntrega99" class="form-input" style="width:100%">
+        </div>
+      </div>
+
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Día Entrega Shipper</div>
+          <select id="editDiaEntregaShip" class="form-input" style="width:100%">
+            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+          </select>
+        </div>
+        <div class="modal-field" id="editHoraEntregaShipWrap">
+          <div class="modal-label">Hora Entrega Shipper</div>
+          <input type="time" id="editHoraEntregaShip" class="form-input" style="width:100%">
+        </div>
+      </div>
+
+      <div class="modal-2col" id="editBultosWrap">
+        <div class="modal-field">
           <div class="modal-label">Bultos Estimados</div>
           <input type="number" id="editBultosEst" class="form-input" min="0" placeholder="—" style="width:100%">
         </div>
         <div class="modal-field">
           <div class="modal-label">Bultos Reales</div>
           <input type="number" id="editBultosReal" class="form-input" min="0" placeholder="—" style="width:100%">
+        </div>
+      </div>
+
+      <!-- Sección OC — solo Paris / Ripley / Falabella -->
+      <div id="editOcSection" style="display:none;margin-top:8px">
+        <div class="modal-label" style="margin-bottom:7px">Órdenes de Compra</div>
+        <div id="editOcList"></div>
+        <button class="btn-secondary edit-only" style="margin-top:4px;width:100%;justify-content:center;font-size:11px" onclick="agregarOcRow()">+ Agregar OC</button>
+        <div style="font-family:'Roboto Mono',monospace;font-size:11px;color:var(--text2);margin-top:8px;padding-top:6px;border-top:1px solid var(--border)" id="editOcTotal"></div>
+      </div>
+
+      <div class="modal-2col" style="margin-top:4px">
+        <div class="modal-field">
+          <div class="modal-label">Courier Preferencia</div>
+          <select id="editCourierPref" class="form-input" style="width:100%">
+            <option value="">— Sin preferencia —</option>
+            <option value="Shipper">Shipper</option>
+            <option value="99 Minutos">99 Minutos</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Tipo Camión (Shipper)</div>
+          <select id="editTipoCamion" class="form-input" style="width:100%">
+            <option value="XL">XL (default)</option>
+            <option value="L">L</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-field" id="editRutaWrap" style="margin-top:4px;display:none">
+        <div class="modal-label">Ruta Shipper</div>
+        <select id="editRutaOverride" class="form-input" style="width:100%">
+          <option value="">— Auto-detectar —</option>
+        </select>
+      </div>
+
+      <div class="modal-field edit-only" id="editCostoManualWrap" style="margin-top:4px">
+        <div class="modal-label">Costo manual <span style="font-size:10px;color:var(--text2)">(vacío = usar calculado)</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="number" id="editCostoManual" class="form-input" min="0" placeholder="—" style="flex:1">
+          <button class="btn-secondary" style="padding:6px 10px;font-size:11px" onclick="document.getElementById('editCostoManual').value=''">Limpiar</button>
         </div>
       </div>
 
@@ -488,10 +666,10 @@
       </div>
 
       <div class="modal-actions">
-        <button id="btnResetOv" class="btn-danger" onclick="eliminarOverride()">Volver al default</button>
+        <button id="btnResetOv" class="btn-danger edit-only" onclick="eliminarOverride()">Volver al default</button>
         <div style="display:flex;gap:9px">
-          <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
-          <button class="btn-primary" style="padding:10px 22px" onclick="guardarOverride()">Guardar</button>
+          <button class="btn-secondary" onclick="cerrarModal()">Cerrar</button>
+          <button class="btn-primary edit-only" style="padding:10px 22px" onclick="guardarOverride()">Guardar</button>
         </div>
       </div>
     </div>
@@ -526,6 +704,28 @@
         <div class="modal-label">Bultos Estimados</div>
         <input type="number" id="addBultosEst" class="form-input" min="0" placeholder="—" style="width:100%">
       </div>
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Courier Preferencia</div>
+          <select id="addCourierPref" class="form-input" style="width:100%">
+            <option value="">— Sin preferencia —</option>
+            <option value="Shipper">Shipper</option>
+            <option value="99 Minutos">99 Minutos</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Tipo Camión (Shipper)</div>
+          <select id="addTipoCamion" class="form-input" style="width:100%">
+            <option value="XL">XL (default)</option>
+            <option value="L">L</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Canal</div>
+        <input type="text" id="addCanal" class="form-input" placeholder="—" style="width:100%" list="addCanalList">
+        <datalist id="addCanalList"></datalist>
+      </div>
 
       <div class="modal-actions">
         <div></div>
@@ -537,13 +737,260 @@
     </div>
   </div>
 
+  <!-- ── TAB ADMIN ── -->
+  <div id="tab-admin" style="display:none">
+    <div style="padding:36px 0 0;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
+      <div>
+        <h1 style="font-size:clamp(28px,4vw,44px);font-weight:700;letter-spacing:-1.5px">Usuarios<span style="color:var(--accent)">.</span></h1>
+        <p style="color:var(--text2);font-size:14px;margin-top:8px;line-height:1.6">Gestión de accesos y permisos</p>
+      </div>
+      <button class="btn-primary" style="padding:9px 18px;font-size:13px" onclick="abrirModalCrearUser()">+ Nuevo usuario</button>
+    </div>
+    <div class="admin-wrap" style="margin-top:24px">
+      <table class="admin-table">
+        <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+        <tbody id="adminUsersBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ── Mapeo clientes BQ ── -->
+    <div style="margin-top:48px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.5px">Mapeo clientes BQ<span style="color:var(--accent)">.</span></h2>
+          <p style="color:var(--text2);font-size:13px;margin-top:4px">Clientes en <code>base_embalaje</code> y su equivalencia con las tiendas del schedule</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="week" id="adminBQSemana" class="form-input" style="font-family:'Roboto Mono',monospace;font-size:12px">
+          <button class="btn-secondary" onclick="cargarMapeoClientes()">Consultar</button>
+        </div>
+      </div>
+      <div id="adminBQResult" style="font-family:'Roboto Mono',monospace;font-size:12px;color:var(--text2)">— Seleccioná una semana y apretá Consultar —</div>
+    </div>
+
+    <!-- ── Estado tablas BQ ── -->
+    <div style="margin-top:36px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;letter-spacing:-0.5px">Estado tablas BQ<span style="color:var(--accent)">.</span></h2>
+          <p style="color:var(--text2);font-size:13px;margin-top:3px">Última fecha disponible en cada tabla fuente</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="cargarEstadoTablas()">Actualizar estado</button>
+          <button class="btn-danger" id="btnRebuild" onclick="confirmarRebuild()" style="padding:8px 14px;font-size:11px">↺ Reconstruir base_embalaje</button>
+        </div>
+      </div>
+      <div id="adminTablasEstado" style="font-family:'Roboto Mono',monospace;font-size:12px;color:var(--text2)">— —</div>
+    </div>
+  </div>
+
+  <!-- ── Modal usuario ── -->
+  <div class="modal-overlay" id="userModal" onclick="if(event.target===this)cerrarUserModal()">
+    <div class="modal-box">
+      <div class="modal-title" id="userModalTitle">Nuevo usuario</div>
+      <div class="modal-sub" id="userModalSub"></div>
+      <div class="modal-field">
+        <div class="modal-label">Nombre</div>
+        <input type="text" id="uNombre" class="form-input" style="width:100%" placeholder="Nombre completo">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Usuario</div>
+        <input type="text" id="uUsername" class="form-input" style="width:100%" placeholder="nombre_usuario" autocomplete="off">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Contraseña <span id="uPassNote" style="font-size:10px;color:var(--text2);display:none">(dejar vacío para no cambiar)</span></div>
+        <input type="password" id="uPass" class="form-input" style="width:100%" placeholder="contraseña" autocomplete="new-password">
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">Rol</div>
+        <select id="uRole" class="form-input" style="width:100%">
+          <option value="admin">Admin</option>
+          <option value="logistica" selected>Logística</option>
+          <option value="readonly">Solo lectura</option>
+          <option value="bodega">Bodega</option>
+          <option value="transportes">Transportes</option>
+        </select>
+      </div>
+      <div id="uError" class="login-error" style="margin-top:12px"></div>
+      <div class="modal-actions">
+        <div id="uDeleteWrap" style="display:none">
+          <button class="btn-danger" onclick="eliminarUser()">Eliminar usuario</button>
+        </div>
+        <div style="display:flex;gap:9px">
+          <button class="btn-secondary" onclick="cerrarUserModal()">Cancelar</button>
+          <button class="btn-primary" style="padding:10px 22px" onclick="guardarUser()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /container -->
+
+<!-- ── Login overlay ── -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo-wrap">
+      <div class="logo-icon">🦙</div>
+      <div>
+        <div class="logo-text">Wild Lama</div>
+        <div class="logo-sub">Warehouse Intelligence</div>
+      </div>
+    </div>
+    <div id="loginError" class="login-error"></div>
+    <div class="login-field">
+      <div class="modal-label">Usuario</div>
+      <input type="text" id="loginUser" class="form-input" style="width:100%" placeholder="usuario" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    </div>
+    <div class="login-field">
+      <div class="modal-label">Contraseña</div>
+      <input type="password" id="loginPass" class="form-input" style="width:100%" placeholder="contraseña" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn-primary full" id="btnLogin" onclick="login()">Ingresar</button>
+  </div>
+</div>
 
 <script>
 const API_URL = "http://localhost:8080";
-let currentFile   = null;
-let currentTipo   = "tienda_propia";
+let currentFile     = null;
+let currentTipo     = "tienda_propia";
 let _lastResultData = null;
+let _savePanelOC    = null; // { oc, bultos } cuando viene de Paris
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const _TOKEN_KEY    = 'wl_tms_token';
+const _ACTIVITY_KEY = 'wl_last_activity';
+const _INACTIVITY_MS = 12 * 60 * 60 * 1000; // 12 horas
+
+let _token = localStorage.getItem(_TOKEN_KEY) || null;
+window._userCanEdit = false;
+window._userRole    = '';
+
+// Inactivity timeout — actualiza timestamp en cualquier interacción
+let _activityThrottle = 0;
+function _touchActivity() {
+  const now = Date.now();
+  if (now - _activityThrottle < 30_000) return; // throttle 30s
+  _activityThrottle = now;
+  localStorage.setItem(_ACTIVITY_KEY, now);
+}
+['click','keydown','mousemove','touchstart','scroll'].forEach(ev =>
+  document.addEventListener(ev, _touchActivity, { passive: true })
+);
+
+// Verificar inactividad al cargar y cada minuto
+function _checkInactivity() {
+  if (!_token) return;
+  const last = parseInt(localStorage.getItem(_ACTIVITY_KEY) || '0', 10);
+  if (last && Date.now() - last > _INACTIVITY_MS) _doLogout();
+}
+_checkInactivity();
+setInterval(_checkInactivity, 60_000);
+
+// También verificar al volver a la pestaña después de estar en segundo plano
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') _checkInactivity();
+});
+
+// Fetch interceptor: inyecta Authorization y maneja 401
+const _origFetch = window.fetch.bind(window);
+window.fetch = async function(url, opts = {}) {
+  if (typeof url === 'string' && url.startsWith(API_URL) && _token) {
+    const headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + _token };
+    opts = { ...opts, headers };
+  }
+  const res = await _origFetch(url, opts);
+  if (res.status === 401 && typeof url === 'string' && url.startsWith(API_URL)) {
+    _doLogout();
+  }
+  return res;
+};
+
+async function login() {
+  const usr   = (document.getElementById('loginUser').value || '').trim();
+  const pass  = document.getElementById('loginPass').value || '';
+  const errEl = document.getElementById('loginError');
+  const btn   = document.getElementById('btnLogin');
+  if (!usr || !pass) { errEl.textContent = 'Ingresa usuario y contraseña.'; errEl.classList.add('show'); return; }
+  btn.disabled = true;
+  errEl.classList.remove('show');
+  try {
+    const res  = await _origFetch(`${API_URL}/auth/login`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ username: usr, password: pass })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error de autenticación');
+    _token = data.token;
+    localStorage.setItem(_TOKEN_KEY, _token);
+    localStorage.setItem(_ACTIVITY_KEY, Date.now()); // resetea contador de inactividad
+    _initApp(data);
+  } catch(e) {
+    errEl.textContent = '❌ ' + e.message;
+    errEl.classList.add('show');
+  } finally { btn.disabled = false; }
+}
+
+function logout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  _doLogout();
+}
+
+function _doLogout() {
+  _token = null;
+  window._userCanEdit = false;
+  window._userRole    = '';
+  localStorage.removeItem(_TOKEN_KEY);
+  localStorage.removeItem(_ACTIVITY_KEY);
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').classList.remove('show');
+  document.getElementById('headerUser').style.display = 'none';
+  document.getElementById('headerBadge').style.display = '';
+  document.body.classList.remove('no-edit', 'no-costos');
+}
+
+function _initApp(perms) {
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('headerUser').style.display = 'flex';
+  document.getElementById('headerBadge').style.display = 'none';
+  document.getElementById('headerNombre').textContent = perms.nombre || perms.usr || '';
+  const roleLabels = { admin:'Admin', logistica:'Logística', readonly:'Solo lectura', bodega:'Bodega', transportes:'Transportes' };
+  document.getElementById('headerRole').textContent = roleLabels[perms.role] || perms.role;
+
+  const ALL_TABS = ['estimador', 'despachos', 'prog', 'admin'];
+  const allowed  = perms.tabs || [];
+  ALL_TABS.forEach(t => {
+    const btn = document.getElementById('tab-btn-' + t);
+    if (btn) btn.style.display = allowed.includes(t) ? '' : 'none';
+  });
+
+  window._userCanEdit = !!perms.edit;
+  window._userRole    = perms.role || '';
+  if (!perms.edit)   document.body.classList.add('no-edit');
+  else               document.body.classList.remove('no-edit');
+  if (!perms.costos) document.body.classList.add('no-costos');
+  else               document.body.classList.remove('no-costos');
+  _applyProgProps(); // re-aplica con el nuevo rol (oculta costo si no tiene permiso)
+
+  const first = allowed[0];
+  if (first) setTab(first);
+}
+
+// Verificar token al cargar
+(async function checkAuth() {
+  if (!_token) return; // overlay ya visible por defecto
+  try {
+    const res = await _origFetch(`${API_URL}/auth/me`, {
+      headers: { 'Authorization': 'Bearer ' + _token }
+    });
+    if (!res.ok) throw new Error('invalid');
+    const data = await res.json();
+    _initApp(data);
+  } catch {
+    _token = null;
+    localStorage.removeItem(_TOKEN_KEY);
+  }
+})();
 
 // ── Drag & drop ──────────────────────────────────────────────────────────────
 const dropZone = document.getElementById("dropZone");
@@ -594,6 +1041,7 @@ async function estimar() {
 function mostrarResultados(data) {
   const orden = data.resumen_orden;
   const esXdb = orden.tipo === "paris_xdb";
+  _savePanelOC = null;
   document.getElementById("costoWrap").classList.remove("show");
   document.getElementById("savePanelProg").classList.remove("show");
 
@@ -646,6 +1094,12 @@ function mostrarResultados(data) {
     document.getElementById("savePanelBultos").textContent = Math.ceil(orden.total_bultos) + " bultos";
     document.getElementById("savePanelProg").classList.add("show");
     _cargarSavePanelTienda(orden.punto_de_venta);
+  } else if ((orden.tipo === "paris_xdb" || orden.tipo === "paris_stock") && orden.n_orden) {
+    const bultos = Math.ceil(orden.total_bultos);
+    _savePanelOC = { oc: String(orden.n_orden), bultos };
+    document.getElementById("savePanelBultos").textContent = `OC ${orden.n_orden} · ${bultos} bultos`;
+    document.getElementById("savePanelProg").classList.add("show");
+    _cargarSavePanelTienda("Paris");
   }
 
   document.getElementById("results").classList.add("show");
@@ -748,22 +1202,92 @@ async function _cargarSavePanelTienda(pdv) {
   } catch {
     selT.innerHTML = `<option value="${pdv}">${pdv}</option>`;
   }
+  actualizarSavePanelEntradas();
+}
+
+async function actualizarSavePanelEntradas() {
+  const tienda = document.getElementById("savePanelTienda").value;
+  const lunes  = document.getElementById("savePanelSemana").value;
+  const sel    = document.getElementById("savePanelEntrada");
+  if (!tienda || !lunes) { sel.style.display = 'none'; return; }
+  try {
+    const res     = await fetch(`${API_URL}/programacion/semana?lunes=${lunes}`);
+    const json    = await res.json();
+    const entries = (json.schedule || []).filter(e => e.tienda === tienda);
+    if (entries.length <= 1) { sel.style.display = 'none'; return; }
+    const labels = {envio:'dia_carga', salida:'dia_salida', entrega:'dia_salida'};
+    sel.innerHTML = entries.map(e => {
+      const dia  = e.dia_salida || e.dia_carga || '—';
+      const hora = e.hora_salida || '—';
+      const tag  = e.extra ? ' · extra' : '';
+      return `<option value="${e._id||''}">${dia.slice(0,3)} ${hora}${tag}</option>`;
+    }).join('');
+    sel.style.display = '';
+  } catch { sel.style.display = 'none'; }
 }
 
 async function guardarEnProg() {
   const tienda = document.getElementById("savePanelTienda").value;
-  const bultos = parseInt(document.getElementById("savePanelBultos").textContent);
   const lunes  = document.getElementById("savePanelSemana").value;
-  if (!lunes || !tienda) return;
+  if (!lunes || !tienda) { alert("Faltan datos: tienda o semana no válidos."); return; }
+
   try {
-    await fetch(`${API_URL}/programacion/override`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ lunes, tienda, cambios: { bultos_estimados: bultos } })
-    });
+    // ── Caso Paris/Ripley/Falabella: merge de OC ──────────────────────────────
+    if (_savePanelOC && _esGT(tienda)) {
+      const { oc, bultos } = _savePanelOC;
+      const res   = await fetch(`${API_URL}/programacion/semana?lunes=${lunes}`);
+      const json  = await res.json();
+      const entry = (json.schedule || []).find(e => e.tienda === tienda);
+      const ocs   = [...(entry?.ordenes_compra || [])];
+      const idx   = ocs.findIndex(o => o.oc === oc);
+      let accion;
+      if (idx >= 0) {
+        ocs[idx] = { ...ocs[idx], bultos_estimados: bultos };
+        accion = 'actualizada';
+      } else {
+        ocs.push({ oc, bultos_estimados: bultos, bultos_reales: null });
+        accion = 'agregada';
+      }
+      const resp = await fetch(`${API_URL}/programacion/override`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ lunes, tienda, cambios: { ordenes_compra: ocs } })
+      });
+      if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.detail||`Error ${resp.status}`); }
+      document.getElementById("savePanelProg").classList.remove("show");
+      if (progLunesISO === lunes) cargarSemana(lunes);
+      alert(`OC ${oc} ${accion} en ${tienda} (semana ${lunes}) · ${bultos} bultos`);
+      return;
+    }
+
+    // ── Caso tienda propia: lógica existente ──────────────────────────────────
+    const raw    = document.getElementById("savePanelBultos").textContent;
+    const bultos = parseInt((raw.match(/\d+/) || [])[0]);
+    if (isNaN(bultos)) { alert("Bultos no válidos."); return; }
+    const entSel = document.getElementById("savePanelEntrada");
+    const entId  = entSel.style.display !== 'none' ? entSel.value : null;
+    if (entId) {
+      const res   = await fetch(`${API_URL}/programacion/semana?lunes=${lunes}`);
+      const json  = await res.json();
+      const entry = (json.schedule || []).find(e => e._id === entId);
+      if (!entry) throw new Error("Entrada no encontrada");
+      await fetch(`${API_URL}/programacion/extra?lunes=${lunes}&id=${entId}`, {method:'DELETE'});
+      const updated = {...entry, bultos_estimados: bultos};
+      delete updated._idx;
+      await fetch(`${API_URL}/programacion/extra`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({lunes, entrada: updated})
+      });
+    } else {
+      const resp = await fetch(`${API_URL}/programacion/override`, {
+        method: "POST", headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ lunes, tienda, cambios: { bultos_estimados: bultos } })
+      });
+      if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e.detail||`Error ${resp.status}`); }
+    }
     document.getElementById("savePanelProg").classList.remove("show");
-    alert(`Guardado: ${bultos} bultos para ${tienda} (semana ${lunes})`);
-  } catch(e) { alert("Error: " + e.message); }
+    if (progLunesISO === lunes) cargarSemana(lunes);
+    alert(`Guardado: ${bultos} bultos estimados para ${tienda} (semana ${lunes})`);
+  } catch(e) { alert("Error al guardar: " + e.message); }
 }
 
 function imprimirProg() {
@@ -774,9 +1298,11 @@ function imprimirProg() {
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
 function setTab(tab) {
-  ['estimador','despachos','prog'].forEach(t => {
-    document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
-    document.getElementById('tab-btn-'+t).classList.toggle('active', t===tab);
+  ['estimador','despachos','prog','admin'].forEach(t => {
+    const el  = document.getElementById('tab-'+t);
+    const btn = document.getElementById('tab-btn-'+t);
+    if (el)  el.style.display = t===tab ? 'block' : 'none';
+    if (btn) btn.classList.toggle('active', t===tab);
   });
   if (tab === 'despachos' && despData.length === 0) cargarDespachos();
   if (tab === 'prog' && !progLunesISO) {
@@ -784,6 +1310,7 @@ function setTab(tab) {
     progLunesISO = _progBase.toISOString().split('T')[0];
     cargarSemana(progLunesISO);
   }
+  if (tab === 'admin') { cargarAdminUsers(); cargarEstadoTablas(); }
 }
 
 // ── DESPACHOS ─────────────────────────────────────────────────────────────────
@@ -895,13 +1422,15 @@ let _progBase      = null;
 let _editCtx       = null;
 let _addDiaCtx     = null;
 let progView       = 'salida';
-let progCourier    = 'shipper';
 let progCanal      = '';
+let progCourier    = '';
 let progOrdenes    = {};   // {diaLabel_view: ['tienda1', ...]}
 let _progByDia     = {};   // {colIdx: [entries]} — visible fuera de renderSemana para DnD
 let _dragSrc       = null; // {col, tienda}
-const DIAS_PROG    = ['Lun','Mar','Mié','Jue','Vie'];
-const DIAS_FULL    = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+const DIAS_PROG       = ['Lun','Mar','Mié','Jue','Vie'];
+const DIAS_FULL       = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+const _GRANDES_TIENDAS = new Set(['Paris', 'Ripley', 'Falabella']);
+const _esGT = t => _GRANDES_TIENDAS.has(t);
 
 const DIA_OFFSET = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5};
 
@@ -909,48 +1438,143 @@ function _dNorm(s) {
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 }
 
+function _courierEs99(entry) {
+  return (entry.courier_preferencia || '').includes('99');
+}
 function _diaField(entry) {
   if (progView === 'envio')   return entry.dia_carga;
-  if (progView === 'entrega') return progCourier === '99min' ? entry.dia_entrega_99min : entry.dia_entrega_shipper;
+  if (progView === 'entrega') return _courierEs99(entry) ? entry.dia_entrega_99min : entry.dia_entrega_shipper;
   return entry.dia_salida;
 }
 
-function setProgView(v) {
-  progView = v;
-  ['envio','salida','entrega'].forEach(x => document.getElementById('pv-'+x).classList.toggle('active', x===v));
-  document.getElementById('progCourierGroup').style.display = v==='entrega' ? 'flex' : 'none';
-  renderSemana(progSemanaData, progLunesISO);
+// ── Filtro de propiedades de tarjeta ─────────────────────────────────────────
+const _PROG_PROPS = [
+  { key: 'hora',    label: 'Día y hora principal' },
+  { key: 'info',    label: 'Entrega / Salida' },
+  { key: 'bultos',  label: 'Bultos' },
+  { key: 'oc',      label: 'Órdenes de Compra' },
+  { key: 'costo',   label: 'Costo estimado', requiereCostos: true },
+  { key: 'courier', label: 'Courier' },
+  { key: 'canal',   label: 'Canal' },
+];
+// Retorna solo las propiedades visibles para el usuario actual
+function _progPropsVisibles() {
+  const sinCostos = document.body.classList.contains('no-costos');
+  return _PROG_PROPS.filter(p => !(p.requiereCostos && sinCostos));
+}
+let progProps = (() => {
+  try { return JSON.parse(localStorage.getItem('wl_progProps') || '{}'); } catch { return {}; }
+})();
+_PROG_PROPS.forEach(p => { if (!(p.key in progProps)) progProps[p.key] = true; });
+
+function _applyProgProps() {
+  const grid     = document.getElementById('progGrid');
+  const table    = document.getElementById('progTable');
+  if (!grid) return;
+  const sinCostos = document.body.classList.contains('no-costos');
+  _PROG_PROPS.forEach(p => {
+    // Propiedades que requieren costos: siempre ocultas si no tiene permiso
+    const forzarOculto = p.requiereCostos && sinCostos;
+    grid.classList.toggle('hide-'  + p.key, forzarOculto || !progProps[p.key]);
+    table?.classList.toggle('hide-' + p.key, forzarOculto || !progProps[p.key]);
+  });
+  const visibles  = _progPropsVisibles();
+  const anyHidden = visibles.some(p => !progProps[p.key]);
+  document.getElementById('progPropsBtn')?.classList.toggle('active', anyHidden);
 }
 
-function setProgCourier(c) {
-  progCourier = c;
-  ['shipper','99min'].forEach(x => document.getElementById('pc-'+x).classList.toggle('active', x===c));
+function toggleProgDd(wrapId) {
+  const panel = document.querySelector('#' + wrapId + ' .prog-dd-panel');
+  if (!panel) return;
+  const opening = !panel.classList.contains('open');
+  _closeAllProgDd();
+  if (opening) panel.classList.add('open');
+}
+
+function _closeAllProgDd() {
+  document.querySelectorAll('.prog-dd-panel').forEach(p => p.classList.remove('open'));
+}
+
+function togglePropsPanel() {
+  const panel = document.getElementById('progPropsPanel');
+  if (!panel) return;
+  const opening = !panel.classList.contains('open');
+  _closeAllProgDd();
+  if (opening) {
+    panel.innerHTML = _progPropsVisibles().map(p =>
+      `<label class="prog-props-item">
+         <input type="checkbox" ${progProps[p.key] ? 'checked' : ''} onchange="setProp('${p.key}',this.checked)">
+         ${p.label}
+       </label>`
+    ).join('');
+    panel.classList.add('open');
+  }
+}
+
+function setProp(key, val) {
+  progProps[key] = val;
+  try { localStorage.setItem('wl_progProps', JSON.stringify(progProps)); } catch {}
+  _applyProgProps();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.prog-dd-wrap'))
+    _closeAllProgDd();
+});
+
+function setProgView(v) {
+  progView = v;
+  const labels = {envio:'Envío repo', salida:'Salida', entrega:'Entrega'};
+  const lbl = document.getElementById('progVistaLabel');
+  if (lbl) lbl.textContent = 'Vista: ' + (labels[v] || v);
+  document.querySelectorAll('#progVistaPanel .prog-dd-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.v === v));
+  _closeAllProgDd();
   renderSemana(progSemanaData, progLunesISO);
 }
 
 function setProgCanal(c) {
   progCanal = c;
-  document.querySelectorAll('.prog-canal-btn').forEach(b =>
-    b.classList.toggle('active', b.dataset.canal === c)
-  );
+  document.querySelectorAll('#progCanalPanel .prog-dd-item').forEach(b =>
+    b.classList.toggle('active', b.dataset.canal === c));
+  const lbl = document.getElementById('progCanalLabel');
+  if (lbl) lbl.textContent = c || 'Canales';
+  document.getElementById('progCanalBtn')?.classList.toggle('active', !!c);
+  _closeAllProgDd();
+  renderSemana(progSemanaData, progLunesISO);
+}
+
+function setProgCourier(c) {
+  progCourier = c;
+  document.querySelectorAll('#progCourierPanel .prog-dd-item').forEach(b =>
+    b.classList.toggle('active', b.dataset.c === c));
+  const labels = {'': 'Courier', shipper: 'Shipper', '99min': '99 Minutos'};
+  const lbl = document.getElementById('progCourierLabel');
+  if (lbl) lbl.textContent = labels[c] ?? 'Courier';
+  document.getElementById('progCourierBtn')?.classList.toggle('active', !!c);
+  _closeAllProgDd();
   renderSemana(progSemanaData, progLunesISO);
 }
 
 function _poblarCanalFilter(schedule) {
   const canales = [...new Set(schedule.map(e => e.canal).filter(Boolean))].sort();
-  const grp = document.getElementById('progCanalGroup');
-  if (!canales.length) { grp.style.display = 'none'; return; }
-  grp.style.display = 'flex';
-  grp.innerHTML = `<button class="prog-canal-btn active" data-canal="" onclick="setProgCanal('')">Todos</button>`
-    + canales.map(c => `<button class="prog-canal-btn" data-canal="${c}" onclick="setProgCanal('${c}')">${c}</button>`).join('');
-  // reset selection when data reloads
+  const wrap  = document.getElementById('progCanalDd');
+  const panel = document.getElementById('progCanalPanel');
+  if (!canales.length || !wrap) { if (wrap) wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  panel.innerHTML = `<button class="prog-dd-item active" data-canal="" onclick="setProgCanal('')">Todos</button>`
+    + canales.map(c => `<button class="prog-dd-item" data-canal="${c}" onclick="setProgCanal('${c}')">${c}</button>`).join('');
   progCanal = '';
+  const lbl = document.getElementById('progCanalLabel');
+  if (lbl) lbl.textContent = 'Canales';
+  document.getElementById('progCanalBtn')?.classList.remove('active');
 }
 
 async function cargarSemana(lunesISO) {
   progLunesISO = lunesISO;
   const ind = document.getElementById('progLoadingIndicator'), err = document.getElementById('progError');
   ind.style.display='inline'; err.classList.remove('show');
+  document.getElementById('progSinMapeoWarn')?.remove();
   try {
     const res = await fetch(`${API_URL}/programacion/semana?lunes=${lunesISO}`);
     if (!res.ok) { const e=await res.json(); throw new Error(e.detail||'Error'); }
@@ -959,6 +1583,15 @@ async function cargarSemana(lunesISO) {
     progOrdenes    = payload.ordenes  || {};
     _poblarCanalFilter(progSemanaData);
     renderSemana(progSemanaData, lunesISO);
+    // Alerta solo para admin: clientes BQ sin mapear
+    const sinMapeo = payload.sin_mapeo || [];
+    if (sinMapeo.length && window._userRole === 'admin') {
+      const div = document.createElement('div');
+      div.id = 'progSinMapeoWarn';
+      div.style.cssText = 'margin:6px 0;padding:8px 14px;background:rgba(198,124,46,0.1);border:1px solid rgba(198,124,46,0.4);border-radius:8px;font-family:"Roboto Mono",monospace;font-size:11px;color:var(--warn)';
+      div.innerHTML = `⚠ Clientes BQ sin mapear (ver <code>/bultos-reales/clientes?lunes=${lunesISO}</code>): ${sinMapeo.join(', ')}`;
+      document.getElementById('progError').after(div);
+    }
   } catch(e) { err.textContent='❌ '+e.message; err.classList.add('show'); }
   finally { ind.style.display='none'; }
 }
@@ -974,13 +1607,17 @@ function irSemanaHoy() {
   cargarSemana(_progBase.toISOString().split('T')[0]);
 }
 
+function _fmtPeso(n) {
+  return '$' + Math.round(n).toLocaleString('es-CL');
+}
+
 function _parseHora(h) {
   if (!h || h === '—') return 9999;
   const p = h.split(':').map(Number);
   return p[0] * 60 + (p[1] || 0);
 }
 function _horaOrden(entry) {
-  if (progView === 'entrega') return progCourier === '99min' ? entry.hora_entrega_99min : entry.hora_entrega_shipper;
+  if (progView === 'entrega') return _courierEs99(entry) ? entry.hora_entrega_99min : entry.hora_entrega_shipper;
   return entry.hora_salida;
 }
 function _applyOrden(entries, colIdx) {
@@ -996,7 +1633,7 @@ function _applyOrden(entries, colIdx) {
 // ── Drag & Drop ───────────────────────────────────────────────────────────────
 function onCardDragStart(ev) {
   const c = ev.currentTarget;
-  _dragSrc = { col: +c.dataset.col, tienda: c.dataset.tienda };
+  _dragSrc = { col: +c.dataset.col, tienda: c.dataset.tienda, idx: +c.dataset.idx };
   ev.dataTransfer.effectAllowed = 'move';
   setTimeout(() => c.classList.add('dragging'), 0);
 }
@@ -1008,23 +1645,37 @@ function onCardDragOver(ev) {
 function onCardDragLeave(ev) {
   ev.currentTarget.classList.remove('drag-over');
 }
-function _diaFieldName() {
+function _diaFieldName(entry) {
   if (progView === 'envio')   return 'dia_carga';
-  if (progView === 'entrega') return progCourier === '99min' ? 'dia_entrega_99min' : 'dia_entrega_shipper';
+  if (progView === 'entrega') return _courierEs99(entry||{}) ? 'dia_entrega_99min' : 'dia_entrega_shipper';
   return 'dia_salida';
 }
 
-async function _crossColumnDrop(srcTienda, tgtCol) {
+async function _crossColumnDrop(srcIdx, tgtCol) {
   const nuevoDia = DIAS_FULL[tgtCol];
+  const srcEntry = progSemanaData[srcIdx] || {};
+  const cambios  = { [_diaFieldName(srcEntry)]: nuevoDia };
+  if (progView === 'salida') {
+    const lt99   = srcEntry.lt_99min   || 0;
+    const ltShip = srcEntry.lt_shipper || 0;
+    cambios.dia_entrega_99min   = DIAS_FULL[Math.min(tgtCol + lt99,   4)];
+    cambios.dia_entrega_shipper = DIAS_FULL[Math.min(tgtCol + ltShip, 4)];
+  }
   try {
-    await fetch(`${API_URL}/programacion/override`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        lunes: progLunesISO,
-        tienda: srcTienda,
-        cambios: { [_diaFieldName()]: nuevoDia }
-      })
-    });
+    if (srcEntry.extra && srcEntry._id) {
+      await fetch(`${API_URL}/programacion/extra?lunes=${progLunesISO}&id=${srcEntry._id}`, {method:'DELETE'});
+      const updated = {...srcEntry, ...cambios};
+      delete updated._idx;
+      await fetch(`${API_URL}/programacion/extra`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({lunes: progLunesISO, entrada: updated})
+      });
+    } else {
+      await fetch(`${API_URL}/programacion/override`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ lunes: progLunesISO, tienda: srcEntry.tienda, cambios })
+      });
+    }
     cargarSemana(progLunesISO);
   } catch(e) { console.error(e); }
 }
@@ -1036,19 +1687,21 @@ function onCardDrop(ev) {
   if (!_dragSrc) return;
   const tgtCol    = +tgt.dataset.col;
   const tgtTienda = tgt.dataset.tienda;
-  if (_dragSrc.tienda === tgtTienda) return;
+  if (_dragSrc.idx === +tgt.dataset.idx) return;
 
   if (_dragSrc.col !== tgtCol) {
     // Arrastrar a otra columna: cambiar el día, mantener hora
     const src = _dragSrc; _dragSrc = null;
-    _crossColumnDrop(src.tienda, tgtCol);
+    _crossColumnDrop(src.idx, tgtCol);
     return;
   }
   // Misma columna: reordenar
   const col = _dragSrc.col;
-  const tiendas = (_progByDia[col] || []).map(e => e.tienda);
-  const from = tiendas.indexOf(_dragSrc.tienda);
-  const to   = tiendas.indexOf(tgtTienda);
+  const entries = _progByDia[col] || [];
+  const tiendas = entries.map(e => e.tienda);
+  const idxList = entries.map(e => e._idx);
+  const from = idxList.indexOf(_dragSrc.idx);
+  const to   = idxList.indexOf(+tgt.dataset.idx);
   if (from === -1 || to === -1) return;
   tiendas.splice(from, 1);
   tiendas.splice(to, 0, _dragSrc.tienda);
@@ -1076,7 +1729,7 @@ function onColDrop(ev, colIdx) {
   ev.currentTarget.classList.remove('col-drag-over');
   if (!_dragSrc || _dragSrc.col === colIdx) return;
   const src = _dragSrc; _dragSrc = null;
-  _crossColumnDrop(src.tienda, colIdx);
+  _crossColumnDrop(src.idx, colIdx);
 }
 
 function onCardDragEnd(ev) {
@@ -1088,35 +1741,61 @@ function onCardDragEnd(ev) {
 function _cardHtml(e, colIdx) {
   const cPref = e.courier_preferencia || '';
   const badgeCls = cPref.toLowerCase().includes('ship') ? 'shipper' : cPref.includes('99') ? 'min99' : '';
-  const hora = progView==='entrega'
-    ? (progCourier==='99min' ? e.hora_entrega_99min : e.hora_entrega_shipper)
+  const es99 = _courierEs99(e);
+  const isEntrega = progView === 'entrega';
+  const diaActual = isEntrega
+    ? (es99 ? e.dia_entrega_99min : e.dia_entrega_shipper)
+    : (progView === 'envio' ? e.dia_carga : e.dia_salida);
+  const hora = isEntrega
+    ? (es99 ? e.hora_entrega_99min : e.hora_entrega_shipper)
     : e.hora_salida;
-  const bultosHtml = (e.bultos_estimados || e.bultos_reales)
-    ? `<div class="prog-card-bultos">
-        ${e.bultos_estimados ? `<span class="prog-bulto-tag est">Est ${e.bultos_estimados}</span>` : ''}
-        ${e.bultos_reales    ? `<span class="prog-bulto-tag real">Real ${e.bultos_reales}</span>` : ''}
-       </div>` : '';
-  const cls = ['prog-card', e.override?'overridden':'', e.extra?'extra-entry':''].filter(Boolean).join(' ');
+  const ocs = e.ordenes_compra || [];
+  let bultosHtml = '';
+  if (ocs.length > 0) {
+    bultosHtml = `<div class="prog-card-ocs">${ocs.map(oc => {
+      const est  = oc.bultos_estimados != null ? `<span class="prog-bulto-tag est" style="font-size:9px;padding:1px 5px">Est ${oc.bultos_estimados}</span>` : '';
+      const real = oc.bultos_reales    != null ? `<span class="prog-bulto-tag real" style="font-size:9px;padding:1px 5px">Real ${oc.bultos_reales}</span>` : '';
+      const hora = oc.hora_cita ? `<span style="font-family:'Roboto Mono',monospace;font-size:9px;color:var(--accent);font-weight:600">${oc.hora_cita}</span>` : '';
+      return `<div class="prog-card-oc"><span class="prog-oc-num">OC ${oc.oc || '—'}</span>${hora}${est}${real}</div>`;
+    }).join('')}</div>`;
+  } else if (e.bultos_estimados || e.bultos_reales) {
+    bultosHtml = `<div class="prog-card-bultos">
+      ${e.bultos_estimados ? `<span class="prog-bulto-tag est">Est ${e.bultos_estimados}</span>` : ''}
+      ${e.bultos_reales    ? `<span class="prog-bulto-tag real">Real ${e.bultos_reales}</span>` : ''}
+    </div>`;
+  }
+  const tipoCamion = e.tipo_camion || 'XL';
+  const costoHtml  = e.costo_estimado
+    ? `<div class="prog-card-costo">${e.costo_es_manual ? '✎ ' : ''}${_fmtPeso(e.costo_estimado)} · ${tipoCamion}</div>
+       ${!e.costo_es_manual && e.ruta_nombre ? `<div class="prog-card-ruta">↔ ${e.ruta_nombre}${e.n_sharing ? ` ×${e.n_sharing}` : ''}</div>` : ''}`
+    : '';
+  const canEdit = window._userCanEdit !== false;
+  const cls = ['prog-card', e.override?'overridden':'', e.extra?'extra-entry':'', canEdit?'':'readonly'].filter(Boolean).join(' ');
   const safeT = (e.tienda||'').replace(/"/g,'&quot;');
-  return `<div class="${cls}" draggable="true" data-col="${colIdx}" data-tienda="${safeT}"
-    ondragstart="onCardDragStart(event)" ondragover="onCardDragOver(event)"
-    ondragleave="onCardDragLeave(event)" ondrop="onCardDrop(event)"
-    ondragend="onCardDragEnd(event)" onclick="openEditModal(${e._idx})">
+  return `<div class="${cls}" draggable="${canEdit}" data-col="${colIdx}" data-tienda="${safeT}" data-idx="${e._idx}"
+    ondragstart="${canEdit?'onCardDragStart(event)':''}" ondragover="${canEdit?'onCardDragOver(event)':''}"
+    ondragleave="${canEdit?'onCardDragLeave(event)':''}" ondrop="${canEdit?'onCardDrop(event)':''}"
+    ondragend="${canEdit?'onCardDragEnd(event)':''}" ${canEdit?`onclick="openEditModal(${e._idx})"`:''}>
     <div class="prog-card-header">
       <span class="prog-card-name">${e.tienda}</span>
-      <span class="prog-card-actions">
+      ${canEdit ? `<span class="prog-card-actions">
         ${e.override ? '<span class="prog-override-dot" title="Modificado">✎</span>' : ''}
         <button class="prog-action-btn" title="Ocultar esta semana" onclick="event.stopPropagation();ocultarTienda(${e._idx})">×</button>
-      </span>
+      </span>` : (e.override ? '<span class="prog-override-dot" title="Modificado" style="opacity:1;font-size:9px;color:var(--warn)">✎</span>' : '')}
     </div>
     ${e.canal ? `<div><span class="canal-badge">${e.canal}</span></div>` : ''}
     <div class="prog-card-hora">${hora||'—'}</div>
     <div class="prog-card-info">
       ${badgeCls ? `<span><span class="courier-badge ${badgeCls}" style="font-size:9px">${cPref}</span></span>` : ''}
-      <span>⚡ ${(e.dia_entrega_99min||'—').slice(0,3)} ${e.hora_entrega_99min||''}</span>
-      <span>🚛 ${(e.dia_entrega_shipper||'—').slice(0,3)} ${e.hora_entrega_shipper||''}</span>
+      ${isEntrega
+        ? `<span>↑ ${(e.dia_salida||'—').slice(0,3)} ${e.hora_salida||''}</span>`
+        : (es99
+            ? `<span>⚡ ${(e.dia_entrega_99min||'—').slice(0,3)} ${e.hora_entrega_99min||''}</span>`
+            : `<span>🚛 ${(e.dia_entrega_shipper||'—').slice(0,3)} ${e.hora_entrega_shipper||''}</span>`)
+      }
     </div>
     ${bultosHtml}
+    ${costoHtml}
   </div>`;
 }
 
@@ -1127,6 +1806,8 @@ function renderSemana(schedule, lunesISO) {
   _progByDia = {0:[],1:[],2:[],3:[],4:[]};
   schedule.forEach((entry,idx) => {
     if (progCanal && entry.canal !== progCanal) return;
+    if (progCourier === 'shipper' && _courierEs99(entry)) return;
+    if (progCourier === '99min'   && !_courierEs99(entry)) return;
     const off = DIA_OFFSET[_dNorm(_diaField(entry)||'')];
     if (off !== undefined && off < 5) _progByDia[off].push({...entry, _idx: idx});
   });
@@ -1152,7 +1833,7 @@ function renderSemana(schedule, lunesISO) {
         <span class="prog-day-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
       </div>
       ${(byDia[i]||[]).map(e => _cardHtml(e, i)).join('')}
-      <div class="prog-add-btn" onclick="abrirAddModal('${DIAS_PROG[i]}', ${i})">+ Agregar</div>
+      ${window._userCanEdit !== false ? `<div class="prog-add-btn" onclick="abrirAddModal('${DIAS_PROG[i]}', ${i})">+ Agregar</div>` : ''}
     </div>`;
   }).join('');
 
@@ -1173,6 +1854,8 @@ function renderSemana(schedule, lunesISO) {
       return `<td>${e ? _cardHtml(e, col) : ''}</td>`;
     }).join('')}</tr>`
   ).join('');
+
+  _applyProgProps();
 }
 
 // ── Edit modal ──────────────────────────────────────────────────────────────
@@ -1184,12 +1867,42 @@ function openEditModal(idx) {
   const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
   document.getElementById('editTiendaNombre').textContent = entry.tienda;
   document.getElementById('editSemanaLabel').textContent  = `Semana ${fmtD(lunes)} — ${fmtD(viernes)}`;
+  document.getElementById('editTienda').value = entry.tienda || '';
+  // Poblar datalist con tiendas del schedule base
+  const dl = document.getElementById('editTiendaList');
+  if (dl && !dl.childElementCount) {
+    const sched = progSemanaData.map(e=>e.tienda).filter((v,i,a)=>a.indexOf(v)===i).sort();
+    dl.innerHTML = sched.map(t=>`<option value="${t}">`).join('');
+  }
   document.getElementById('editDiaSalida').value  = entry.dia_salida || 'Lunes';
   document.getElementById('editHoraSalida').value = entry.hora_salida || '';
-  document.getElementById('editBultosEst').value  = entry.bultos_estimados || '';
-  document.getElementById('editBultosReal').value = entry.bultos_reales || '';
-  document.getElementById('editOcultar').checked  = false;
+  document.getElementById('editBultosEst').value       = entry.bultos_estimados || '';
+  document.getElementById('editBultosReal').value      = entry.bultos_reales || '';
+  document.getElementById('editCourierPref').value      = entry.courier_preferencia || '';
+  document.getElementById('editTipoCamion').value       = entry.tipo_camion         || 'XL';
+  document.getElementById('editDiaEntrega99').value    = entry.dia_entrega_99min   || 'Lunes';
+  document.getElementById('editHoraEntrega99').value   = entry.hora_entrega_99min  || '';
+  document.getElementById('editDiaEntregaShip').value  = entry.dia_entrega_shipper || 'Lunes';
+  document.getElementById('editHoraEntregaShip').value = entry.hora_entrega_shipper|| '';
+  document.getElementById('editCostoManual').value     = entry.costo_manual ?? '';
+  document.getElementById('editOcultar').checked       = false;
   document.getElementById('btnResetOv').style.display = entry.override ? 'inline-flex' : 'none';
+  _cargarOcSection(entry);
+
+  // Ruta override — siempre visible para Shipper, muestra todas las rutas + Directo
+  const esShipper = (entry.courier_preferencia || '').toLowerCase().includes('ship');
+  const rutaWrap  = document.getElementById('editRutaWrap');
+  const rutaSel   = document.getElementById('editRutaOverride');
+  const rutas     = entry.rutas_disponibles || [];
+  rutaSel.innerHTML = '<option value="">— Auto-detectar —</option><option value="directo">Directo (sin ruta compartida)</option>';
+  rutas.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    rutaSel.appendChild(opt);
+  });
+  rutaSel.value = entry.ruta_override || '';
+  rutaWrap.style.display = esShipper ? '' : 'none';
+
   document.getElementById('editModal').classList.add('open');
 }
 
@@ -1199,10 +1912,20 @@ async function guardarOverride() {
   let cambios = ocultar
     ? { visible: false }
     : {
-        dia_salida:        document.getElementById('editDiaSalida').value,
-        hora_salida:       document.getElementById('editHoraSalida').value,
-        bultos_estimados:  parseInt(document.getElementById('editBultosEst').value)||null,
-        bultos_reales:     parseInt(document.getElementById('editBultosReal').value)||null,
+        tienda:               document.getElementById('editTienda').value.trim() || _editCtx.tienda,
+        dia_salida:           document.getElementById('editDiaSalida').value,
+        hora_salida:          document.getElementById('editHoraSalida').value,
+        bultos_estimados:     _esGT(_editCtx.tienda) ? null : (parseInt(document.getElementById('editBultosEst').value)||null),
+        bultos_reales:        _esGT(_editCtx.tienda) ? null : (parseInt(document.getElementById('editBultosReal').value)||null),
+        ordenes_compra:       _esGT(_editCtx.tienda) ? _getOcRows() : undefined,
+        courier_preferencia:  document.getElementById('editCourierPref').value,
+        tipo_camion:          document.getElementById('editTipoCamion').value,
+        ruta_override:        document.getElementById('editRutaOverride').value || null,
+        costo_manual:         parseInt(document.getElementById('editCostoManual').value) || null,
+        dia_entrega_99min:    document.getElementById('editDiaEntrega99').value,
+        hora_entrega_99min:   document.getElementById('editHoraEntrega99').value,
+        dia_entrega_shipper:  document.getElementById('editDiaEntregaShip').value,
+        hora_entrega_shipper: document.getElementById('editHoraEntregaShip').value,
       };
   try {
     if (_editCtx.isExtra) {
@@ -1264,6 +1987,12 @@ function abrirAddModal(diaLabel, diaOffset) {
   document.getElementById('addDiaSalida').value=DIAS_ESP[diaOffset]||'Lunes';
   document.getElementById('addHoraSalida').value='11:00';
   document.getElementById('addBultosEst').value='';
+  document.getElementById('addCourierPref').value='';
+  document.getElementById('addTipoCamion').value='XL';
+  document.getElementById('addCanal').value='';
+  const dlCanal = document.getElementById('addCanalList');
+  dlCanal.innerHTML = [...new Set(progSemanaData.map(e=>e.canal).filter(Boolean))]
+    .map(c=>`<option value="${c}">`).join('');
   // Populate datalist with existing tiendas
   const dl=document.getElementById('addTiendaList');
   dl.innerHTML=progSemanaData.filter((e,i,a)=>a.findIndex(x=>x.tienda===e.tienda)===i)
@@ -1285,7 +2014,9 @@ async function confirmarAgregar() {
     hora_entrega_99min:   baseTienda?.hora_entrega_99min||'',
     dia_entrega_shipper:  baseTienda?.dia_entrega_shipper||'',
     hora_entrega_shipper: baseTienda?.hora_entrega_shipper||'',
-    courier_preferencia:  baseTienda?.courier_preferencia||'',
+    courier_preferencia:  document.getElementById('addCourierPref').value || baseTienda?.courier_preferencia||'',
+    tipo_camion:          document.getElementById('addTipoCamion').value  || baseTienda?.tipo_camion || 'XL',
+    canal:                document.getElementById('addCanal').value.trim() || baseTienda?.canal||'',
     lt_99min: baseTienda?.lt_99min||0,
     lt_shipper: baseTienda?.lt_shipper||0,
     bultos_estimados: bultosEst,
@@ -1301,9 +2032,342 @@ function cerrarAddModal() {
   document.getElementById('addModal').classList.remove('open'); _addDiaCtx=null;
 }
 
-function exportarProg() {
+async function exportarProg() {
   if (!progLunesISO) return;
-  window.open(`${API_URL}/programacion/export?lunes=${progLunesISO}`, '_blank');
+  try {
+    const res = await fetch(`${API_URL}/programacion/export?lunes=${progLunesISO}`);
+    if (!res.ok) throw new Error('Error al exportar');
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `programacion_${progLunesISO}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('Error al exportar: ' + e.message); }
+}
+
+// ── OC: Órdenes de Compra (Paris / Ripley / Falabella) ───────────────────────
+let _ocRows = [];
+
+const _OC_HEADERS = `<div style="display:flex;gap:6px;margin-bottom:3px;padding:0 2px">
+  <span style="flex:1;min-width:60px;font-family:'Roboto Mono',monospace;font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">N° OC</span>
+  <span style="width:82px;font-family:'Roboto Mono',monospace;font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Hora cita</span>
+  <span style="width:60px;font-family:'Roboto Mono',monospace;font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Est.</span>
+  <span style="width:60px;font-family:'Roboto Mono',monospace;font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Real</span>
+  <span style="width:28px"></span>
+</div>`;
+
+function _ocRowHtml(idx, oc) {
+  return `<div class="oc-row" id="oc-row-${idx}">
+    <input type="text"   class="form-input oc-num"  placeholder="N° OC"  value="${(oc.oc||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:60px">
+    <input type="time"   class="form-input oc-cita" value="${oc.hora_cita||''}" style="width:82px" oninput="_actualizarOcTotal()">
+    <input type="number" class="form-input oc-est"  placeholder="Est."   value="${oc.bultos_estimados??''}" min="0" style="width:60px" oninput="_actualizarOcTotal()">
+    <input type="number" class="form-input oc-real" placeholder="Real"   value="${oc.bultos_reales??''}"    min="0" style="width:60px" oninput="_actualizarOcTotal()">
+    <button class="btn-danger edit-only" style="padding:6px 9px;font-size:12px" onclick="eliminarOcRow(${idx})">×</button>
+  </div>`;
+}
+
+function _cargarOcSection(entry) {
+  const esGrande = _esGT(entry.tienda);
+  document.getElementById('editOcSection').style.display        = esGrande ? '' : 'none';
+  document.getElementById('editBultosWrap').style.display       = esGrande ? 'none' : '';
+  document.getElementById('editHoraEntregaShipWrap').style.display = esGrande ? 'none' : '';
+  if (!esGrande) return;
+  _ocRows = (entry.ordenes_compra || []).map(oc => ({...oc}));
+  if (_ocRows.length === 0) _ocRows.push({ oc: '', hora_cita: '', bultos_estimados: null, bultos_reales: null });
+  _renderOcRows();
+}
+
+function _renderOcRows() {
+  document.getElementById('editOcList').innerHTML = _OC_HEADERS + _ocRows.map((oc, i) => _ocRowHtml(i, oc)).join('');
+  _actualizarOcTotal();
+}
+
+function agregarOcRow() {
+  _ocRows.push({ oc: '', bultos_estimados: null, bultos_reales: null });
+  _renderOcRows();
+}
+
+function eliminarOcRow(idx) {
+  _ocRows.splice(idx, 1);
+  if (_ocRows.length === 0) _ocRows.push({ oc: '', bultos_estimados: null, bultos_reales: null });
+  _renderOcRows();
+}
+
+function _actualizarOcTotal() {
+  let totalEst = 0, totalReal = 0;
+  const citas = [];
+  document.querySelectorAll('#editOcList .oc-row').forEach(row => {
+    totalEst  += parseInt(row.querySelector('.oc-est').value)  || 0;
+    totalReal += parseInt(row.querySelector('.oc-real').value) || 0;
+    const cita = row.querySelector('.oc-cita').value;
+    if (cita) citas.push(cita);
+  });
+  const minCita = citas.length > 0 ? citas.sort()[0] : null;
+  const lbl = document.getElementById('editOcTotal');
+  if (lbl) lbl.textContent = [
+    `Total: ${totalEst || '—'} est · ${totalReal || '—'} real`,
+    minCita ? `Entrega más temprana: ${minCita}` : null,
+  ].filter(Boolean).join(' · ');
+}
+
+function _getOcRows() {
+  const result = [];
+  document.querySelectorAll('#editOcList .oc-row').forEach(row => {
+    const oc   = (row.querySelector('.oc-num').value  || '').trim();
+    const cita = row.querySelector('.oc-cita').value  || null;
+    const est  = parseInt(row.querySelector('.oc-est').value)  || null;
+    const real = parseInt(row.querySelector('.oc-real').value) || null;
+    if (oc || cita || est != null || real != null)
+      result.push({ oc, hora_cita: cita, bultos_estimados: est, bultos_reales: real });
+  });
+  return result;
+}
+
+// ── Admin: gestión de usuarios ────────────────────────────────────────────────
+let _editingUserId = null;
+
+const _ROLE_LABELS = { admin:'Admin', logistica:'Logística', readonly:'Solo lectura', bodega:'Bodega', transportes:'Transportes' };
+const _ROLE_CLS    = { admin:'rb-admin', logistica:'rb-logistica', readonly:'rb-readonly', bodega:'', transportes:'' };
+
+async function cargarAdminUsers() {
+  try {
+    const res  = await fetch(`${API_URL}/users`);
+    if (!res.ok) return;
+    const data = await res.json();
+    document.getElementById('adminUsersBody').innerHTML = (data.users || []).map(u => {
+      const rLabel = _ROLE_LABELS[u.role] || u.role;
+      const rCls   = _ROLE_CLS[u.role]   || '';
+      const activo = u.activo !== false;
+      const safeN  = (u.nombre || u.username).replace(/'/g,"\\'");
+      const safeU  = (u.username).replace(/'/g,"\\'");
+      return `<tr>
+        <td style="font-weight:500">${u.nombre || u.username}</td>
+        <td><span style="font-family:'Roboto Mono',monospace;font-size:12px;color:var(--text2)">${u.username}</span></td>
+        <td><span class="role-badge ${rCls}">${rLabel}</span></td>
+        <td><span style="font-family:'Roboto Mono',monospace;font-size:11px;color:${activo?'var(--success)':'var(--danger)'}">${activo?'Activo':'Inactivo'}</span></td>
+        <td style="text-align:right">
+          <button class="btn-secondary" style="padding:5px 12px;font-size:11px"
+            onclick="abrirModalEditUser('${u.id}','${safeN}','${safeU}','${u.role}',${activo})">Editar</button>
+        </td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--text2);padding:28px;font-family:'Roboto Mono',monospace;font-size:12px">Sin usuarios</td></tr>`;
+  } catch(e) { console.error('Error cargando usuarios:', e); }
+}
+
+async function cargarEstadoTablas() {
+  const out = document.getElementById('adminTablasEstado');
+  out.textContent = 'Consultando…';
+  try {
+    const res = await fetch(`${API_URL}/admin/tablas-estado`);
+    if (!res.ok) throw new Error((await res.json()).detail || 'Error');
+    const data = await res.json();
+    const _fila = (nombre, info) => {
+      if (info.error) return `<tr><td style="padding:7px 10px;font-weight:500">${nombre}</td><td colspan="3" style="padding:7px 10px;color:var(--danger)">${info.error}</td></tr>`;
+      const ultima = info.fecha_max || '—';
+      const hoy    = new Date().toISOString().split('T')[0];
+      const dias   = ultima !== '—' ? Math.floor((new Date(hoy)-new Date(ultima))/(1000*60*60*24)) : null;
+      const color  = dias === null ? 'var(--text2)' : dias > 30 ? 'var(--danger)' : dias > 7 ? 'var(--warn)' : 'var(--success)';
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:7px 10px;font-weight:500;color:var(--text)">${nombre}</td>
+        <td style="padding:7px 10px;color:var(--text2)">${info.fecha_min||'—'}</td>
+        <td style="padding:7px 10px;font-weight:600;color:${color}">${ultima}${dias !== null ? ` <span style="font-weight:400;color:var(--text2)">(hace ${dias}d)</span>` : ''}</td>
+        <td style="padding:7px 10px;text-align:right;color:var(--text2)">${(info.total||0).toLocaleString()} registros</td>
+      </tr>`;
+    };
+    out.innerHTML = `<table style="width:100%;border-collapse:collapse">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">Tabla</th>
+        <th style="text-align:left;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">Desde</th>
+        <th style="text-align:left;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">Hasta</th>
+        <th style="text-align:right;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">Volumen</th>
+      </tr></thead>
+      <tbody>
+        ${_fila('base_embalaje', data.base_embalaje || {})}
+        ${_fila('documento_salida', data.documento_salida || {})}
+      </tbody>
+    </table>`;
+  } catch(e) {
+    out.innerHTML = `<span style="color:var(--danger)">❌ ${e.message}</span>`;
+  }
+}
+
+async function confirmarRebuild() {
+  if (!confirm('¿Reconstruir base_embalaje completa desde documento_salida + log_embalaje?\n\nEsto puede tardar 1-2 minutos. La tabla será reemplazada.')) return;
+  const btn = document.getElementById('btnRebuild');
+  btn.disabled = true; btn.textContent = '↺ Reconstruyendo…';
+  try {
+    const res = await fetch(`${API_URL}/admin/rebuild-base-embalaje`, {method:'POST'});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error');
+    alert(`✓ base_embalaje reconstruida.\nJob ID: ${data.job_id}`);
+    cargarEstadoTablas();
+  } catch(e) {
+    alert('❌ ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '↺ Reconstruir base_embalaje';
+  }
+}
+
+async function cargarMapeoClientes() {
+  const semanaInput = document.getElementById('adminBQSemana').value; // "2026-W20"
+  const out = document.getElementById('adminBQResult');
+  if (!semanaInput) { out.textContent = '⚠ Seleccioná una semana primero.'; return; }
+  // Convertir "YYYY-Www" → lunes ISO
+  const [year, week] = semanaInput.split('-W').map(Number);
+  const jan4 = new Date(year, 0, 4);
+  const lunes = new Date(jan4);
+  lunes.setDate(jan4.getDate() - ((jan4.getDay() + 6) % 7) + (week - 1) * 7);
+  const lunesISO = lunes.toISOString().split('T')[0];
+
+  out.innerHTML = '<span style="color:var(--text2)">Consultando BQ…</span>';
+  try {
+    const res = await fetch(`${API_URL}/bultos-reales/clientes?lunes=${lunesISO}`);
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Error'); }
+    const data = await res.json();
+
+    const sinMapeo  = data.sin_mapeo  || [];
+    const tiendas   = data.tiendas    || {};
+    const mapeoAct  = data.mapeo_actual || {};
+
+    const fuente = data.fuente || '?';
+    const fuenteColor = fuente.includes('documento') ? 'var(--warn)' : 'var(--success)';
+    const fuenteLabel = fuente.includes('documento') ? `⚠ Fuente: ${fuente} (base_embalaje sin datos para esta semana)` : `✓ Fuente: ${fuente}`;
+    let html = `<div style="margin-bottom:12px;color:var(--text);font-size:13px;font-weight:600">Semana ${lunesISO}</div>
+    <div style="margin-bottom:12px;font-size:11px;color:${fuenteColor}">${fuenteLabel}</div>`;
+
+    // Clientes sin mapear
+    if (sinMapeo.length) {
+      html += `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(198,124,46,0.1);border:1px solid rgba(198,124,46,0.4);border-radius:8px">
+        <div style="color:var(--warn);font-weight:600;margin-bottom:6px">⚠ Sin mapear (${sinMapeo.length})</div>
+        ${sinMapeo.map(n => `<div style="margin:3px 0">• ${n}</div>`).join('')}
+        <div style="margin-top:8px;color:var(--text2);font-size:11px">Agregalos en <code>MAPEO_CLIENTES</code> dentro de <code>bultos_reales.py</code></div>
+      </div>`;
+    } else {
+      html += `<div style="margin-bottom:12px;padding:8px 14px;background:rgba(45,125,58,0.1);border:1px solid rgba(45,125,58,0.3);border-radius:8px;color:var(--success)">✓ Todos los clientes BQ están mapeados</div>`;
+    }
+
+    // Tabla de tiendas con bultos
+    const filas = Object.entries(tiendas).sort((a,b)=>a[0].localeCompare(b[0]));
+    if (filas.length) {
+      html += `<table style="width:100%;border-collapse:collapse;margin-top:8px">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">Tienda (schedule)</th>
+          <th style="text-align:right;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">Bultos totales</th>
+          <th style="text-align:right;padding:6px 10px;color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px">N° OCs</th>
+        </tr></thead>
+        <tbody>
+        ${filas.map(([t, v]) => `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:7px 10px;font-weight:500;color:var(--text)">${t}</td>
+          <td style="padding:7px 10px;text-align:right;color:var(--accent);font-weight:600">${v.total}</td>
+          <td style="padding:7px 10px;text-align:right;color:var(--text2)">${v.ocs}</td>
+        </tr>`).join('')}
+        </tbody>
+      </table>`;
+    } else {
+      const r = data.rango_tabla || {};
+      const rangoTxt = r.fecha_min
+        ? `La tabla tiene datos entre <strong>${r.fecha_min}</strong> y <strong>${r.fecha_max}</strong> (${(r.total_registros||0).toLocaleString()} registros total). Probá consultar una semana dentro de ese rango.`
+        : 'Sin registros en la tabla.';
+      html += `<div style="color:var(--text2);padding:16px 0">Sin datos en <code>base_embalaje</code> para la semana <strong>${lunesISO}</strong>.<br><span style="font-size:11px">${rangoTxt}</span></div>`;
+    }
+    out.innerHTML = html;
+  } catch(e) {
+    out.innerHTML = `<span style="color:var(--danger)">❌ ${e.message}</span>`;
+  }
+}
+
+function abrirModalCrearUser() {
+  _editingUserId = null;
+  document.getElementById('userModalTitle').textContent    = 'Nuevo usuario';
+  document.getElementById('userModalSub').textContent      = '';
+  document.getElementById('uNombre').value                 = '';
+  document.getElementById('uUsername').value               = '';
+  document.getElementById('uUsername').disabled            = false;
+  document.getElementById('uPass').value                   = '';
+  document.getElementById('uRole').value                   = 'logistica';
+  document.getElementById('uPassNote').style.display       = 'none';
+  document.getElementById('uDeleteWrap').style.display     = 'none';
+  document.getElementById('uError').classList.remove('show');
+  document.getElementById('userModal').classList.add('open');
+  setTimeout(() => document.getElementById('uNombre').focus(), 50);
+}
+
+function abrirModalEditUser(id, nombre, username, role, activo) {
+  _editingUserId = id;
+  document.getElementById('userModalTitle').textContent    = 'Editar usuario';
+  document.getElementById('userModalSub').textContent      = '@' + username;
+  document.getElementById('uNombre').value                 = nombre;
+  document.getElementById('uUsername').value               = username;
+  document.getElementById('uUsername').disabled            = false;
+  document.getElementById('uPass').value                   = '';
+  document.getElementById('uRole').value                   = role;
+  document.getElementById('uPassNote').style.display       = '';
+  document.getElementById('uDeleteWrap').style.display     = '';
+  document.getElementById('uError').classList.remove('show');
+  document.getElementById('userModal').classList.add('open');
+}
+
+async function guardarUser() {
+  const nombre   = (document.getElementById('uNombre').value || '').trim();
+  const username = (document.getElementById('uUsername').value || '').trim();
+  const pass     = document.getElementById('uPass').value || '';
+  const role     = document.getElementById('uRole').value;
+  const errEl    = document.getElementById('uError');
+  errEl.classList.remove('show');
+  if (!nombre || !username) {
+    errEl.textContent = 'Nombre y usuario son obligatorios.';
+    errEl.classList.add('show'); return;
+  }
+  if (!_editingUserId && !pass) {
+    errEl.textContent = 'La contraseña es obligatoria para nuevos usuarios.';
+    errEl.classList.add('show'); return;
+  }
+  try {
+    let res;
+    if (_editingUserId) {
+      const body = { nombre, username, role };
+      if (pass) body.password = pass;
+      res = await fetch(`${API_URL}/users/${_editingUserId}`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body)
+      });
+    } else {
+      res = await fetch(`${API_URL}/users`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ nombre, username, password: pass, role })
+      });
+    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Error al guardar');
+    cerrarUserModal();
+    cargarAdminUsers();
+  } catch(e) {
+    errEl.textContent = '❌ ' + e.message;
+    errEl.classList.add('show');
+  }
+}
+
+async function eliminarUser() {
+  if (!_editingUserId) return;
+  const nombre = (document.getElementById('uNombre').value || '').trim() || 'este usuario';
+  if (!confirm(`¿Eliminar a ${nombre} permanentemente?`)) return;
+  const errEl = document.getElementById('uError');
+  errEl.classList.remove('show');
+  try {
+    const res = await fetch(`${API_URL}/users/${_editingUserId}`, { method: 'DELETE' });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.detail || 'Error'); }
+    cerrarUserModal();
+    cargarAdminUsers();
+  } catch(e) {
+    errEl.textContent = '❌ ' + e.message;
+    errEl.classList.add('show');
+  }
+}
+
+function cerrarUserModal() {
+  document.getElementById('userModal').classList.remove('open');
+  _editingUserId = null;
 }
 
 </script>

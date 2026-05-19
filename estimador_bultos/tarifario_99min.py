@@ -88,8 +88,10 @@ TIENDA_DESTINO = {
     "Tienda Coyhaique":         "COYHAIQUE",
     "Tienda La Serena":         "COQUIMBO",
     "Tienda Laguna":            "VIÑA DEL MAR",
-    "Tienda Los Ángeles":       "LOS ANGELES",
-    "Tienda Los Angeles":       "LOS ANGELES",
+    "Tienda Los Ángeles":           "LOS ANGELES",
+    "Tienda Los Angeles":           "LOS ANGELES",
+    "Tienda Mallplaza Los Ángeles": "LOS ANGELES",
+    "Tienda Mallplaza Los Angeles": "LOS ANGELES",
     "Tienda Mall Curicó":       "CURICO",
     "Tienda Mall Curico":       "CURICO",
     "Tienda Marina":            "VIÑA DEL MAR",
@@ -113,6 +115,7 @@ TIENDA_DESTINO = {
     "Tienda Vitacura":          "SANTIAGO",
     "Tienda Nueva Costanera":   "SANTIAGO",
     "Ecommerce":                "SANTIAGO",
+    "Ecommerce 1":              "SANTIAGO",
 }
 
 _TIENDAS_LISTA = list(TIENDA_DESTINO.keys())
