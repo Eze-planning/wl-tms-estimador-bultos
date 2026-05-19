@@ -1,4 +1,4 @@
-# Wild Lama TMS — Estimador de Bultos
+# WildRoute — by Wild Lama
 > Planning & Logistics · Mayo 2026
 
 Sistema de gestión logística que combina estimación de bultos por IA, programación semanal de despachos y visualización de costos de transporte.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMS — Wild Lama</title>
+<title>WildRoute — by Wild Lama</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -353,8 +353,8 @@
     <div class="logo">
       <div class="logo-icon">🦙</div>
       <div>
-        <div class="logo-text">Wild Lama</div>
-        <div class="logo-sub">Warehouse Intelligence</div>
+        <div class="logo-text">WildRoute</div>
+        <div class="logo-sub">by Wild Lama</div>
       </div>
     </div>
     <div id="headerUser" class="header-user" style="display:none">
@@ -362,7 +362,7 @@
       <span class="header-role-badge" id="headerRole"></span>
       <button class="btn-secondary" onclick="logout()" style="padding:5px 12px;font-size:11px">Salir</button>
     </div>
-    <div class="badge" id="headerBadge">TMS · v2.0</div>
+    <div class="badge" id="headerBadge">v2.0</div>
   </header>
 
   <nav class="tab-nav">
@@ -832,8 +832,8 @@
     <div class="login-logo-wrap">
       <div class="logo-icon">🦙</div>
       <div>
-        <div class="logo-text">Wild Lama</div>
-        <div class="logo-sub">Warehouse Intelligence</div>
+        <div class="logo-text">WildRoute</div>
+        <div class="logo-sub">by Wild Lama</div>
       </div>
     </div>
     <div id="loginError" class="login-error"></div>
@@ -939,6 +939,8 @@ function _doLogout() {
   _token = null;
   window._userCanEdit = false;
   window._userRole    = '';
+  progLunesISO = '';
+  progSemanaData = [];
   localStorage.removeItem(_TOKEN_KEY);
   localStorage.removeItem(_ACTIVITY_KEY);
   document.getElementById('loginOverlay').classList.remove('hidden');
