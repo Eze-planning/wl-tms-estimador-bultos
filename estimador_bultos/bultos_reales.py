@@ -166,14 +166,16 @@ def reconstruir_base_embalaje() -> dict:
 
 
 def estado_tablas() -> dict:
-    """Retorna fecha_min, fecha_max y total_registros de base_embalaje y documento_salida."""
+    """Retorna fecha_min, fecha_max y total_registros de las tablas fuente."""
     client = get_bq_client()
     resultado = {}
-    tablas = {
-        "base_embalaje":  f"`{BQ_PROJECT}.sandbox.base_embalaje`",
+
+    # Tablas con columna fechacompromiso propia
+    tablas_directas = {
+        "base_embalaje":   f"`{BQ_PROJECT}.sandbox.base_embalaje`",
         "documento_salida": f"`{BQ_PROJECT}.sandbox.documento_salida`",
     }
-    for nombre, tabla in tablas.items():
+    for nombre, tabla in tablas_directas.items():
         try:
             q = f"""
             SELECT
@@ -191,6 +193,29 @@ def estado_tablas() -> dict:
             }
         except Exception as e:
             resultado[nombre] = {"error": str(e)}
+
+    # log_embalaje: fecha via JOIN con documento_salida (no tiene fechacompromiso propia)
+    try:
+        q = f"""
+        SELECT
+            MIN(SUBSTR(CAST(ds.fechacompromiso AS STRING), 1, 10)) AS fecha_min,
+            MAX(SUBSTR(CAST(ds.fechacompromiso AS STRING), 1, 10)) AS fecha_max,
+            COUNT(*) AS total
+        FROM `{BQ_PROJECT}.sandbox.log_embalaje` le
+        JOIN `{BQ_PROJECT}.sandbox.documento_salida` ds
+            ON ds.orden_salida = le.nro_orden_salida
+        WHERE le.caja_origen IS NOT NULL
+          AND ds.fechacompromiso IS NOT NULL
+        """
+        row = list(client.query(q).result())[0]
+        resultado["log_embalaje"] = {
+            "fecha_min": row.fecha_min,
+            "fecha_max": row.fecha_max,
+            "total":     row.total,
+        }
+    except Exception as e:
+        resultado["log_embalaje"] = {"error": str(e)}
+
     return resultado
 
 
