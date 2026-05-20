@@ -3,6 +3,7 @@
 !estimador_bultos/overrides_programacion.json
 !estimador_bultos/users.json
 !estimador_bultos/schedule_base.json
+!estimador_bultos/mapeo_clientes.json
 downloads/
 __pycache__/
 *.log

@@ -36,7 +36,7 @@ from auth import (
 try:
     from bultos_reales import (
         consultar_bultos_reales, invalidar_cache, MAPEO_CLIENTES,
-        reconstruir_base_embalaje, estado_tablas,
+        reconstruir_base_embalaje, estado_tablas, guardar_mapeo_cliente,
     )
     _BQ_DISPONIBLE = True
 except Exception:
@@ -492,15 +492,29 @@ async def get_bultos_clientes(
         tiendas   = {k: {"total": v["total"], "ocs": len(v["ocs"])}
                      for k, v in datos.items() if not k.startswith("_")}
         tablas    = estado_tablas()
+        tiendas_schedule = sorted({e["tienda"] for e in cargar_schedule_base() if e.get("tienda")})
         return {
-            "tiendas":      tiendas,
-            "sin_mapeo":    sin_mapeo,
-            "mapeo_actual": MAPEO_CLIENTES,
-            "fuente":       fuente,
-            "tablas":       tablas,
+            "tiendas":          tiendas,
+            "sin_mapeo":        sin_mapeo,
+            "mapeo_actual":     MAPEO_CLIENTES,
+            "fuente":           fuente,
+            "tablas":           tablas,
+            "tiendas_schedule": tiendas_schedule,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/admin/mapeo-clientes")
+async def guardar_mapeo(body: dict, _: dict = Depends(require_admin)):
+    nom = (body.get("nom_cliente") or "").strip()
+    tienda = (body.get("tienda") or "").strip()
+    if not nom or not tienda:
+        raise HTTPException(status_code=400, detail="nom_cliente y tienda son requeridos")
+    if not _BQ_DISPONIBLE:
+        raise HTTPException(status_code=503, detail="BQ no disponible")
+    guardar_mapeo_cliente(nom, tienda)
+    return {"ok": True, "nom_cliente": nom, "tienda": tienda}
 
 
 @app.post("/bultos-reales/cache/invalidar")

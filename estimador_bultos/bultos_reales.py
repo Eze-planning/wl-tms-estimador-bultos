@@ -7,20 +7,33 @@ solicitada, cae al join directo documento_salida + log_embalaje (siempre actuali
 """
 
 import os
+import json
 import time
 from datetime import date, timedelta
+from pathlib import Path
 from google.cloud import bigquery
 from modelo import get_bq_client
 
-BQ_PROJECT = os.getenv("BQ_PROJECT", "prj-wlcl-p-data-share")
+BQ_PROJECT  = os.getenv("BQ_PROJECT", "prj-wlcl-p-data-share")
+_MAPEO_PATH = Path(__file__).parent / "mapeo_clientes.json"
 
-# Mapeo nom_cliente (BigQuery) → nombre de tienda en el schedule.
-# Completar con los valores reales que aparezcan en Admin > Mapeo clientes BQ.
-MAPEO_CLIENTES: dict[str, str] = {
-    # "PARIS S.A.": "Paris",
-    # "RIPLEY CHILE S.A.": "Ripley",
-    # "FALABELLA RETAIL S.A.": "Falabella",
-}
+
+def _load_mapeo() -> dict:
+    if _MAPEO_PATH.exists():
+        with open(_MAPEO_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+MAPEO_CLIENTES: dict[str, str] = _load_mapeo()
+
+
+def guardar_mapeo_cliente(nom_cliente: str, tienda: str) -> None:
+    """Persiste un nuevo par nom_cliente → tienda y recarga el mapeo en memoria."""
+    MAPEO_CLIENTES[nom_cliente] = tienda
+    with open(_MAPEO_PATH, "w", encoding="utf-8") as f:
+        json.dump(MAPEO_CLIENTES, f, ensure_ascii=False, indent=2)
+    invalidar_cache()
 
 _CACHE: dict[str, tuple[float, dict]] = {}
 _CACHE_TTL = 300  # 5 minutos

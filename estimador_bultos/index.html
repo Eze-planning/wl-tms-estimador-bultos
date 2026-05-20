@@ -2232,9 +2232,10 @@ async function cargarMapeoClientes() {
     if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Error'); }
     const data = await res.json();
 
-    const sinMapeo  = data.sin_mapeo  || [];
-    const tiendas   = data.tiendas    || {};
-    const mapeoAct  = data.mapeo_actual || {};
+    const sinMapeo         = data.sin_mapeo        || [];
+    const tiendas          = data.tiendas          || {};
+    const mapeoAct         = data.mapeo_actual     || {};
+    const tiendasSchedule  = data.tiendas_schedule || [];
 
     const fuente = data.fuente || '?';
     const fuenteColor = fuente.includes('documento') ? 'var(--warn)' : 'var(--success)';
@@ -2244,10 +2245,26 @@ async function cargarMapeoClientes() {
 
     // Clientes sin mapear
     if (sinMapeo.length) {
+      const opcionsTienda = tiendasSchedule.map(t => `<option value="${t}">${t}</option>`).join('');
       html += `<div style="margin-bottom:12px;padding:10px 14px;background:rgba(198,124,46,0.1);border:1px solid rgba(198,124,46,0.4);border-radius:8px">
-        <div style="color:var(--warn);font-weight:600;margin-bottom:6px">⚠ Sin mapear (${sinMapeo.length})</div>
-        ${sinMapeo.map(n => `<div style="margin:3px 0">• ${n}</div>`).join('')}
-        <div style="margin-top:8px;color:var(--text2);font-size:11px">Agregalos en <code>MAPEO_CLIENTES</code> dentro de <code>bultos_reales.py</code></div>
+        <div style="color:var(--warn);font-weight:600;margin-bottom:10px">⚠ Sin mapear (${sinMapeo.length})</div>
+        <table style="width:100%;border-collapse:collapse">
+          ${sinMapeo.map(n => `<tr style="border-bottom:1px solid rgba(198,124,46,0.2)">
+            <td style="padding:6px 8px;color:var(--text)">${n}</td>
+            <td style="padding:6px 8px">
+              <select id="mapeo_sel_${btoa(n).replace(/=/g,'')}" class="form-input" style="font-size:12px;padding:4px 8px">
+                <option value="">— Seleccionar tienda —</option>
+                ${opcionsTienda}
+              </select>
+            </td>
+            <td style="padding:6px 8px">
+              <button class="btn-secondary" style="font-size:11px;padding:4px 10px"
+                onclick="asignarMapeo('${n.replace(/'/g,"\\'")}', '${btoa(n).replace(/=/g,'')}')">
+                Asignar
+              </button>
+            </td>
+          </tr>`).join('')}
+        </table>
       </div>`;
     } else {
       html += `<div style="margin-bottom:12px;padding:8px 14px;background:rgba(45,125,58,0.1);border:1px solid rgba(45,125,58,0.3);border-radius:8px;color:var(--success)">✓ Todos los clientes BQ están mapeados</div>`;
@@ -2280,6 +2297,23 @@ async function cargarMapeoClientes() {
     out.innerHTML = html;
   } catch(e) {
     out.innerHTML = `<span style="color:var(--danger)">❌ ${e.message}</span>`;
+  }
+}
+
+async function asignarMapeo(nomCliente, selId) {
+  const sel = document.getElementById('mapeo_sel_' + selId);
+  const tienda = sel?.value;
+  if (!tienda) { alert('Seleccioná una tienda primero.'); return; }
+  try {
+    const res = await fetch(`${API_URL}/admin/mapeo-clientes`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nom_cliente: nomCliente, tienda})
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Error');
+    cargarMapeoClientes();
+  } catch(e) {
+    alert('Error: ' + e.message);
   }
 }
 
