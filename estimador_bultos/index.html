@@ -2191,6 +2191,7 @@ async function cargarEstadoTablas() {
       <tbody>
         ${_fila('base_embalaje', data.base_embalaje || {})}
         ${_fila('documento_salida', data.documento_salida || {})}
+        ${_fila('log_embalaje', data.log_embalaje || {})}
       </tbody>
     </table>`;
   } catch(e) {
