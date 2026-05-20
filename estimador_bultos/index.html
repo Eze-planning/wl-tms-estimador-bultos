@@ -809,6 +809,7 @@
           <option value="readonly">Solo lectura</option>
           <option value="bodega">Bodega</option>
           <option value="transportes">Transportes</option>
+          <option value="tiendas">Tiendas</option>
         </select>
       </div>
       <div id="uError" class="login-error" style="margin-top:12px"></div>
@@ -958,7 +959,7 @@ function _initApp(perms) {
   document.getElementById('headerUser').style.display = 'flex';
   document.getElementById('headerBadge').style.display = 'none';
   document.getElementById('headerNombre').textContent = perms.nombre || perms.usr || '';
-  const roleLabels = { admin:'Admin', logistica:'Logística', readonly:'Solo lectura', bodega:'Bodega', transportes:'Transportes' };
+  const roleLabels = { admin:'Admin', logistica:'Logística', readonly:'Solo lectura', bodega:'Bodega', transportes:'Transportes', tiendas:'Tiendas' };
   document.getElementById('headerRole').textContent = roleLabels[perms.role] || perms.role;
 
   const ALL_TABS = ['estimador', 'despachos', 'prog', 'admin'];
@@ -2132,8 +2133,8 @@ function _getOcRows() {
 // ── Admin: gestión de usuarios ────────────────────────────────────────────────
 let _editingUserId = null;
 
-const _ROLE_LABELS = { admin:'Admin', logistica:'Logística', readonly:'Solo lectura', bodega:'Bodega', transportes:'Transportes' };
-const _ROLE_CLS    = { admin:'rb-admin', logistica:'rb-logistica', readonly:'rb-readonly', bodega:'', transportes:'' };
+const _ROLE_LABELS = { admin:'Admin', logistica:'Logística', readonly:'Solo lectura', bodega:'Bodega', transportes:'Transportes', tiendas:'Tiendas' };
+const _ROLE_CLS    = { admin:'rb-admin', logistica:'rb-logistica', readonly:'rb-readonly', bodega:'', transportes:'', tiendas:'' };
 
 async function cargarAdminUsers() {
   try {

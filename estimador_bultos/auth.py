@@ -34,6 +34,7 @@ ROLES: dict[str, dict] = {
     "readonly":    {"tabs": ["estimador", "despachos", "prog"],          "edit": False, "costos": True},
     "bodega":      {"tabs": ["prog"],                                    "edit": False, "costos": False},
     "transportes": {"tabs": ["prog"],                                    "edit": False, "costos": False},
+    "tiendas":     {"tabs": ["prog"],                                    "edit": False, "costos": False},
 }
 
 # ---------------------------------------------------------------------------
