@@ -57,13 +57,13 @@ def _query_base_embalaje(client, lunes_iso: str, viernes_iso: str) -> list:
     query = f"""
     SELECT
         nom_cliente,
-        CAST(nroordencliente AS STRING) AS oc,
-        COUNT(DISTINCT caja_origen)     AS bultos
+        REGEXP_REPLACE(CAST(nroordencliente AS STRING), r'-[SP]$', '') AS oc,
+        COUNT(DISTINCT caja_origen) AS bultos
     FROM `{BQ_PROJECT}.sandbox.base_embalaje`
     WHERE caja_origen  IS NOT NULL
       AND nom_cliente  IS NOT NULL
       AND SUBSTR(CAST(fechacompromiso AS STRING), 1, 10) BETWEEN @lunes AND @viernes
-    GROUP BY nom_cliente, nroordencliente
+    GROUP BY nom_cliente, oc
     ORDER BY nom_cliente, oc
     """
     cfg = bigquery.QueryJobConfig(query_parameters=[
@@ -81,8 +81,8 @@ def _query_fuente_directa(client, lunes_iso: str, viernes_iso: str) -> list:
     query = f"""
     SELECT
         ds.nom_cliente,
-        CAST(ds.nroordencliente AS STRING) AS oc,
-        COUNT(DISTINCT le.caja_origen)     AS bultos
+        REGEXP_REPLACE(CAST(ds.nroordencliente AS STRING), r'-[SP]$', '') AS oc,
+        COUNT(DISTINCT le.caja_origen) AS bultos
     FROM `{BQ_PROJECT}.sandbox.documento_salida` ds
     LEFT JOIN `{BQ_PROJECT}.sandbox.log_embalaje` le
         ON le.nro_orden_salida = ds.orden_salida
@@ -90,7 +90,7 @@ def _query_fuente_directa(client, lunes_iso: str, viernes_iso: str) -> list:
     WHERE ds.nom_cliente   IS NOT NULL
       AND ds.fechacompromiso IS NOT NULL
       AND SUBSTR(CAST(ds.fechacompromiso AS STRING), 1, 10) BETWEEN @lunes AND @viernes
-    GROUP BY ds.nom_cliente, ds.nroordencliente
+    GROUP BY ds.nom_cliente, oc
     ORDER BY ds.nom_cliente
     """
     cfg = bigquery.QueryJobConfig(query_parameters=[
