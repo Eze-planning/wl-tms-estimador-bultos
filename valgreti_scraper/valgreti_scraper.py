@@ -394,9 +394,11 @@ def run_historico(page, client, start_date, end_date):
 def run_incremental(page, client):
     log.info("=== MODO INCREMENTAL ===")
     hoy = date.today()
-    desde_emb = get_last_date_bq(client, "log_embalaje", "fecha_inicio") + timedelta(days=1)
-    desde_doc = get_last_date_bq(client, "documento_salida", "actualizado_en") + timedelta(days=1)
-    desde_rec = get_last_date_bq(client, "log_recepcion", "fecha_recepcion") + timedelta(days=1)
+    ayer = hoy - timedelta(days=1)
+    # Siempre reprocesa al menos desde ayer para cubrir posibles huecos del día anterior
+    desde_emb = min(get_last_date_bq(client, "log_embalaje", "fecha_inicio") + timedelta(days=1), ayer)
+    desde_doc = min(get_last_date_bq(client, "documento_salida", "actualizado_en") + timedelta(days=1), ayer)
+    desde_rec = min(get_last_date_bq(client, "log_recepcion", "fecha_recepcion") + timedelta(days=1), ayer)
 
     if desde_emb <= hoy:
         path = download_log_embalaje(page, desde_emb.strftime("%d/%m/%Y"), hoy.strftime("%d/%m/%Y"))
