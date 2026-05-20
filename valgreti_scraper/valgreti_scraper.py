@@ -365,8 +365,14 @@ def get_last_date_bq(client, table, date_col):
     result = list(client.query(f"SELECT MAX({date_col}) as max_date FROM `{p}.{d}.{table}`").result())
     val = result[0].max_date if result else None
     inicio = date(2025, 1, 1) if table == "log_recepcion" else date(2020, 1, 1)
-    if val is None: return inicio
-    return val if isinstance(val, date) else val.date()
+    if val is None:
+        return inicio
+    if isinstance(val, date):
+        return val if not isinstance(val, datetime) else val.date()
+    try:
+        return datetime.fromisoformat(str(val).replace("Z", "+00:00")).date()
+    except Exception:
+        return inicio
 
 
 def run_historico(page, client, start_date, end_date):
