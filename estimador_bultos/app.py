@@ -201,6 +201,12 @@ def _enriquecer_bultos_reales(schedule: list, lunes_iso: str) -> list[str]:
 
     sin_mapeo = datos.get("_sin_mapeo") or []
 
+    # Contar entradas por tienda para evitar asignar el total a múltiples casillas
+    entradas_por_tienda: dict[str, int] = {}
+    for e in schedule:
+        t = e.get("tienda", "")
+        entradas_por_tienda[t] = entradas_por_tienda.get(t, 0) + 1
+
     for e in schedule:
         tienda = e.get("tienda", "")
         info   = datos.get(tienda)
@@ -215,9 +221,11 @@ def _enriquecer_bultos_reales(schedule: list, lunes_iso: str) -> list[str]:
                 if bq_val is not None:
                     oc["bultos_reales"] = bq_val
         else:
-            total = info.get("total")
-            if total:
-                e["bultos_reales"] = total
+            # Solo auto-completar si hay una única entrada para esta tienda en la semana
+            if entradas_por_tienda.get(tienda, 0) == 1:
+                total = info.get("total")
+                if total:
+                    e["bultos_reales"] = total
 
     return sin_mapeo
 
