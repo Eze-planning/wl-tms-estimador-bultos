@@ -1306,13 +1306,15 @@ async function guardarEnProg() {
       const json  = await res.json();
       const entry = (json.schedule || []).find(e => e._id === entId);
       if (!entry) throw new Error("Entrada no encontrada");
-      await fetch(`${API_URL}/programacion/extra?lunes=${lunes}&id=${entId}`, {method:'DELETE'});
+      const rd = await fetch(`${API_URL}/programacion/extra?lunes=${lunes}&id=${entId}`, {method:'DELETE'});
+      if (!rd.ok) { const d=await rd.json().catch(()=>({})); throw new Error(d.detail||`Error ${rd.status}`); }
       const updated = {...entry, bultos_estimados: bultos};
       delete updated._idx;
-      await fetch(`${API_URL}/programacion/extra`, {
+      const rp = await fetch(`${API_URL}/programacion/extra`, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({lunes, entrada: updated})
       });
+      if (!rp.ok) { const d=await rp.json().catch(()=>({})); throw new Error(d.detail||`Error ${rp.status}`); }
     } else {
       const resp = await fetch(`${API_URL}/programacion/override`, {
         method: "POST", headers: {"Content-Type":"application/json"},
@@ -1768,21 +1770,24 @@ async function _crossColumnDrop(srcIdx, tgtCol) {
   }
   try {
     if (srcEntry.extra && srcEntry._id) {
-      await fetch(`${API_URL}/programacion/extra?lunes=${_progDataLunes}&id=${srcEntry._id}`, {method:'DELETE'});
+      const r1 = await fetch(`${API_URL}/programacion/extra?lunes=${_progDataLunes}&id=${srcEntry._id}`, {method:'DELETE'});
+      if (!r1.ok) { const d=await r1.json().catch(()=>({})); throw new Error(d.detail||`Error ${r1.status}`); }
       const updated = {...srcEntry, ...cambios};
       delete updated._idx;
-      await fetch(`${API_URL}/programacion/extra`, {
+      const r2 = await fetch(`${API_URL}/programacion/extra`, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({lunes: _progDataLunes, entrada: updated})
       });
+      if (!r2.ok) { const d=await r2.json().catch(()=>({})); throw new Error(d.detail||`Error ${r2.status}`); }
     } else {
-      await fetch(`${API_URL}/programacion/override`, {
+      const r = await fetch(`${API_URL}/programacion/override`, {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ lunes: _progDataLunes, tienda: srcEntry.tienda, cambios })
       });
+      if (!r.ok) { const d=await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
     }
     cargarSemana(progLunesISO);
-  } catch(e) { console.error(e); }
+  } catch(e) { alert('Error al mover: '+e.message); }
 }
 
 function onCardDrop(ev) {
@@ -2077,44 +2082,49 @@ async function guardarOverride() {
   try {
     if (_editCtx.isExtra) {
       // Update extra entry: delete old, add new
-      await fetch(`${API_URL}/programacion/extra?lunes=${_editCtx.lunesISO}&id=${_editCtx.extraId}`, {method:'DELETE'});
+      const r1 = await fetch(`${API_URL}/programacion/extra?lunes=${_editCtx.lunesISO}&id=${_editCtx.extraId}`, {method:'DELETE'});
+      if (!r1.ok) { const d=await r1.json().catch(()=>({})); throw new Error(d.detail||`Error ${r1.status}`); }
       if (!ocultar) {
         const entry = progSemanaData.find(e=>e.tienda===_editCtx.tienda && e._id===_editCtx.extraId);
-        await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
+        const r2 = await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({lunes:_editCtx.lunesISO,entrada:{...entry,...cambios}})});
+        if (!r2.ok) { const d=await r2.json().catch(()=>({})); throw new Error(d.detail||`Error ${r2.status}`); }
       }
     } else {
-      await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
+      const r = await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({lunes:_editCtx.lunesISO,tienda:_editCtx.tienda,cambios})});
+      if (!r.ok) { const d=await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
     }
-    const lunes = _editCtx.lunesISO;
-    cerrarModal(); cargarSemana(lunes);
-  } catch(e) { alert('Error: '+e.message); }
+    cerrarModal(); cargarSemana(progLunesISO);
+  } catch(e) { alert('Error al guardar: '+e.message); }
 }
 
 async function eliminarOverride() {
   if (!_editCtx) return;
   try {
+    let r;
     if (_editCtx.isExtra) {
-      await fetch(`${API_URL}/programacion/extra?lunes=${_editCtx.lunesISO}&id=${_editCtx.extraId}`,{method:'DELETE'});
+      r = await fetch(`${API_URL}/programacion/extra?lunes=${_editCtx.lunesISO}&id=${_editCtx.extraId}`,{method:'DELETE'});
     } else {
-      await fetch(`${API_URL}/programacion/override?lunes=${encodeURIComponent(_editCtx.lunesISO)}&tienda=${encodeURIComponent(_editCtx.tienda)}`,{method:'DELETE'});
+      r = await fetch(`${API_URL}/programacion/override?lunes=${encodeURIComponent(_editCtx.lunesISO)}&tienda=${encodeURIComponent(_editCtx.tienda)}`,{method:'DELETE'});
     }
-    const lunes = _editCtx.lunesISO;
-    cerrarModal(); cargarSemana(lunes);
-  } catch(e) { alert('Error: '+e.message); }
+    if (!r.ok) { const d=await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
+    cerrarModal(); cargarSemana(progLunesISO);
+  } catch(e) { alert('Error al eliminar: '+e.message); }
 }
 
 async function ocultarTienda(idx) {
   const entry = progSemanaData[idx];
   if (!entry) return;
   try {
+    let r;
     if (entry.extra) {
-      await fetch(`${API_URL}/programacion/extra?lunes=${_progDataLunes}&id=${entry._id}`,{method:'DELETE'});
+      r = await fetch(`${API_URL}/programacion/extra?lunes=${_progDataLunes}&id=${entry._id}`,{method:'DELETE'});
     } else {
-      await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
+      r = await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({lunes:_progDataLunes,tienda:entry.tienda,cambios:{visible:false}})});
     }
+    if (!r.ok) { const d=await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
     cargarSemana(progLunesISO);
   } catch(e) { alert('Error: '+e.message); }
 }
@@ -2176,8 +2186,9 @@ async function confirmarAgregar() {
     bultos_estimados: bultosEst,
   };
   try {
-    await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
+    const r = await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({lunes:_progDataLunes,entrada})});
+    if (!r.ok) { const d=await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
     cerrarAddModal(); cargarSemana(progLunesISO);
   } catch(e) { alert('Error: '+e.message); }
 }
