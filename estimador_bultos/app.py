@@ -184,6 +184,19 @@ def _enriquecer_costos(schedule: list) -> None:
 _GRANDES_TIENDAS = {"Paris", "Ripley", "Falabella"}
 
 
+def _dia_iso(lunes_iso: str, dia_salida: str) -> str | None:
+    """Convierte dia_salida ('Lunes', 'Martes'…) a fecha ISO relativa a lunes_iso."""
+    import unicodedata
+    _OFF = {"lunes": 0, "martes": 1, "miercoles": 2, "miércoles": 2, "jueves": 3, "viernes": 4}
+    norm = "".join(c for c in unicodedata.normalize("NFD", (dia_salida or "").lower())
+                   if unicodedata.category(c) != "Mn")
+    off = _OFF.get(norm)
+    if off is None:
+        return None
+    from datetime import date, timedelta
+    return (date.fromisoformat(lunes_iso) + timedelta(days=off)).isoformat()
+
+
 def _enriquecer_bultos_reales(schedule: list, lunes_iso: str) -> list[str]:
     """
     Inyecta bultos_reales desde base_embalaje BQ.
@@ -201,7 +214,7 @@ def _enriquecer_bultos_reales(schedule: list, lunes_iso: str) -> list[str]:
 
     sin_mapeo = datos.get("_sin_mapeo") or []
 
-    # Contar entradas por tienda para evitar asignar el total a múltiples casillas
+    # Contar entradas por tienda para decidir si usar match por fecha
     entradas_por_tienda: dict[str, int] = {}
     for e in schedule:
         t = e.get("tienda", "")
@@ -221,8 +234,14 @@ def _enriquecer_bultos_reales(schedule: list, lunes_iso: str) -> list[str]:
                 if bq_val is not None:
                     oc["bultos_reales"] = bq_val
         else:
-            # Solo auto-completar si hay una única entrada para esta tienda en la semana
-            if entradas_por_tienda.get(tienda, 0) == 1:
+            if entradas_por_tienda.get(tienda, 0) > 1:
+                # Múltiples casillas: match por fechacompromiso == dia_salida
+                fecha = _dia_iso(lunes_iso, e.get("dia_salida", ""))
+                if fecha:
+                    info_fecha = info.get("por_fecha", {}).get(fecha)
+                    if info_fecha and info_fecha.get("total"):
+                        e["bultos_reales"] = info_fecha["total"]
+            else:
                 total = info.get("total")
                 if total:
                     e["bultos_reales"] = total

@@ -46,7 +46,7 @@ def _rango_semana(lunes_iso: str) -> tuple[str, str]:
 
 
 def _procesar_filas(rows) -> dict:
-    """Convierte filas BQ → {tienda: {total, ocs}, _sin_mapeo: [...]}"""
+    """Convierte filas BQ → {tienda: {total, ocs, por_fecha}, _sin_mapeo: [...]}"""
     resultado: dict = {}
     sin_mapeo: set  = set()
     for row in rows:
@@ -57,11 +57,19 @@ def _procesar_filas(rows) -> dict:
             tienda = nom
         oc     = str(row.oc or "").strip()
         bultos = int(row.bultos or 0)
+        fecha  = str(getattr(row, "fecha_compromiso", None) or "")[:10]
         if tienda not in resultado:
-            resultado[tienda] = {"total": 0, "ocs": {}}
+            resultado[tienda] = {"total": 0, "ocs": {}, "por_fecha": {}}
         resultado[tienda]["total"] += bultos
         if oc:
             resultado[tienda]["ocs"][oc] = resultado[tienda]["ocs"].get(oc, 0) + bultos
+        if fecha:
+            pf = resultado[tienda]["por_fecha"]
+            if fecha not in pf:
+                pf[fecha] = {"total": 0, "ocs": {}}
+            pf[fecha]["total"] += bultos
+            if oc:
+                pf[fecha]["ocs"][oc] = pf[fecha]["ocs"].get(oc, 0) + bultos
     resultado["_sin_mapeo"] = sorted(sin_mapeo)
     return resultado
 
@@ -71,13 +79,14 @@ def _query_base_embalaje(client, lunes_iso: str, viernes_iso: str) -> list:
     SELECT
         nom_cliente,
         REGEXP_REPLACE(CAST(nroordencliente AS STRING), r'-[SP]$', '') AS oc,
+        SUBSTR(CAST(fechacompromiso AS STRING), 1, 10) AS fecha_compromiso,
         COUNT(DISTINCT caja_origen) AS bultos
     FROM `{BQ_PROJECT}.sandbox.base_embalaje`
     WHERE caja_origen  IS NOT NULL
       AND nom_cliente  IS NOT NULL
       AND SUBSTR(CAST(fechacompromiso AS STRING), 1, 10) BETWEEN @lunes AND @viernes
-    GROUP BY nom_cliente, oc
-    ORDER BY nom_cliente, oc
+    GROUP BY nom_cliente, oc, fecha_compromiso
+    ORDER BY nom_cliente, fecha_compromiso, oc
     """
     cfg = bigquery.QueryJobConfig(query_parameters=[
         bigquery.ScalarQueryParameter("lunes",   "STRING", lunes_iso),
@@ -95,6 +104,7 @@ def _query_fuente_directa(client, lunes_iso: str, viernes_iso: str) -> list:
     SELECT
         ds.nom_cliente,
         REGEXP_REPLACE(CAST(ds.nroordencliente AS STRING), r'-[SP]$', '') AS oc,
+        SUBSTR(CAST(ds.fechacompromiso AS STRING), 1, 10) AS fecha_compromiso,
         COUNT(DISTINCT le.caja_origen) AS bultos
     FROM `{BQ_PROJECT}.sandbox.documento_salida` ds
     LEFT JOIN `{BQ_PROJECT}.sandbox.log_embalaje` le
@@ -103,8 +113,8 @@ def _query_fuente_directa(client, lunes_iso: str, viernes_iso: str) -> list:
     WHERE ds.nom_cliente   IS NOT NULL
       AND ds.fechacompromiso IS NOT NULL
       AND SUBSTR(CAST(ds.fechacompromiso AS STRING), 1, 10) BETWEEN @lunes AND @viernes
-    GROUP BY ds.nom_cliente, oc
-    ORDER BY ds.nom_cliente
+    GROUP BY ds.nom_cliente, oc, fecha_compromiso
+    ORDER BY ds.nom_cliente, fecha_compromiso
     """
     cfg = bigquery.QueryJobConfig(query_parameters=[
         bigquery.ScalarQueryParameter("lunes",   "STRING", lunes_iso),
