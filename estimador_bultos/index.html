@@ -554,6 +554,7 @@
     <div class="modal-box">
       <div class="modal-title" id="editTiendaNombre"></div>
       <div class="modal-sub" id="editSemanaLabel"></div>
+      <div class="modal-sub" id="editFechaExacta" style="color:var(--accent);font-weight:500"></div>
 
       <div class="modal-field" style="margin-top:8px">
         <div class="modal-label">Tienda</div>
@@ -564,15 +565,30 @@
       <div class="modal-2col" style="margin-top:8px">
         <div class="modal-field">
           <div class="modal-label">Día de Salida</div>
-          <select id="editDiaSalida" class="form-input" style="width:100%">
-            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
+          <select id="editDiaSalida" class="form-input" style="width:100%" onchange="_syncCarga(this,'editDiaCarga')">
             <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
-            <option value="Viernes">Viernes</option>
+            <option value="Viernes">Viernes</option><option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
           </select>
         </div>
         <div class="modal-field">
           <div class="modal-label">Hora de Salida</div>
-          <input type="time" id="editHoraSalida" class="form-input" style="width:100%">
+          <input type="time" id="editHoraSalida" class="form-input" style="width:100%" oninput="_syncCarga(this,'editHoraCarga')">
+        </div>
+      </div>
+
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Día Carga Repo</div>
+          <select id="editDiaCarga" class="form-input" style="width:100%">
+            <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option><option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Hora Carga Repo</div>
+          <input type="time" id="editHoraCarga" class="form-input" style="width:100%">
         </div>
       </div>
 
@@ -580,9 +596,9 @@
         <div class="modal-field">
           <div class="modal-label">Día Entrega 99min</div>
           <select id="editDiaEntrega99" class="form-input" style="width:100%">
-            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
             <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
-            <option value="Viernes">Viernes</option>
+            <option value="Viernes">Viernes</option><option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
           </select>
         </div>
         <div class="modal-field">
@@ -595,9 +611,9 @@
         <div class="modal-field">
           <div class="modal-label">Día Entrega Shipper</div>
           <select id="editDiaEntregaShip" class="form-input" style="width:100%">
-            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
             <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
-            <option value="Viernes">Viernes</option>
+            <option value="Viernes">Viernes</option><option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
           </select>
         </div>
         <div class="modal-field" id="editHoraEntregaShipWrap">
@@ -689,15 +705,29 @@
       <div class="modal-2col">
         <div class="modal-field">
           <div class="modal-label">Día de Salida</div>
-          <select id="addDiaSalida" class="form-input" style="width:100%">
-            <option value="Lunes">Lunes</option><option value="Martes">Martes</option>
+          <select id="addDiaSalida" class="form-input" style="width:100%" onchange="_syncCarga(this,'addDiaCarga')">
             <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
-            <option value="Viernes">Viernes</option>
+            <option value="Viernes">Viernes</option><option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
           </select>
         </div>
         <div class="modal-field">
           <div class="modal-label">Hora de Salida</div>
-          <input type="time" id="addHoraSalida" class="form-input" value="11:00" style="width:100%">
+          <input type="time" id="addHoraSalida" class="form-input" value="11:00" style="width:100%" oninput="_syncCarga(this,'addHoraCarga')">
+        </div>
+      </div>
+      <div class="modal-2col">
+        <div class="modal-field">
+          <div class="modal-label">Día Carga Repo</div>
+          <select id="addDiaCarga" class="form-input" style="width:100%">
+            <option value="Miércoles">Miércoles</option><option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option><option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-label">Hora Carga Repo</div>
+          <input type="time" id="addHoraCarga" class="form-input" style="width:100%">
         </div>
       </div>
       <div class="modal-field">
@@ -942,7 +972,8 @@ function _doLogout() {
   _token = null;
   window._userCanEdit = false;
   window._userRole    = '';
-  progLunesISO = '';
+  progLunesISO   = '';
+  _progDataLunes = '';
   progSemanaData = [];
   localStorage.removeItem(_TOKEN_KEY);
   localStorage.removeItem(_ACTIVITY_KEY);
@@ -1314,6 +1345,10 @@ function setTab(tab) {
     _progBase = _getLunes(new Date());
     progLunesISO = _progBase.toISOString().split('T')[0];
     cargarSemana(progLunesISO);
+    fetch(`${API_URL}/programacion`, {headers:{Authorization:`Bearer ${_token}`}})
+      .then(r=>r.json()).then(j=>{
+        _tiendaBase = (j.schedule||[]).map(e=>e.tienda).filter((v,i,a)=>a.indexOf(v)===i).sort();
+      }).catch(()=>{});
   }
   if (tab === 'admin') { cargarAdminUsers(); cargarEstadoTablas(); }
 }
@@ -1421,11 +1456,34 @@ function renderCalendario(data) {
 }
 
 // ── PROGRAMACIÓN ─────────────────────────────────────────────────────────────
-let progSemanaData = [];
-let progLunesISO   = '';
-let _progBase      = null;
+let progSemanaData  = [];
+let progLunesISO    = '';  // semana de visualización (columnas)
+let _progDataLunes  = '';  // semana de datos en backend (= progLunesISO+7 en vista envío)
+let _progBase       = null;
+
+function _addDays(iso, n) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
+// Sincroniza el campo de carga cuando cambia el de salida, solo si el usuario
+// no lo ha separado manualmente (el campo carga tiene data-manual="1" si fue editado)
+function _syncCarga(srcEl, tgtId) {
+  const tgt = document.getElementById(tgtId);
+  if (!tgt || tgt.dataset.manual === '1') return;
+  tgt.value = srcEl.value;
+}
+// Marcar dia/hora carga como manual cuando el usuario lo toca directamente
+document.addEventListener('DOMContentLoaded', () => {
+  ['editDiaCarga','editHoraCarga','addDiaCarga','addHoraCarga'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', () => el.dataset.manual = '1');
+  });
+});
 let _editCtx       = null;
 let _addDiaCtx     = null;
+let _tiendaBase    = [];
 let progView       = 'salida';
 let progCanal      = '';
 let progCourier    = '';
@@ -1438,6 +1496,41 @@ const _GRANDES_TIENDAS = new Set(['Paris', 'Ripley', 'Falabella']);
 const _esGT = t => _GRANDES_TIENDAS.has(t);
 
 const DIA_OFFSET = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4,'sábado':5,'sabado':5};
+
+function _diasConfig() {
+  return {
+    prog:      ['Lun','Mar','Mié','Jue','Vie'],
+    full:      ['Lunes','Martes','Miércoles','Jueves','Viernes'],
+    offsets:   [0,1,2,3,4],
+    diaOffset: {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4},
+  };
+}
+
+// Calcula la fecha real del día secundario, teniendo en cuenta cruce de semana.
+// primColIdx: columna del día primario (0=Lun … 4=Vie)
+// secIsAfter: true si el secundario ocurre DESPUÉS del primario (envío→salida, salida→entrega)
+//             false si ocurre ANTES (entrega→salida)
+function _diaDateRelTo(secDia, primColIdx, secIsAfter) {
+  if (!secDia || !progLunesISO) return null;
+  const stdOff = {'lunes':0,'martes':1,'miércoles':2,'miercoles':2,'jueves':3,'viernes':4};
+  const secOff = stdOff[_dNorm(secDia)];
+  if (secOff === undefined) return null;
+  let off = secOff;
+  if ( secIsAfter && secOff < primColIdx) off += 7; // cruza a semana siguiente
+  if (!secIsAfter && secOff > primColIdx) off -= 7; // retrocede a semana anterior
+  const d = new Date(progLunesISO + 'T00:00:00');
+  d.setDate(d.getDate() + off);
+  return d;
+}
+
+function _semDiaRelTo(secDia, primColIdx, secIsAfter) {
+  const d = _diaDateRelTo(secDia, primColIdx, secIsAfter);
+  if (!d) return '';
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  dt.setUTCDate(dt.getUTCDate() + 4 - (dt.getUTCDay() || 7));
+  const w = Math.ceil((((dt - new Date(Date.UTC(dt.getUTCFullYear(), 0, 1))) / 86400000) + 1) / 7);
+  return `S${w}`;
+}
 
 function _dNorm(s) {
   return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -1528,6 +1621,7 @@ document.addEventListener('click', e => {
 });
 
 function setProgView(v) {
+  const wasEnvio = progView === 'envio';
   progView = v;
   const labels = {envio:'Envío repo', salida:'Salida', entrega:'Entrega'};
   const lbl = document.getElementById('progVistaLabel');
@@ -1535,7 +1629,12 @@ function setProgView(v) {
   document.querySelectorAll('#progVistaPanel .prog-dd-item').forEach(el =>
     el.classList.toggle('active', el.dataset.v === v));
   _closeAllProgDd();
-  renderSemana(progSemanaData, progLunesISO);
+  // Si cambia hacia/desde envío, el data anchor cambia → re-fetch
+  if ((v === 'envio') !== wasEnvio) {
+    cargarSemana(progLunesISO);
+  } else {
+    renderSemana(progSemanaData, progLunesISO);
+  }
 }
 
 function setProgCanal(c) {
@@ -1576,12 +1675,13 @@ function _poblarCanalFilter(schedule) {
 }
 
 async function cargarSemana(lunesISO) {
-  progLunesISO = lunesISO;
+  progLunesISO   = lunesISO;
+  _progDataLunes = progView === 'envio' ? _addDays(lunesISO, 7) : lunesISO;
   const ind = document.getElementById('progLoadingIndicator'), err = document.getElementById('progError');
   ind.style.display='inline'; err.classList.remove('show');
   document.getElementById('progSinMapeoWarn')?.remove();
   try {
-    const res = await fetch(`${API_URL}/programacion/semana?lunes=${lunesISO}`);
+    const res = await fetch(`${API_URL}/programacion/semana?lunes=${_progDataLunes}`);
     if (!res.ok) { const e=await res.json(); throw new Error(e.detail||'Error'); }
     const payload = await res.json();
     progSemanaData = payload.schedule || [];
@@ -1657,28 +1757,28 @@ function _diaFieldName(entry) {
 }
 
 async function _crossColumnDrop(srcIdx, tgtCol) {
-  const nuevoDia = DIAS_FULL[tgtCol];
+  const nuevoDia = _diasConfig().full[tgtCol];
   const srcEntry = progSemanaData[srcIdx] || {};
   const cambios  = { [_diaFieldName(srcEntry)]: nuevoDia };
   if (progView === 'salida') {
     const lt99   = srcEntry.lt_99min   || 0;
     const ltShip = srcEntry.lt_shipper || 0;
-    cambios.dia_entrega_99min   = DIAS_FULL[Math.min(tgtCol + lt99,   4)];
-    cambios.dia_entrega_shipper = DIAS_FULL[Math.min(tgtCol + ltShip, 4)];
+    cambios.dia_entrega_99min   = _diasConfig().full[Math.min(tgtCol + lt99,   4)];
+    cambios.dia_entrega_shipper = _diasConfig().full[Math.min(tgtCol + ltShip, 4)];
   }
   try {
     if (srcEntry.extra && srcEntry._id) {
-      await fetch(`${API_URL}/programacion/extra?lunes=${progLunesISO}&id=${srcEntry._id}`, {method:'DELETE'});
+      await fetch(`${API_URL}/programacion/extra?lunes=${_progDataLunes}&id=${srcEntry._id}`, {method:'DELETE'});
       const updated = {...srcEntry, ...cambios};
       delete updated._idx;
       await fetch(`${API_URL}/programacion/extra`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({lunes: progLunesISO, entrada: updated})
+        body: JSON.stringify({lunes: _progDataLunes, entrada: updated})
       });
     } else {
       await fetch(`${API_URL}/programacion/override`, {
         method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ lunes: progLunesISO, tienda: srcEntry.tienda, cambios })
+        body: JSON.stringify({ lunes: _progDataLunes, tienda: srcEntry.tienda, cambios })
       });
     }
     cargarSemana(progLunesISO);
@@ -1716,7 +1816,7 @@ function onCardDrop(ev) {
   renderSemana(progSemanaData, progLunesISO);
   fetch(`${API_URL}/programacion/orden`, {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ lunes: progLunesISO, dia_vista: key, tiendas })
+    body: JSON.stringify({ lunes: _progDataLunes, dia_vista: key, tiendas })
   });
 }
 
@@ -1748,12 +1848,31 @@ function _cardHtml(e, colIdx) {
   const badgeCls = cPref.toLowerCase().includes('ship') ? 'shipper' : cPref.includes('99') ? 'min99' : '';
   const es99 = _courierEs99(e);
   const isEntrega = progView === 'entrega';
+  const isEnvio   = progView === 'envio';
   const diaActual = isEntrega
     ? (es99 ? e.dia_entrega_99min : e.dia_entrega_shipper)
-    : (progView === 'envio' ? e.dia_carga : e.dia_salida);
+    : (isEnvio ? e.dia_carga : e.dia_salida);
   const hora = isEntrega
     ? (es99 ? e.hora_entrega_99min : e.hora_entrega_shipper)
     : e.hora_salida;
+  // Fecha del día de la columna (para mostrar en la tarjeta)
+  const _lCol = new Date(progLunesISO + 'T00:00:00');
+  _lCol.setDate(_lCol.getDate() + colIdx);
+  const fechaCard = _lCol.toLocaleDateString('es-CL', {day:'numeric', month:'short'});
+  // Día secundario por vista:
+  //   envío  → muestra dia_salida  (DESPUÉS del carga)  icon →
+  //   salida → muestra dia_carga   (ANTES de la salida) icon ↑
+  //   entrega→ muestra dia_salida  (ANTES de la entrega)icon ↑
+  const isSalida = progView === 'salida';
+  const secDia  = isEnvio ? e.dia_salida
+                : isSalida ? e.dia_carga
+                : e.dia_salida; // entrega → salida
+  const secHora = isEnvio   ? e.hora_salida
+                : isSalida  ? ''            // no hay campo hora_carga
+                : e.hora_salida;
+  const secIcon = isEnvio ? '→' : '↑';
+  // secIsAfter: solo en envío el secundario es posterior al primario
+  const secSem  = _semDiaRelTo(secDia, colIdx, isEnvio);
   const ocs = e.ordenes_compra || [];
   let bultosHtml = '';
   if (ocs.length > 0) {
@@ -1780,7 +1899,7 @@ function _cardHtml(e, colIdx) {
   return `<div class="${cls}" draggable="${canEdit}" data-col="${colIdx}" data-tienda="${safeT}" data-idx="${e._idx}"
     ondragstart="${canEdit?'onCardDragStart(event)':''}" ondragover="${canEdit?'onCardDragOver(event)':''}"
     ondragleave="${canEdit?'onCardDragLeave(event)':''}" ondrop="${canEdit?'onCardDrop(event)':''}"
-    ondragend="${canEdit?'onCardDragEnd(event)':''}" ${canEdit?`onclick="openEditModal(${e._idx})"`:''}>
+    ondragend="${canEdit?'onCardDragEnd(event)':''}" ${canEdit?`onclick="openEditModal(${e._idx},${colIdx})"`:''}>
     <div class="prog-card-header">
       <span class="prog-card-name">${e.tienda}</span>
       ${canEdit ? `<span class="prog-card-actions">
@@ -1789,15 +1908,10 @@ function _cardHtml(e, colIdx) {
       </span>` : (e.override ? '<span class="prog-override-dot" title="Modificado" style="opacity:1;font-size:9px;color:var(--warn)">✎</span>' : '')}
     </div>
     ${e.canal ? `<div><span class="canal-badge">${e.canal}</span></div>` : ''}
-    <div class="prog-card-hora">${hora||'—'}</div>
+    <div class="prog-card-hora">${hora||'—'} <small style="font-size:10px;font-weight:400;opacity:0.65">${fechaCard}</small></div>
     <div class="prog-card-info">
       ${badgeCls ? `<span><span class="courier-badge ${badgeCls}" style="font-size:9px">${cPref}</span></span>` : ''}
-      ${isEntrega
-        ? `<span>↑ ${(e.dia_salida||'—').slice(0,3)} ${e.hora_salida||''}</span>`
-        : (es99
-            ? `<span>⚡ ${(e.dia_entrega_99min||'—').slice(0,3)} ${e.hora_entrega_99min||''}</span>`
-            : `<span>🚛 ${(e.dia_entrega_shipper||'—').slice(0,3)} ${e.hora_entrega_shipper||''}</span>`)
-      }
+      <span>${secIcon} ${(secDia||'—').slice(0,3)} ${secSem} ${secHora||''}</span>
     </div>
     ${bultosHtml}
     ${costoHtml}
@@ -1808,20 +1922,22 @@ function renderSemana(schedule, lunesISO) {
   if (!lunesISO) return;
   const lunes=new Date(lunesISO+'T00:00:00');
   const today=new Date().toISOString().split('T')[0];
+  const cfg = _diasConfig();
   _progByDia = {0:[],1:[],2:[],3:[],4:[]};
   schedule.forEach((entry,idx) => {
     if (progCanal && entry.canal !== progCanal) return;
     if (progCourier === 'shipper' && _courierEs99(entry)) return;
     if (progCourier === '99min'   && !_courierEs99(entry)) return;
-    const off = DIA_OFFSET[_dNorm(_diaField(entry)||'')];
+    const off = cfg.diaOffset[_dNorm(_diaField(entry)||'')];
     if (off !== undefined && off < 5) _progByDia[off].push({...entry, _idx: idx});
   });
   // Aplicar orden (custom o time-sort)
   for (let i=0; i<5; i++) _progByDia[i] = _applyOrden(_progByDia[i], i);
   const byDia = _progByDia;
   const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-  const viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
-  const tituloSemana = `${fmtD(lunes)} — ${fmtD(viernes)}`;
+  const dIni=new Date(lunes); dIni.setDate(lunes.getDate()+cfg.offsets[0]);
+  const dFin=new Date(lunes); dFin.setDate(lunes.getDate()+cfg.offsets[4]);
+  const tituloSemana = `${fmtD(dIni)} — ${fmtD(dFin)}`;
   document.getElementById('progTitulo').textContent = tituloSemana;
   document.getElementById('printHeaderSemana').textContent = tituloSemana;
   const vistaLabel = {'envio':'Vista: Envío repo','salida':'Vista: Salida bodega','entrega':'Vista: Entrega'}[progView] || '';
@@ -1830,24 +1946,24 @@ function renderSemana(schedule, lunesISO) {
 
   // Grid para pantalla
   document.getElementById('progGrid').innerHTML = Array.from({length:5},(_,i) => {
-    const d=new Date(lunes); d.setDate(lunes.getDate()+i);
+    const d=new Date(lunes); d.setDate(lunes.getDate()+cfg.offsets[i]);
     const diso=d.toISOString().split('T')[0], isToday=diso===today;
     return `<div class="prog-col" ondragover="onColDragOver(event,${i})" ondragleave="onColDragLeave(event)" ondrop="onColDrop(event,${i})">
       <div class="prog-day-header${isToday?' today':''}">
-        <span>${DIAS_PROG[i]}</span>
+        <span>${cfg.prog[i]}</span>
         <span class="prog-day-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
       </div>
       ${(byDia[i]||[]).map(e => _cardHtml(e, i)).join('')}
-      ${window._userCanEdit !== false ? `<div class="prog-add-btn" onclick="abrirAddModal('${DIAS_PROG[i]}', ${i})">+ Agregar</div>` : ''}
+      ${window._userCanEdit !== false ? `<div class="prog-add-btn" onclick="abrirAddModal('${cfg.prog[i]}', ${i})">+ Agregar</div>` : ''}
     </div>`;
   }).join('');
 
   // Tabla para impresión: thead se repite automáticamente en cada página
   document.getElementById('progTableHead').innerHTML = `<tr>${Array.from({length:5},(_,i) => {
-    const d=new Date(lunes); d.setDate(lunes.getDate()+i);
+    const d=new Date(lunes); d.setDate(lunes.getDate()+cfg.offsets[i]);
     const isToday=d.toISOString().split('T')[0]===today;
     return `<th class="${isToday?'today':''}">
-      <span class="th-day">${DIAS_PROG[i]}</span>
+      <span class="th-day">${cfg.prog[i]}</span>
       <span class="th-date">${d.getDate()} ${d.toLocaleDateString('es-CL',{month:'short'})}</span>
     </th>`;
   }).join('')}</tr>`;
@@ -1864,14 +1980,31 @@ function renderSemana(schedule, lunesISO) {
 }
 
 // ── Edit modal ──────────────────────────────────────────────────────────────
-function openEditModal(idx) {
+function openEditModal(idx, colIdx) {
   const entry = progSemanaData[idx];
   if (!entry) return;
-  _editCtx = {tienda: entry.tienda, lunesISO: progLunesISO, isOverride: entry.override, isExtra: entry.extra, extraId: entry._id};
-  const lunes=new Date(progLunesISO+'T00:00:00'), viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
+  _editCtx = {tienda: entry.tienda, lunesISO: _progDataLunes, isOverride: entry.override, isExtra: entry.extra, extraId: entry._id};
+  const lunes=new Date(progLunesISO+'T00:00:00');
+  const cfg = _diasConfig();
   const fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+  const dIni=new Date(lunes); dIni.setDate(lunes.getDate()+cfg.offsets[0]);
+  const dFin=new Date(lunes); dFin.setDate(lunes.getDate()+cfg.offsets[4]);
+  const fmtFull = d => d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Fecha de referencia en el modal según vista:
+  //   envío  → Salida (después del carga)
+  //   salida → Carga repo (antes de la salida)
+  //   entrega→ Salida (antes de la entrega)
+  let fechaExactaTxt = '';
+  if (progView === 'salida' && entry.dia_carga) {
+    const dCarga = _diaDateRelTo(entry.dia_carga, colIdx ?? 0, false);
+    if (dCarga) fechaExactaTxt = `Carga repo: ${fmtFull(dCarga)}`;
+  } else if (entry.dia_salida) {
+    const dSalida = _diaDateRelTo(entry.dia_salida, colIdx ?? 0, progView === 'envio');
+    if (dSalida) fechaExactaTxt = `Salida: ${fmtFull(dSalida)}`;
+  }
   document.getElementById('editTiendaNombre').textContent = entry.tienda;
-  document.getElementById('editSemanaLabel').textContent  = `Semana ${fmtD(lunes)} — ${fmtD(viernes)}`;
+  document.getElementById('editSemanaLabel').textContent  = `Semana ${fmtD(dIni)} — ${fmtD(dFin)}`;
+  document.getElementById('editFechaExacta').textContent  = fechaExactaTxt;
   document.getElementById('editTienda').value = entry.tienda || '';
   // Poblar datalist con tiendas del schedule base
   const dl = document.getElementById('editTiendaList');
@@ -1881,6 +2014,13 @@ function openEditModal(idx) {
   }
   document.getElementById('editDiaSalida').value  = entry.dia_salida || 'Lunes';
   document.getElementById('editHoraSalida').value = entry.hora_salida || '';
+  const eDiaCarga = document.getElementById('editDiaCarga');
+  const eHoraCarga = document.getElementById('editHoraCarga');
+  eDiaCarga.value = entry.dia_carga || entry.dia_salida || 'Lunes';
+  eHoraCarga.value = entry.hora_carga || entry.hora_salida || '';
+  // Resetear flag manual: si dia_carga difiere de dia_salida, marcar como manual
+  eDiaCarga.dataset.manual  = (entry.dia_carga && entry.dia_carga !== entry.dia_salida) ? '1' : '';
+  eHoraCarga.dataset.manual = (entry.hora_carga && entry.hora_carga !== entry.hora_salida) ? '1' : '';
   document.getElementById('editBultosEst').value       = entry.bultos_estimados || '';
   document.getElementById('editBultosReal').value      = entry.bultos_reales || '';
   document.getElementById('editCourierPref').value      = entry.courier_preferencia || '';
@@ -1920,6 +2060,8 @@ async function guardarOverride() {
         tienda:               document.getElementById('editTienda').value.trim() || _editCtx.tienda,
         dia_salida:           document.getElementById('editDiaSalida').value,
         hora_salida:          document.getElementById('editHoraSalida').value,
+        dia_carga:            document.getElementById('editDiaCarga').value,
+        hora_carga:           document.getElementById('editHoraCarga').value || null,
         bultos_estimados:     _esGT(_editCtx.tienda) ? null : (parseInt(document.getElementById('editBultosEst').value)||null),
         bultos_reales:        _esGT(_editCtx.tienda) ? null : (parseInt(document.getElementById('editBultosReal').value)||null),
         ordenes_compra:       _esGT(_editCtx.tienda) ? _getOcRows() : undefined,
@@ -1968,10 +2110,10 @@ async function ocultarTienda(idx) {
   if (!entry) return;
   try {
     if (entry.extra) {
-      await fetch(`${API_URL}/programacion/extra?lunes=${progLunesISO}&id=${entry._id}`,{method:'DELETE'});
+      await fetch(`${API_URL}/programacion/extra?lunes=${_progDataLunes}&id=${entry._id}`,{method:'DELETE'});
     } else {
       await fetch(`${API_URL}/programacion/override`,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({lunes:progLunesISO,tienda:entry.tienda,cambios:{visible:false}})});
+        body:JSON.stringify({lunes:_progDataLunes,tienda:entry.tienda,cambios:{visible:false}})});
     }
     cargarSemana(progLunesISO);
   } catch(e) { alert('Error: '+e.message); }
@@ -1984,13 +2126,19 @@ function cerrarModal() {
 // ── Add modal ────────────────────────────────────────────────────────────────
 function abrirAddModal(diaLabel, diaOffset) {
   _addDiaCtx = diaOffset;
-  const DIAS_ESP=['Lunes','Martes','Miércoles','Jueves','Viernes'];
   const lunes=new Date(progLunesISO+'T00:00:00'), fmtD=d=>d.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
-  const viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
-  document.getElementById('addModalSub').textContent=`Semana ${fmtD(lunes)} — ${fmtD(viernes)}`;
+  const cfgA=_diasConfig(), dIA=new Date(lunes); dIA.setDate(lunes.getDate()+cfgA.offsets[0]);
+  const dFA=new Date(lunes); dFA.setDate(lunes.getDate()+cfgA.offsets[4]);
+  document.getElementById('addModalSub').textContent=`Semana ${fmtD(dIA)} — ${fmtD(dFA)}`;
   document.getElementById('addTienda').value='';
-  document.getElementById('addDiaSalida').value=DIAS_ESP[diaOffset]||'Lunes';
+  document.getElementById('addDiaSalida').value=cfgA.full[diaOffset]||cfgA.full[0];
   document.getElementById('addHoraSalida').value='11:00';
+  const aDiaCarga = document.getElementById('addDiaCarga');
+  const aHoraCarga = document.getElementById('addHoraCarga');
+  aDiaCarga.value = cfgA.full[diaOffset]||cfgA.full[0];
+  aHoraCarga.value = '11:00';
+  aDiaCarga.dataset.manual = '';
+  aHoraCarga.dataset.manual = '';
   document.getElementById('addBultosEst').value='';
   document.getElementById('addCourierPref').value='';
   document.getElementById('addTipoCamion').value='XL';
@@ -1998,10 +2146,10 @@ function abrirAddModal(diaLabel, diaOffset) {
   const dlCanal = document.getElementById('addCanalList');
   dlCanal.innerHTML = [...new Set(progSemanaData.map(e=>e.canal).filter(Boolean))]
     .map(c=>`<option value="${c}">`).join('');
-  // Populate datalist with existing tiendas
   const dl=document.getElementById('addTiendaList');
-  dl.innerHTML=progSemanaData.filter((e,i,a)=>a.findIndex(x=>x.tienda===e.tienda)===i)
-    .map(e=>`<option value="${e.tienda}">`).join('');
+  const tSemana=progSemanaData.map(e=>e.tienda).filter(Boolean);
+  const tAll=[..._tiendaBase,...tSemana].filter((v,i,a)=>a.indexOf(v)===i).sort();
+  dl.innerHTML=tAll.map(t=>`<option value="${t}">`).join('');
   document.getElementById('addModal').classList.add('open');
 }
 
@@ -2014,7 +2162,8 @@ async function confirmarAgregar() {
   const baseTienda=progSemanaData.find(e=>e.tienda===tienda);
   const entrada={
     tienda, dia_salida: diaSalida, hora_salida: horaSalida,
-    dia_carga: diaSalida,
+    dia_carga:  document.getElementById('addDiaCarga').value  || diaSalida,
+    hora_carga: document.getElementById('addHoraCarga').value || horaSalida || null,
     dia_entrega_99min:    baseTienda?.dia_entrega_99min||'',
     hora_entrega_99min:   baseTienda?.hora_entrega_99min||'',
     dia_entrega_shipper:  baseTienda?.dia_entrega_shipper||'',
@@ -2028,7 +2177,7 @@ async function confirmarAgregar() {
   };
   try {
     await fetch(`${API_URL}/programacion/extra`,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({lunes:progLunesISO,entrada})});
+      body:JSON.stringify({lunes:_progDataLunes,entrada})});
     cerrarAddModal(); cargarSemana(progLunesISO);
   } catch(e) { alert('Error: '+e.message); }
 }
@@ -2040,7 +2189,7 @@ function cerrarAddModal() {
 async function exportarProg() {
   if (!progLunesISO) return;
   try {
-    const res = await fetch(`${API_URL}/programacion/export?lunes=${progLunesISO}`);
+    const res = await fetch(`${API_URL}/programacion/export?lunes=${_progDataLunes}`);
     if (!res.ok) throw new Error('Error al exportar');
     const blob = await res.blob();
     const url  = URL.createObjectURL(blob);

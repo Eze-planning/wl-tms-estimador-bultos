@@ -7,6 +7,9 @@ Usuarios almacenados en users.json con contraseñas hasheadas con bcrypt.
 import os
 import json
 import uuid
+import base64
+import urllib.request
+import urllib.error
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional
@@ -21,6 +24,45 @@ ALGORITHM   = "HS256"
 TOKEN_HOURS = 24 * 7   # 7 días
 
 USERS_PATH  = Path(__file__).parent / "users.json"
+
+_GH_TOKEN  = os.getenv("GITHUB_TOKEN", "")
+_GH_REPO   = os.getenv("GITHUB_REPO", "")    # "owner/repo"
+_GH_BRANCH = os.getenv("GITHUB_BRANCH", "master")
+_GH_PATH   = "estimador_bultos/users.json"   # ruta dentro del repo
+
+
+def _push_users_github() -> None:
+    """Commitea users.json a GitHub vía API. Silencioso si no está configurado."""
+    if not _GH_TOKEN or not _GH_REPO:
+        return
+    api = f"https://api.github.com/repos/{_GH_REPO}/contents/{_GH_PATH}"
+    headers = {
+        "Authorization": f"token {_GH_TOKEN}",
+        "Accept": "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+    }
+    try:
+        # Obtener SHA actual del archivo en el repo
+        req = urllib.request.Request(f"{api}?ref={_GH_BRANCH}", headers=headers)
+        with urllib.request.urlopen(req, timeout=10) as r:
+            sha = json.loads(r.read()).get("sha", "")
+
+        with open(USERS_PATH, "rb") as f:
+            content_b64 = base64.b64encode(f.read()).decode()
+
+        payload = json.dumps({
+            "message": "Auto: update users.json [skip ci]",
+            "content": content_b64,
+            "sha":     sha,
+            "branch":  _GH_BRANCH,
+        }).encode()
+
+        req = urllib.request.Request(api, data=payload, headers=headers, method="PUT")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            r.read()
+    except Exception:
+        pass  # no bloquear la operación si falla
+
 
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 _bearer = HTTPBearer(auto_error=False)
@@ -58,6 +100,7 @@ def _load_users() -> dict:
 def _save_users(data: dict):
     with open(USERS_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    _push_users_github()
 
 def _safe(user: dict) -> dict:
     return {k: v for k, v in user.items() if k != "password"}

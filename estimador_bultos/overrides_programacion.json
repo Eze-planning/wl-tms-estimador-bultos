@@ -100,6 +100,33 @@
         "tipo_camion": "XL",
         "ruta_override": "directo",
         "costo_es_manual": false
+      },
+      {
+        "tienda": "Tienda Coyhaique",
+        "dia_salida": "Miércoles",
+        "hora_salida": "11:00",
+        "dia_carga": "Miércoles",
+        "dia_entrega_99min": "Lunes",
+        "hora_entrega_99min": "09:00",
+        "dia_entrega_shipper": "Lunes",
+        "hora_entrega_shipper": "",
+        "courier_preferencia": "99 Minutos",
+        "tipo_camion": "XL",
+        "canal": "Tiendas Propias",
+        "lt_99min": 0,
+        "lt_shipper": 0,
+        "bultos_estimados": null,
+        "_id": "d5fa332f",
+        "override": true,
+        "extra": true,
+        "bultos_reales": null,
+        "costo_estimado": null,
+        "ruta_nombre": null,
+        "n_sharing": null,
+        "rutas_disponibles": [],
+        "costo_es_manual": false,
+        "ruta_override": null,
+        "costo_manual": null
       }
     ],
     "Tienda Pucon": {
@@ -185,7 +212,17 @@
     "TIenda Talca": {
       "dia_salida": "Martes",
       "dia_entrega_shipper": "Martes",
-      "bultos_estimados": 66
+      "bultos_estimados": 66,
+      "tienda": "TIenda Talca",
+      "hora_salida": "11:00",
+      "bultos_reales": 64,
+      "courier_preferencia": "Shipper",
+      "tipo_camion": "XL",
+      "ruta_override": null,
+      "costo_manual": null,
+      "dia_entrega_99min": "Jueves",
+      "hora_entrega_99min": "09:00",
+      "hora_entrega_shipper": "16:00"
     },
     "Tienda Chillan": {
       "dia_salida": "Martes",
@@ -348,14 +385,15 @@
       "dia_salida": "Lunes",
       "hora_salida": "14:00",
       "bultos_estimados": 200,
-      "bultos_reales": null,
+      "bultos_reales": 165,
       "courier_preferencia": "Shipper",
       "tipo_camion": "XL",
       "ruta_override": "Santiago combinado",
       "dia_entrega_99min": "Lunes",
       "hora_entrega_99min": "09:00",
       "hora_entrega_shipper": "15:00",
-      "tienda": "Ecommerce 2"
+      "tienda": "Ecommerce 2",
+      "costo_manual": null
     },
     "Tienda Vespucio": {
       "dia_entrega_shipper": "Martes",
@@ -437,7 +475,99 @@
     "Tienda Chicureo": {
       "dia_salida": "Miércoles",
       "dia_entrega_99min": "Miércoles",
-      "dia_entrega_shipper": "Miércoles"
+      "dia_entrega_shipper": "Miércoles",
+      "dia_carga": "Lunes"
+    },
+    "Tienda Laguna": {
+      "visible": false
+    },
+    "Tienda Temuco": {
+      "bultos_estimados": 49,
+      "tienda": "Tienda Temuco",
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "99 Minutos",
+      "tipo_camion": "XL",
+      "ruta_override": "Largo: Temuco-Pucón-PV-PM-Osorno",
+      "costo_manual": null,
+      "dia_entrega_99min": "Martes",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "20:00"
+    },
+    "Tienda Pucon": {
+      "bultos_estimados": 29,
+      "tienda": "Tienda Pucon",
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "99 Minutos",
+      "tipo_camion": "XL",
+      "ruta_override": "Largo: Temuco-Pucón-PV-PM-Osorno",
+      "costo_manual": null,
+      "dia_entrega_99min": "Martes",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "17:00"
+    },
+    "Tienda Osorno": {
+      "bultos_estimados": 41,
+      "tienda": "Tienda Osorno",
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "99 Minutos",
+      "tipo_camion": "XL",
+      "ruta_override": "Largo: Temuco-Pucón-PV-PM-Osorno",
+      "costo_manual": null,
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "07:00"
+    },
+    "Tienda Puerto Montt": {
+      "bultos_estimados": 23,
+      "tienda": "Tienda Puerto Montt",
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "99 Minutos",
+      "tipo_camion": "XL",
+      "ruta_override": "Largo: Temuco-Pucón-PV-PM-Osorno",
+      "costo_manual": null,
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "09:00"
+    },
+    "Tienda Puerto Varas": {
+      "bultos_estimados": 30,
+      "tienda": "Tienda Puerto Varas",
+      "dia_salida": "Lunes",
+      "hora_salida": "11:00",
+      "bultos_reales": null,
+      "courier_preferencia": "99 Minutos",
+      "tipo_camion": "XL",
+      "ruta_override": "Largo: Temuco-Pucón-PV-PM-Osorno",
+      "costo_manual": null,
+      "dia_entrega_99min": "Miércoles",
+      "hora_entrega_99min": "09:00",
+      "dia_entrega_shipper": "Martes",
+      "hora_entrega_shipper": "11:00"
+    },
+    "__ordenes": {
+      "Lun_salida": [
+        "Tienda Antofagasta",
+        "Tienda Temuco",
+        "Tienda Osorno",
+        "Tienda Pucon",
+        "Tienda Puerto Montt",
+        "Tienda Puerto Varas",
+        "Ecommerce 1",
+        "Tienda Nueva Costanera",
+        "Tienda Vitacura"
+      ]
     }
   }
 }
