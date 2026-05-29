@@ -391,6 +391,12 @@
           <span class="fname" id="fileName"></span>
           <span class="fsize" id="fileSize"></span>
         </div>
+        <!-- Zona multi-archivo (solo visible en modo múltiples tiendas) -->
+        <div id="multiFilesZone" style="display:none">
+          <div id="multiFileList" style="margin-bottom:8px;min-height:44px"></div>
+          <button class="btn-secondary full" style="font-size:13px" onclick="abrirMultiFilePicker()">+ Agregar archivo Excel</button>
+          <input type="file" id="multiFileInput" accept=".xlsx,.xls" style="display:none">
+        </div>
         <div class="tipo-selector">
           <button class="tipo-btn active" id="btnTiendaPropia" onclick="setTipo('tienda_propia')">Tienda propia</button>
           <button class="tipo-btn" id="btnMultiTienda" onclick="setTipo('multi_tienda')">Múltiples tiendas</button>
@@ -887,6 +893,7 @@ const API_URL = (window.location.hostname === 'localhost' || window.location.hos
   : 'https://estimador-bultos-zhbdwxprfa-uc.a.run.app';
 let currentFile     = null;
 let currentTipo     = "tienda_propia";
+let _multiFiles     = [];
 let _lastResultData = null;
 let _savePanelOC    = null; // { oc, bultos } cuando viene de Paris
 
@@ -1050,29 +1057,83 @@ function setTipo(tipo) {
   document.getElementById("btnTiendaPropia").classList.toggle("active", tipo === "tienda_propia");
   document.getElementById("btnMultiTienda").classList.toggle("active", tipo === "multi_tienda");
   document.getElementById("btnParisXdb").classList.toggle("active", tipo === "paris_xdb");
+  const esMulti = tipo === "multi_tienda";
+  document.getElementById("dropZone").style.display       = esMulti ? "none" : "";
+  document.getElementById("fileSelected").style.display   = esMulti ? "none" : (currentFile ? "flex" : "none");
+  document.getElementById("multiFilesZone").style.display = esMulti ? "block" : "none";
+  if (esMulti) {
+    _multiFiles = [];
+    _renderMultiFileList();
+    document.getElementById("btnEstimar").disabled = true;
+  } else {
+    document.getElementById("btnEstimar").disabled = !currentFile;
+  }
+}
+
+function abrirMultiFilePicker() { document.getElementById("multiFileInput").click(); }
+
+document.getElementById("multiFileInput").addEventListener("change", e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  _multiFiles.push(f);
+  _renderMultiFileList();
+  document.getElementById("btnEstimar").disabled = false;
+  e.target.value = "";
+});
+
+function _removeMultiFile(idx) {
+  _multiFiles.splice(idx, 1);
+  _renderMultiFileList();
+  document.getElementById("btnEstimar").disabled = _multiFiles.length === 0;
+}
+
+function _renderMultiFileList() {
+  const el = document.getElementById("multiFileList");
+  if (!_multiFiles.length) {
+    el.innerHTML = '<div style="color:var(--text2);font-size:12px;text-align:center;padding:10px 0;font-family:\'Roboto Mono\',monospace">Agregá un archivo por tienda · podés seleccionar desde distintas carpetas</div>';
+    return;
+  }
+  el.innerHTML = _multiFiles.map((f,i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">📄</span>
+      <span style="flex:1;font-size:11px;font-family:'Roboto Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${f.name}">${f.name}</span>
+      <span style="font-size:10px;color:var(--text2);white-space:nowrap">${(f.size/1024).toFixed(0)} KB</span>
+      <button onclick="_removeMultiFile(${i})" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:16px;line-height:1;padding:0 2px" title="Quitar">×</button>
+    </div>`).join("");
 }
 
 // ── Estimar ──────────────────────────────────────────────────────────────────
 async function estimar() {
-  if (!currentFile) return;
+  if (currentTipo === "multi_tienda") { if (!_multiFiles.length) return; }
+  else { if (!currentFile) return; }
   document.getElementById("loading").classList.add("show");
   document.getElementById("results").classList.remove("show");
   document.getElementById("btnEstimar").disabled = true;
   document.getElementById("errorMsg").classList.remove("show");
-  const fd = new FormData();
-  fd.append("file", currentFile);
-  fd.append("tipo", currentTipo);
   try {
-    const res = await fetch(`${API_URL}/estimar`, { method: "POST", body: fd });
-    if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Error al procesar"); }
-    _lastResultData = await res.json();
-    mostrarResultados(_lastResultData);
+    let data;
+    if (currentTipo === "multi_tienda") {
+      const fd = new FormData();
+      for (const f of _multiFiles) fd.append("files", f);
+      const res = await fetch(`${API_URL}/estimar/multi-archivos`, { method: "POST", body: fd });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Error al procesar"); }
+      data = await res.json();
+    } else {
+      const fd = new FormData();
+      fd.append("file", currentFile);
+      fd.append("tipo", currentTipo);
+      const res = await fetch(`${API_URL}/estimar`, { method: "POST", body: fd });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Error al procesar"); }
+      data = await res.json();
+    }
+    _lastResultData = data;
+    mostrarResultados(data);
   } catch(e) {
     document.getElementById("errorMsg").textContent = "❌ " + e.message;
     document.getElementById("errorMsg").classList.add("show");
   } finally {
     document.getElementById("loading").classList.remove("show");
-    document.getElementById("btnEstimar").disabled = false;
+    document.getElementById("btnEstimar").disabled = currentTipo === "multi_tienda" ? !_multiFiles.length : !currentFile;
   }
 }
 

@@ -508,13 +508,14 @@ def estimar_paris(filepath: str) -> dict:
     return estimar_paris_xdb(filepath)
 
 
-def estimar_multi_tienda(filepath: str) -> dict:
+def estimar_multi_tienda(filepath: str = None, df: pd.DataFrame = None) -> dict:
     client      = get_bq_client()
     ratios      = cargar_ratios(client, "tienda_propia")
     product_dim = cargar_product_dim(client)
 
-    df = pd.read_excel(filepath, dtype={"Código producto": str})
-    df = df.where(pd.notnull(df), None)
+    if df is None:
+        df = pd.read_excel(filepath, dtype={"Código producto": str})
+        df = df.where(pd.notnull(df), None)
 
     tiendas_result = []
     detalle_total  = []

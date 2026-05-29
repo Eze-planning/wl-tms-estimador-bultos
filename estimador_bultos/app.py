@@ -17,7 +17,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 # Debe setearse como variable de entorno CRON_SECRET en Cloud Run.
 _CRON_SECRET = os.getenv("CRON_SECRET", "")
 
-from modelo import estimar_bultos
+from modelo import estimar_bultos, estimar_multi_tienda
 from collections import defaultdict
 from tarifario_99min import calcular_costo_99min
 from tarifario_shipper import (
@@ -351,6 +351,32 @@ async def estimar(
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         os.unlink(tmp_path)
+
+
+@app.post("/estimar/multi-archivos")
+async def estimar_multi_archivos(
+    files: list[UploadFile] = File(...),
+    _: dict = Depends(get_current_user),
+):
+    if not files:
+        raise HTTPException(status_code=400, detail="No se recibieron archivos")
+    dfs = []
+    for f in files:
+        if not f.filename.endswith((".xlsx", ".xls")):
+            raise HTTPException(status_code=400, detail=f"'{f.filename}' debe ser .xlsx o .xls")
+        content = await f.read()
+        try:
+            df = pd.read_excel(io.BytesIO(content), dtype={"Código producto": str})
+            df = df.where(pd.notnull(df), None)
+            dfs.append(df)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error leyendo '{f.filename}': {e}")
+    try:
+        combined = pd.concat(dfs, ignore_index=True)
+        resultado = estimar_multi_tienda(df=combined)
+        return JSONResponse(content=resultado)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/estimar/excel")
