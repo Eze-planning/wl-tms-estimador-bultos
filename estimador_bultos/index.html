@@ -393,6 +393,7 @@
         </div>
         <div class="tipo-selector">
           <button class="tipo-btn active" id="btnTiendaPropia" onclick="setTipo('tienda_propia')">Tienda propia</button>
+          <button class="tipo-btn" id="btnMultiTienda" onclick="setTipo('multi_tienda')">Múltiples tiendas</button>
           <button class="tipo-btn" id="btnParisXdb" onclick="setTipo('paris_xdb')">Paris</button>
         </div>
         <div class="error-msg" id="errorMsg"></div>
@@ -1047,6 +1048,7 @@ function setFile(file) {
 function setTipo(tipo) {
   currentTipo = tipo;
   document.getElementById("btnTiendaPropia").classList.toggle("active", tipo === "tienda_propia");
+  document.getElementById("btnMultiTienda").classList.toggle("active", tipo === "multi_tienda");
   document.getElementById("btnParisXdb").classList.toggle("active", tipo === "paris_xdb");
 }
 
@@ -1081,7 +1083,40 @@ function mostrarResultados(data) {
   document.getElementById("costoWrap").classList.remove("show");
   document.getElementById("savePanelProg").classList.remove("show");
 
-  if (orden.tipo === "paris_stock") {
+  if (orden.tipo === "multi_tienda") {
+    document.getElementById("summaryGrid").innerHTML = `
+      <div class="summary-card"><div class="summary-label">Tiendas</div><div class="summary-value">${orden.n_tiendas}</div><div class="summary-sub">puntos de venta</div></div>
+      <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias únicas</div></div>
+      <div class="summary-card"><div class="summary-label">Total Unidades</div><div class="summary-value">${orden.total_unidades.toLocaleString()}</div><div class="summary-sub">unidades pedidas</div></div>
+      <div class="summary-card highlight"><div class="summary-label">Bultos Estimados</div><div class="summary-value">${orden.total_bultos.toLocaleString()}</div><div class="summary-sub">cajas de despacho</div></div>`;
+    const tiendas = data.tiendas_detalle || [];
+    const maxB = Math.max(...tiendas.map(t => t.total_bultos), 1);
+    document.getElementById("tiendasGrid").innerHTML = tiendas
+      .sort((a,b) => b.total_bultos - a.total_bultos)
+      .map(t => {
+        const lineasBadges = (t.lineas||[])
+          .filter(l => l.Bultos_estimados >= 1)
+          .sort((a,b) => b.Bultos_estimados - a.Bultos_estimados)
+          .map(l => `<span style="display:inline-block;background:var(--border);border-radius:4px;padding:1px 7px;font-size:10px;font-family:'Roboto Mono',monospace;margin:1px 2px">${l["Línea"]||l.linea}: ${Math.ceil(l.Bultos_estimados)}</span>`)
+          .join("");
+        return `<div class="tienda-row" style="align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div class="tienda-name">${t.tienda}</div>
+            <div class="linea-bar" style="margin:4px 0 6px"><div class="linea-bar-fill" style="width:${t.total_bultos/maxB*100}%"></div></div>
+            <div style="margin-top:2px">${lineasBadges}</div>
+          </div>
+          <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${t.total_skus}</div></div>
+          <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${t.total_unidades.toLocaleString()}</div></div>
+          <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(t.total_bultos)}</div></div>
+          <div class="edit-only" style="margin-left:8px">
+            <button class="btn-secondary" style="padding:5px 10px;font-size:11px;white-space:nowrap"
+              onclick="_abrirSaveMulti('${t.tienda.replace(/'/g,"\\'")}',${Math.ceil(t.total_bultos)})">→ Prog</button>
+          </div>
+        </div>`;
+      }).join("");
+    document.getElementById("tiendasSection").style.display = "block";
+    document.getElementById("savePanelProg").classList.remove("show");
+  } else if (orden.tipo === "paris_stock") {
     document.getElementById("summaryGrid").innerHTML = `
       <div class="summary-card"><div class="summary-label">N° Orden</div><div class="summary-value" style="font-size:20px">${orden.n_orden}</div><div class="summary-sub">Stock · Cd Omnicanal</div></div>
       <div class="summary-card"><div class="summary-label">Total SKUs</div><div class="summary-value">${orden.total_skus}</div><div class="summary-sub">referencias</div></div>
@@ -1113,7 +1148,7 @@ function mostrarResultados(data) {
     document.getElementById("tiendasSection").style.display = "none";
   }
 
-  const lineas = orden.lineas || [];
+  const lineas = (orden.tipo === "multi_tienda" ? data.resumen_linea : orden.lineas) || [];
   const maxB = Math.max(...lineas.map(l => l.Bultos_estimados), 1);
   document.getElementById("lineasGrid").innerHTML = lineas.map(l => `
     <div class="linea-row">
@@ -1215,6 +1250,14 @@ function _proximosLunes(n=8) {
   const dow=today.getDay(), daysToMon=dow===1?0:(8-dow)%7||7;
   const first=new Date(today); first.setDate(today.getDate()+daysToMon);
   return Array.from({length:n},(_,i)=>{ const d=new Date(first); d.setDate(first.getDate()+i*7); return d; });
+}
+
+function _abrirSaveMulti(tienda, bultos) {
+  _savePanelOC = null;
+  document.getElementById("savePanelBultos").textContent = bultos + " bultos";
+  document.getElementById("savePanelProg").classList.add("show");
+  document.getElementById("savePanelProg").scrollIntoView({behavior:"smooth", block:"nearest"});
+  _cargarSavePanelTienda(tienda);
 }
 
 async function _cargarSavePanelTienda(pdv) {

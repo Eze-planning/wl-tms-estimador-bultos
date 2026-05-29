@@ -508,9 +508,70 @@ def estimar_paris(filepath: str) -> dict:
     return estimar_paris_xdb(filepath)
 
 
+def estimar_multi_tienda(filepath: str) -> dict:
+    client      = get_bq_client()
+    ratios      = cargar_ratios(client, "tienda_propia")
+    product_dim = cargar_product_dim(client)
+
+    df = pd.read_excel(filepath, dtype={"Código producto": str})
+    df = df.where(pd.notnull(df), None)
+
+    tiendas_result = []
+    detalle_total  = []
+
+    for tienda_raw, grupo in df.groupby("Punto de venta"):
+        tienda = str(tienda_raw).strip()
+        detalle, resumen_linea, _ = procesar_pedido(
+            grupo, product_dim, ratios, tienda,
+            col_sku="Código producto", col_und="Pedidos",
+            col_desc="Descripción", col_talla="Talla"
+        )
+        df_det = pd.DataFrame(detalle)
+        bultos_tienda = sum(r["Bultos_estimados"] for r in resumen_linea)
+
+        tiendas_result.append({
+            "tienda":           tienda,
+            "total_skus":       df_det["sku"].nunique() if len(df_det) > 0 else 0,
+            "total_unidades":   int(df_det["unidades"].sum()) if len(df_det) > 0 else 0,
+            "total_bultos":     round(bultos_tienda),
+            "lineas":           resumen_linea,
+        })
+        for r in detalle:
+            r["tienda"] = tienda
+        detalle_total.extend(detalle)
+
+    df_all = pd.DataFrame(detalle_total) if detalle_total else pd.DataFrame()
+
+    resumen_linea_global = (
+        df_all.groupby("linea")
+        .agg(SKUs=("sku","nunique"), Unidades_totales=("unidades","sum"),
+             Bultos_estimados=("bultos_estimados","sum"))
+        .reset_index()
+        .assign(Bultos_estimados=lambda x: x["Bultos_estimados"].round(1))
+        .rename(columns={"linea": "Línea"})
+        .to_dict(orient="records")
+    ) if len(df_all) > 0 else []
+
+    resumen_orden = {
+        "tipo":             "multi_tienda",
+        "n_tiendas":        len(tiendas_result),
+        "total_skus":       int(df_all["sku"].nunique()) if len(df_all) > 0 else 0,
+        "total_unidades":   int(df_all["unidades"].sum()) if len(df_all) > 0 else 0,
+        "total_bultos":     round(sum(t["total_bultos"] for t in tiendas_result)),
+    }
+
+    return {
+        "tiendas_detalle": tiendas_result,
+        "resumen_linea":   resumen_linea_global,
+        "resumen_orden":   resumen_orden,
+    }
+
+
 def estimar_bultos(filepath: str, tipo: str = "tienda_propia") -> dict:
     if tipo in ("paris_xdb", "paris"):
         return estimar_paris(filepath)
+    if tipo == "multi_tienda":
+        return estimar_multi_tienda(filepath)
     return estimar_tienda_propia(filepath)
 
 
