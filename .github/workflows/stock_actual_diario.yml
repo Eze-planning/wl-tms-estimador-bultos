@@ -1,0 +1,49 @@
+name: Stock Actual Diario
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 03:00 Chile (CLT = UTC-4, invierno)
+  workflow_dispatch:        # trigger manual desde GitHub Actions
+
+jobs:
+  scrape-stock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright pandas "google-cloud-bigquery[pandas]" \
+                      google-auth python-dotenv rapidfuzz openpyxl
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Write BQ service account key
+        run: echo '${{ secrets.BQ_KEY_JSON }}' > valgreti_scraper/bq_service_account.json
+
+      - name: Create .env
+        run: |
+          cat > valgreti_scraper/.env <<EOF
+          VALGRETI_USER=${{ secrets.VALGRETI_USER }}
+          VALGRETI_PASS=${{ secrets.VALGRETI_PASS }}
+          BQ_PROJECT=${{ secrets.BQ_PROJECT }}
+          BQ_DATASET=sandbox
+          BQ_KEY_PATH=bq_service_account.json
+          EOF
+
+      - name: Run scraper — stock-actual
+        run: |
+          cd valgreti_scraper
+          python valgreti_scraper.py --mode stock-actual --headless
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f valgreti_scraper/bq_service_account.json valgreti_scraper/.env

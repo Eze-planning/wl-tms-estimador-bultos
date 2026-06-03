@@ -17,11 +17,12 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
-BASE_URL    = "http://valgretiapp2.brazilsouth.cloudapp.azure.com:4190/EDARKSTORE/EnfasysWMS_Admin_PROD"
-LOGIN_URL   = f"{BASE_URL}/VIEW/Security/login.aspx"
-LOG_EMB_URL = f"{BASE_URL}/VIEW/Salida/HistorialVAS.aspx"
-DOC_SAL_URL = f"{BASE_URL}/VIEW/Salida/DocumentoSalida.aspx"
-LOG_REC_URL = f"{BASE_URL}/VIEW/Entrada/LogCrearCaja.aspx"
+BASE_URL       = "http://valgretiapp2.brazilsouth.cloudapp.azure.com:4190/EDARKSTORE/EnfasysWMS_Admin_PROD"
+LOGIN_URL      = f"{BASE_URL}/VIEW/Security/login.aspx"
+LOG_EMB_URL    = f"{BASE_URL}/VIEW/Salida/HistorialVAS.aspx"
+DOC_SAL_URL    = f"{BASE_URL}/VIEW/Salida/DocumentoSalida.aspx"
+LOG_REC_URL    = f"{BASE_URL}/VIEW/Entrada/LogCrearCaja.aspx"
+STOCK_ITEM_URL = f"{BASE_URL}/VIEW/Stock/ConsultaStockItem.aspx"
 
 DOWNLOAD_DIR = Path(__file__).parent / "downloads"
 DOWNLOAD_DIR.mkdir(exist_ok=True)
@@ -423,9 +424,44 @@ def run_incremental(page, client):
     log.info("=== INCREMENTAL COMPLETADO ===")
 
 
+def download_stock_actual(page):
+    log.info("[stock_actual] Descargando stock por item...")
+    page.goto(STOCK_ITEM_URL, wait_until="domcontentloaded")
+    page.wait_for_timeout(2000)
+    page.locator("#bodyContent_btnBuscar").click()
+    page.wait_for_load_state("domcontentloaded")
+    page.wait_for_timeout(5000)
+    dest = DOWNLOAD_DIR / "stock_actual.xlsx"
+    with page.expect_download(timeout=120000) as dl:
+        page.locator("#bodyContent_btnExportar").click()
+    dl.value.save_as(dest)
+    log.info(f"[stock_actual] Guardado: {dest}")
+    return dest
+
+
+def load_stock_actual(client, filepath):
+    p, d = os.getenv("BQ_PROJECT"), os.getenv("BQ_DATASET")
+    table_id = f"{p}.{d}.stock_actual"
+    df = normalize_columns(pd.read_excel(filepath, dtype=str))
+    df = df.where(pd.notnull(df), None)
+    df = df.loc[:, df.columns != ""]                          # quitar col sin nombre
+    for c in df.columns:
+        if any(k in c for k in ["cantidad", "unidad", "stock"]):
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+    for c in df.columns:                                      # cols vacías → STRING
+        if df[c].isna().all():
+            df[c] = df[c].astype(str).where(df[c].notna(), None)
+    job_config = bigquery.LoadJobConfig(
+        autodetect=True,
+        write_disposition="WRITE_TRUNCATE",
+    )
+    client.load_table_from_dataframe(df, table_id, job_config=job_config).result()
+    log.info(f"Stock Actual: {len(df)} filas en {table_id}.")
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["historico","incremental"], default="incremental")
+    parser.add_argument("--mode", choices=["historico","incremental","stock-actual"], default="incremental")
     parser.add_argument("--start", default="2020-01-01")
     parser.add_argument("--end", default=str(date.today()))
     parser.add_argument("--headless", action="store_true")
@@ -445,6 +481,9 @@ def main():
                 run_historico(page, client,
                     datetime.strptime(args.start, "%Y-%m-%d").date(),
                     datetime.strptime(args.end, "%Y-%m-%d").date())
+            elif args.mode == "stock-actual":
+                path = download_stock_actual(page)
+                load_stock_actual(client, path)
             else:
                 run_incremental(page, client)
         except Exception as e:
