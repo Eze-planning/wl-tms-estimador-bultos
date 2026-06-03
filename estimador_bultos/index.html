@@ -441,9 +441,9 @@
         <div class="section-header"><div class="section-title">Bultos por Tienda</div></div>
         <!-- Panel guardar todo — solo visible en modo multi_tienda -->
         <div id="multiSaveAllPanel" class="save-prog-panel edit-only" style="display:none">
-          <span class="save-prog-label">Guardar todas en Programación:</span>
+          <span class="save-prog-label">Semana destino:</span>
           <select class="form-input" id="multiSaveSemana" style="width:170px"></select>
-          <button class="btn-primary" id="btnGuardarTodos" style="padding:8px 16px;font-size:13px" onclick="_guardarTodos()">Guardar todos</button>
+          <span style="font-size:11px;color:var(--text2);font-family:'Roboto Mono',monospace">Confirmá cada tienda con su botón Guardar</span>
         </div>
         <div class="tiendas-grid" id="tiendasGrid"></div>
         <div class="divider"></div>
@@ -1166,6 +1166,7 @@ function mostrarResultados(data) {
           .sort((a,b) => b.Bultos_estimados - a.Bultos_estimados)
           .map(l => `<span style="display:inline-block;background:var(--border);border-radius:4px;padding:1px 7px;font-size:10px;font-family:'Roboto Mono',monospace;margin:1px 2px">${l["Línea"]||l.linea}: ${Math.ceil(l.Bultos_estimados)}</span>`)
           .join("");
+        const tid = 'mt_' + Math.random().toString(36).slice(2,8);
         return `<div class="tienda-row" style="align-items:flex-start">
           <div style="flex:1;min-width:0">
             <div class="tienda-name">${t.tienda}</div>
@@ -1175,9 +1176,11 @@ function mostrarResultados(data) {
           <div class="linea-stat"><div class="linea-stat-label">SKUs</div><div class="linea-stat-value">${t.total_skus}</div></div>
           <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${t.total_unidades.toLocaleString()}</div></div>
           <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(t.total_bultos)}</div></div>
-          <div class="edit-only" style="margin-left:8px">
-            <button class="btn-secondary" style="padding:5px 10px;font-size:11px;white-space:nowrap"
-              onclick="_abrirSaveMulti('${t.tienda.replace(/'/g,"\\'")}',${Math.ceil(t.total_bultos)})">→ Prog</button>
+          <div class="edit-only" style="margin-left:8px;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <button id="${tid}" class="btn-primary" style="padding:5px 12px;font-size:11px;white-space:nowrap"
+              onclick="_guardarUnaTienda('${t.tienda.replace(/'/g,"\\'")}',${Math.ceil(t.total_bultos)},'${tid}')">Guardar</button>
+            <button class="btn-secondary" style="padding:3px 8px;font-size:10px;white-space:nowrap;opacity:0.7"
+              onclick="_abrirSaveMulti('${t.tienda.replace(/'/g,"\\'")}',${Math.ceil(t.total_bultos)})">→ Prog manual</button>
           </div>
         </div>`;
       }).join("");
@@ -1328,27 +1331,26 @@ function _proximosLunes(n=8) {
   return Array.from({length:n},(_,i)=>{ const d=new Date(first); d.setDate(first.getDate()+i*7); return d; });
 }
 
-async function _guardarTodos() {
-  const lunes   = document.getElementById('multiSaveSemana').value;
-  const tiendas = _lastResultData?.tiendas_detalle;
-  if (!lunes || !tiendas?.length) return;
-  const btn = document.getElementById('btnGuardarTodos');
-  btn.disabled = true; btn.textContent = 'Guardando…';
-  let ok = 0, errores = [];
-  for (const t of tiendas) {
-    try {
-      const r = await fetch(`${API_URL}/programacion/override`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({lunes, tienda: t.tienda, cambios: {bultos_estimados: Math.ceil(t.total_bultos)}})
-      });
-      if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
-      ok++;
-    } catch(e) { errores.push(`${t.tienda}: ${e.message}`); }
+async function _guardarUnaTienda(tienda, bultos, btnId) {
+  const lunes = document.getElementById('multiSaveSemana').value;
+  if (!lunes) { alert('Seleccioná una semana primero'); return; }
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    const r = await fetch(`${API_URL}/programacion/override`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({lunes, tienda, cambios: {bultos_estimados: bultos}})
+    });
+    if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
+    btn.textContent = '✓';
+    btn.style.background = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Guardar';
+    alert(`Error guardando ${tienda}: ${e.message}`);
   }
-  btn.disabled = false; btn.textContent = 'Guardar todos';
-  if (!errores.length) alert(`✓ ${ok} tiendas guardadas en semana ${lunes}`);
-  else alert(`${ok} guardadas.\nFallaron:\n${errores.join('\n')}`);
 }
 
 function _abrirSaveMulti(tienda, bultos) {
