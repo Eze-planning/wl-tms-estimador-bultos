@@ -73,6 +73,8 @@ Ver `.env.example` para el listado completo. Las críticas:
 | `sandbox.documento_salida` | Lectura | 3×/día (pipeline externo) |
 | `sandbox.log_recepcion` | Lectura | 3×/día (pipeline externo) |
 | `sandbox.base_embalaje` | Lectura + **Escritura** | 3×/día via Cloud Scheduler → `/cron/rebuild-base-embalaje` |
+| `sandbox.stock_actual` | **Escritura** (WRITE_TRUNCATE) | 1×/día a las 03:00 CLT via GitHub Actions |
+| `sandbox.comex_importaciones` | **Escritura** (carga manual) | Al actualizar el Excel fuente |
 | `dims.product_dim` | Lectura | Sin cambios frecuentes |
 
 ### Permisos necesarios para la service account
@@ -121,6 +123,35 @@ Los usuarios se almacenan en `users.json` (local). En Cloud Run, este archivo de
 
 ---
 
+## GitHub Actions — stock_actual diario
+
+El workflow `.github/workflows/stock_actual_diario.yml` corre todos los días a las **03:00 CLT (07:00 UTC)** y reemplaza la tabla `sandbox.stock_actual` con el snapshot vigente de Valgreti → Stock por Item.
+
+### Secrets requeridos en el repo
+
+Ir a `Settings → Secrets and variables → Actions → New repository secret`:
+
+| Secret | Valor |
+|--------|-------|
+| `VALGRETI_USER` | Usuario de Valgreti |
+| `VALGRETI_PASS` | Contraseña de Valgreti |
+| `BQ_PROJECT` | `prj-wlcl-p-data-share` |
+| `BQ_KEY_JSON` | Contenido completo del archivo `bq_service_account.json` |
+
+### Trigger manual
+
+Desde **Actions → Stock Actual Diario → Run workflow** para ejecutar fuera de horario.
+
+### Lógica del scraper
+
+```
+valgreti_scraper/valgreti_scraper.py --mode stock-actual --headless
+```
+
+Navega a `ConsultaStockItem.aspx`, hace clic en Buscar sin filtros, descarga el Excel y lo carga a BQ con `WRITE_TRUNCATE`.
+
+---
+
 ## Cloud Scheduler — Actualización de base_embalaje
 
 El endpoint `POST /cron/rebuild-base-embalaje` se llama 3 veces al día para mantener `base_embalaje` sincronizada con las tablas fuente.
@@ -152,6 +183,46 @@ Abrir `index.html` en el browser (o servir con `python -m http.server`).
 ---
 
 ## Changelog (rama actual)
+
+### Junio 2026
+
+#### Estimador — modo múltiples tiendas
+- Nuevo tipo **"Múltiples tiendas"** en el estimador: sube N archivos (uno por tienda, mismo formato que tienda propia) y obtiene bultos + desglose por línea para cada una
+- Soporte de **carga multi-archivo**: cada click en "+ Agregar archivo" abre un selector independiente, permitiendo seleccionar archivos desde distintas carpetas
+- Endpoint `POST /estimar/multi-archivos` en el backend (`app.py`)
+- Función `estimar_multi_tienda()` en `modelo.py` — agrupa por `"Punto de venta"` y corre el modelo por tienda
+- Botón **→ Prog** por tienda en los resultados para guardar directamente en el calendario
+
+#### Bultos reales — match por fecha de compromiso
+- Cuando una tienda tiene **dos casillas en la misma semana**, los bultos reales ya no se asignan al total semanal en ambas — se matchean por `fechacompromiso` contra la fecha exacta de `dia_salida` de cada casilla
+- Las queries BQ ahora incluyen `fecha_compromiso` en el GROUP BY (`bultos_reales.py`)
+
+#### Programación — fix persistencia de cambios
+- Corregido bug crítico: `guardarOverride` y `eliminarOverride` llamaban `cargarSemana(_editCtx.lunesISO)` en lugar de `cargarSemana(progLunesISO)`. En vista **envío repo** esto desplazaba el display una semana hacia adelante después de cada guardado, haciendo parecer que los cambios se habían perdido
+- Agregados checks `response.ok` en todos los fetch de escritura — los errores del servidor ahora se muestran como alert en lugar de fallar silenciosamente
+
+#### Programación — mejoras de calendario
+- Vistas **salida** y **entrega**: siempre Lun–Vie
+- Vista **envío repo**: muestra la semana siguiente (los envíos de esta semana preparan las salidas de la próxima)
+- Fechas cruzadas entre semanas calculadas correctamente (ej. Antofagasta: carga jueves S21 → salida lunes S22)
+- Número de semana (`S21`, `S22`) visible en las tarjetas como dato secundario
+- Nuevos campos editables **Día Carga Repo** y **Hora Carga Repo** en los modales, sincronizados automáticamente con `dia_salida`
+- Fecha exacta visible dentro de cada tarjeta (junto a la hora)
+
+#### Tablas BigQuery — nuevas
+- `sandbox.stock_actual`: snapshot diario del stock por item desde Valgreti (GitHub Actions, 03:00 CLT)
+- `sandbox.comex_importaciones`: 4.574 filas desde `BBDD Comex - Looker.xlsx` (carga manual)
+
+#### Scraper Valgreti
+- Nuevo modo `--mode stock-actual`: descarga Stock por Item sin filtros y reemplaza `sandbox.stock_actual`
+- Workflow `.github/workflows/stock_actual_diario.yml` para ejecución automática diaria
+- Credenciales via GitHub Secrets (nunca en el repo)
+
+#### Auto-commit users.json a GitHub
+- Al crear/editar/eliminar usuarios, `auth.py` commitea `users.json` al repo via GitHub Contents API
+- Variables `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH` en `.env`
+
+---
 
 ### Autenticación y roles
 - `auth.py` nuevo: JWT + bcrypt, 5 roles, CRUD de usuarios, usuario admin inicial
