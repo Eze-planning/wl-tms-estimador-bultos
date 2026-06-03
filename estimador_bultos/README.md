@@ -191,7 +191,7 @@ Abrir `index.html` en el browser (o servir con `python -m http.server`).
 - Soporte de **carga multi-archivo**: cada click en "+ Agregar archivo" abre un selector independiente, permitiendo seleccionar archivos desde distintas carpetas
 - Endpoint `POST /estimar/multi-archivos` en el backend (`app.py`)
 - Función `estimar_multi_tienda()` en `modelo.py` — agrupa por `"Punto de venta"` y corre el modelo por tienda
-- Botón **→ Prog** por tienda en los resultados para guardar directamente en el calendario
+- **Guardado por tienda**: selector de semana compartido en el encabezado; cada fila tiene un botón **Guardar** que guarda directo y se pone verde (✓) al confirmar. Botón secundario **→ Prog manual** para ajustes finos antes de guardar
 
 #### Bultos reales — match por fecha de compromiso
 - Cuando una tienda tiene **dos casillas en la misma semana**, los bultos reales ya no se asignan al total semanal en ambas — se matchean por `fechacompromiso` contra la fecha exacta de `dia_salida` de cada casilla
