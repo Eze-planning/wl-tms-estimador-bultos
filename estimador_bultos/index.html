@@ -439,6 +439,12 @@
       <div class="divider"></div>
       <div id="tiendasSection" style="display:none">
         <div class="section-header"><div class="section-title">Bultos por Tienda</div></div>
+        <!-- Panel guardar todo — solo visible en modo multi_tienda -->
+        <div id="multiSaveAllPanel" class="save-prog-panel edit-only" style="display:none">
+          <span class="save-prog-label">Guardar todas en Programación:</span>
+          <select class="form-input" id="multiSaveSemana" style="width:170px"></select>
+          <button class="btn-primary" id="btnGuardarTodos" style="padding:8px 16px;font-size:13px" onclick="_guardarTodos()">Guardar todos</button>
+        </div>
         <div class="tiendas-grid" id="tiendasGrid"></div>
         <div class="divider"></div>
       </div>
@@ -1175,6 +1181,14 @@ function mostrarResultados(data) {
           </div>
         </div>`;
       }).join("");
+    // Panel guardar todo
+    const _semLunes = _proximosLunes(8);
+    document.getElementById("multiSaveSemana").innerHTML = _semLunes.map(d => {
+      const iso = d.toISOString().split('T')[0];
+      const lbl = d.toLocaleDateString('es-CL',{day:'numeric',month:'short',year:'numeric'});
+      return `<option value="${iso}">Semana ${lbl}</option>`;
+    }).join('');
+    document.getElementById("multiSaveAllPanel").style.display = 'flex';
     document.getElementById("tiendasSection").style.display = "block";
     document.getElementById("savePanelProg").classList.remove("show");
   } else if (orden.tipo === "paris_stock") {
@@ -1199,6 +1213,7 @@ function mostrarResultados(data) {
         <div class="linea-stat"><div class="linea-stat-label">Unidades</div><div class="linea-stat-value">${t.Unidades}</div></div>
         <div class="linea-stat"><div class="linea-stat-label">Bultos</div><div class="linea-stat-value accent">${Math.ceil(t.Bultos_estimados)}</div></div>
       </div>`).join("");
+    document.getElementById("multiSaveAllPanel").style.display = 'none';
     document.getElementById("tiendasSection").style.display = "block";
   } else {
     document.getElementById("summaryGrid").innerHTML = `
@@ -1311,6 +1326,29 @@ function _proximosLunes(n=8) {
   const dow=today.getDay(), daysToMon=dow===1?0:(8-dow)%7||7;
   const first=new Date(today); first.setDate(today.getDate()+daysToMon);
   return Array.from({length:n},(_,i)=>{ const d=new Date(first); d.setDate(first.getDate()+i*7); return d; });
+}
+
+async function _guardarTodos() {
+  const lunes   = document.getElementById('multiSaveSemana').value;
+  const tiendas = _lastResultData?.tiendas_detalle;
+  if (!lunes || !tiendas?.length) return;
+  const btn = document.getElementById('btnGuardarTodos');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  let ok = 0, errores = [];
+  for (const t of tiendas) {
+    try {
+      const r = await fetch(`${API_URL}/programacion/override`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({lunes, tienda: t.tienda, cambios: {bultos_estimados: Math.ceil(t.total_bultos)}})
+      });
+      if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.detail||`Error ${r.status}`); }
+      ok++;
+    } catch(e) { errores.push(`${t.tienda}: ${e.message}`); }
+  }
+  btn.disabled = false; btn.textContent = 'Guardar todos';
+  if (!errores.length) alert(`✓ ${ok} tiendas guardadas en semana ${lunes}`);
+  else alert(`${ok} guardadas.\nFallaron:\n${errores.join('\n')}`);
 }
 
 function _abrirSaveMulti(tienda, bultos) {
